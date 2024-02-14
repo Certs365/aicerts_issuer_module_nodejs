@@ -12,6 +12,7 @@ const { sendEmail, generateAccount, generateOTP } = require('../models/tasks');
 
 // Password handler
 const bcrypt = require("bcrypt");
+const { generateJwtToken } = require('../utils/authUtils');
 
 
 // Signup
@@ -65,17 +66,17 @@ const signup = async (req, res) => {
       }
 
       // generate OTP and sending to the email
-      // const generatedOtp = generateOTP();
-      // await sendEmail(generatedOtp, email);
+      const generatedOtp = generateOTP();
+      await sendEmail(generatedOtp, email);
 
       // Save verification details
-      // const newVerification = new Verification({
-      //   email,
-      //   code: generatedOtp,
-      //   verified: false,
-      // });
+      const newVerification = new Verification({
+        email,
+        code: generatedOtp,
+        verified: false,
+      });
 
-      // const savedVerification = await newVerification.save();
+      const savedVerification = await newVerification.save();
 
       // password handling
       const saltRounds = 10;
@@ -131,6 +132,7 @@ const login = async (req, res) => {
           bcrypt
             .compare(password, hashedPassword)
             .then((result) => {
+              const JWTToken =  generateJwtToken()
               if (result) {
                  // generate OTP and sending to the email
                 // sendEmail(generatedOtp, email);
@@ -143,6 +145,12 @@ const login = async (req, res) => {
                 res.json({
                   status: "SUCCESS",
                   message: "Valid User Credentials",
+                  data:{
+                    JWTToken:JWTToken,
+                    name:data[0]?.name,
+                    organization:data[0]?.organization,
+                    email:data[0]?.email
+                  }
                 });
               } else {
                 res.json({
