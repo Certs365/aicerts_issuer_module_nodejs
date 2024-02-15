@@ -237,11 +237,13 @@ const twoFactor = async (req, res) => {
 
 const verifyIssuer = async (req, res) => {
   let { email, code } = req.body;
+  console.log(req.body)
   try {
     const verify = await Verification.findOne({ email });
 
     Verification.find({ email })
       .then((result) => {
+        console.log(result,"res")
         if (result.length && verify.code == code) {
           // A email already exists
           res.json({
@@ -277,11 +279,12 @@ const verifyIssuer = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   let { email } = req.body;
-  // const verify = await Verification.findOne({ email });
-  // const generatedOtp = generateOTP();
+  console.log(email)
+  const verify = await Verification.findOne({ email });
+  const generatedOtp = generateOTP();
   try {
     const user = await User.findOne({ email });
-
+console.log(user,"user")
     if (!user || !user.approved) {
       return res.json({
         status: 'FAILED',
@@ -289,11 +292,11 @@ const forgotPassword = async (req, res) => {
       });
     }
     // password handling
-    // sendEmail(generatedOtp, email);
+    sendEmail(generatedOtp, email);
 
     // Save verification details
-    // verify.code = generatedOtp;
-    // verify.save();
+    verify.code = generatedOtp;
+    verify.save();
 
     return res.json({
         status: 'PASSED',
