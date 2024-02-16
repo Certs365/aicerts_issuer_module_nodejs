@@ -8,7 +8,7 @@ const web3 = new Web3(process.env.RPC_URL);
 // mongodb user model
 const { User, Verification, Issues } = require("../config/schema");
 
-const { sendEmail, generateAccount, generateOTP } = require('../models/tasks');
+const { sendEmail, generateAccount, generateOTP , isDBConncted, sendWelcomeMail } = require('../models/tasks');
 
 // Password handler
 const bcrypt = require("bcrypt");
@@ -54,6 +54,13 @@ const signup = async (req, res) => {
     });
   } else {
     try {
+      // Check mongoose connection
+      const dbState = await isDBConncted();
+      if (dbState === false) {
+        console.error("Database connection is not ready");
+      } else {
+        console.log("Database connection is ready");
+      }
       // Checking if user already exists
       const existingUser = await User.findOne({ email });
 
@@ -93,6 +100,7 @@ const signup = async (req, res) => {
       });
 
       const savedUser = await newUser.save();
+      await sendWelcomeMail(email);
 
       res.json({
         status: "SUCCESS",
@@ -115,7 +123,7 @@ const login = async (req, res) => {
   password = password.trim();
 
   const verify = await Verification.findOne({ email });
-  // const generatedOtp = generateOTP();
+  const generatedOtp = generateOTP();
 
   if (email == "" || password == "") {
     res.json({
@@ -135,11 +143,11 @@ const login = async (req, res) => {
               const JWTToken =  generateJwtToken()
               if (result) {
                  // generate OTP and sending to the email
-                // sendEmail(generatedOtp, email);
+                sendEmail(generatedOtp, email);
 
                 // Save verification details
-                // verify.code = generatedOtp;
-                // verify.save();
+                verify.code = generatedOtp;
+                verify.save();
 
                 // Password match
                 res.json({
