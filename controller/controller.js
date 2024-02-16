@@ -100,7 +100,7 @@ const signup = async (req, res) => {
       });
 
       const savedUser = await newUser.save();
-      await sendWelcomeMail(email);
+      await sendWelcomeMail(name, email);
 
       res.json({
         status: "SUCCESS",
@@ -122,8 +122,8 @@ const login = async (req, res) => {
   email = email.trim();
   password = password.trim();
 
-  const verify = await Verification.findOne({ email });
-  const generatedOtp = generateOTP();
+  // const verify = await Verification.findOne({ email });
+  // const generatedOtp = generateOTP();
 
   if (email == "" || password == "") {
     res.json({
@@ -143,11 +143,11 @@ const login = async (req, res) => {
               const JWTToken =  generateJwtToken()
               if (result) {
                  // generate OTP and sending to the email
-                sendEmail(generatedOtp, email);
+                // sendEmail(generatedOtp, email);
 
                 // Save verification details
-                verify.code = generatedOtp;
-                verify.save();
+                // verify.code = generatedOtp;
+                // verify.save();
 
                 // Password match
                 res.json({
@@ -367,56 +367,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-const issueCertificate = async (req, res) => {
-  let { email, transactionHash, certificateHash, certificateNumber, name, course, grantDate, expirationDate } = req.body;
-  if (email == "" || name == "" || transactionHash == "" || certificateHash == "" || certificateNumber == "" || course == "" || grantDate == "" || expirationDate == "") {
-      res.json({
-        status: "FAILED",
-        message: "Empty input fields!",
-      });
-    } else {
-    try {
-      // Checking if user already exists
-      const user = await User.findOne({ email });
-      const issues = await Issues.findOne({ certificateNumber });
-      // console.log("Issues found", issues);
-      if (user && user.approved && !issues) {
-          // Save new user
-          const newIssues = new Issues({
-            id: user.id,
-            organization: user.organization,
-            transactionHash,
-            certificateHash,
-            certificateNumber,
-            name: name,
-            course: course,
-            grantDate: grantDate,
-            expirationDate: expirationDate,
-            issueDate: new Date(),
-          });
-
-          const savedIssues = await newIssues.save();
-
-          res.json({
-            status: "SUCCESS",
-            message: "Certificate Issued successful",
-            data: savedIssues,
-          });
-        } else {
-          res.json({
-            status: "FAILED",
-            message: "Certificate Issued with Number (or) User not approved!",
-          });
-        }
-
-    } catch (error) {
-      res.json({
-        status: "FAILED",
-        message: "An error occurred during the certificate issuance!",
-      });
-    }  
-  }
-};
 
 
 module.exports = {
@@ -425,7 +375,6 @@ module.exports = {
     twoFactor,
     forgotPassword,
     resetPassword,
-    verifyIssuer,
-    issueCertificate
+    verifyIssuer
 }
 
