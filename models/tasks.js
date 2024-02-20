@@ -5,13 +5,13 @@ const crypto = require('crypto');
 const mongoose = require("mongoose");
 
 const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com',
+        service:  process.env.MAIL_SERVICE,
+        host: process.env.MAIL_HOST,
         port: 587,
         secure: false,
         auth: {
-            user: process.env.USER_MAIL, // replace with your Gmail email
-            pass: process.env.MAIL_PWD,       // replace with your Gmail password
+            user: process.env.USER_NAME, 
+            pass: process.env.MAIL_PWD,      
         },
     });
 
@@ -19,8 +19,8 @@ const mailOptions = {
     from: {
         name: 'AICerts Admin',
         address: process.env.USER_MAIL,
-    }, // replace with your Gmail email
-    to: '', // replace with your Gmail email
+    },
+    to: '', 
     subject: '',
     text: '',
 };
