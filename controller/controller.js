@@ -17,8 +17,24 @@ const { generateJwtToken } = require('../utils/authUtils');
 
 // Signup
 const signup = async (req, res) => {
-  let { name, organization, email, password } = req.body;
-  
+  let {
+    name,
+    organization,
+    email,
+    password,
+    address,
+    country,
+    organizationType,
+    city,
+    zip,
+    industrySector,
+    state,
+    websiteLink,
+    phoneNumber,
+    designation,
+    username,
+  } = req.body;
+
   const accountDetails = await generateAccount();
   name = name.trim();
   organization = organization.trim();
@@ -27,94 +43,135 @@ const signup = async (req, res) => {
   id = accountDetails;
   approved = false;
 
-  if (name == "" || organization == "" || email == "" || password == "") {
+  // Validation for mandatory fields
+  if (
+    name == "" ||
+    organization == "" ||
+    email == "" ||
+    password == "" ||
+    username == ""
+  ) {
     res.json({
       status: "FAILED",
       message: "Empty input fields!",
     });
+    return;
   } else if (!/^[a-zA-Z ]*$/.test(name)) {
     res.json({
       status: "FAILED",
       message: "Invalid name entered",
     });
+    return;
   } else if (!/^[a-zA-Z ]*$/.test(organization)) {
     res.json({
       status: "FAILED",
       message: "Invalid organization entered",
     });
+    return;
   } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
     res.json({
       status: "FAILED",
       message: "Invalid email entered",
     });
+    return;
   } else if (password.length < 8) {
     res.json({
       status: "FAILED",
       message: "Password is too short!",
     });
-  } else {
-    try {
-      // Check mongoose connection
-      const dbState = await isDBConncted();
-      if (dbState === false) {
-        console.error("Database connection is not ready");
-      } else {
-        console.log("Database connection is ready");
-      }
-      // Checking if user already exists
-      const existingUser = await User.findOne({ email });
+    return;
+  }
 
-      if (existingUser) {
-        res.json({
-          status: "FAILED",
-          message: "User with the provided email already exists",
-        });
-        return; // Stop execution if user already exists
-      }
-
-      // generate OTP and sending to the email
-      const generatedOtp = generateOTP();
-      await sendEmail(generatedOtp, email);
-
-      // Save verification details
-      const newVerification = new Verification({
-        email,
-        code: generatedOtp,
-        verified: false,
-      });
-
-      const savedVerification = await newVerification.save();
-
-      // password handling
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      // Save new user
-      const newUser = new User({
-        name,
-        organization,
-        email,
-        password: hashedPassword,
-        id, // Assuming you want to link the user to the verification entry
-        approved: false,
-      });
-
-      const savedUser = await newUser.save();
-      await sendWelcomeMail(email);
-
-      res.json({
-        status: "SUCCESS",
-        message: "Signup successful",
-        data: savedUser,
-      });
-    } catch (error) {
+  try {
+    // Check mongoose connection
+    const dbState = await isDBConncted();
+    if (dbState === false) {
+      console.error("Database connection is not ready");
       res.json({
         status: "FAILED",
-        message: "An error occurred",
+        message: "Database connection is not ready",
       });
-    }  
+      return;
+    } else {
+      console.log("Database connection is ready");
+    }
+
+    // Checking if user already exists
+    const existingUser = await User.findOne({ email });
+    const existingUsername = await User.findOne({ username });
+
+    if (existingUser) {
+      res.json({
+        status: "FAILED",
+        message: "User with the provided email already exists",
+      });
+      return; // Stop execution if user already exists
+    }
+
+    if (existingUsername) {
+      res.json({
+        status: "FAILED",
+        message: "User with the provided username already exists",
+      });
+      return; // Stop execution if user with the same username already exists
+    }
+
+    // generate OTP and sending to the email
+    const generatedOtp = generateOTP();
+    await sendEmail(generatedOtp, email);
+
+    // Save verification details
+    const newVerification = new Verification({
+      email,
+      code: generatedOtp,
+      verified: false,
+    });
+
+    const savedVerification = await newVerification.save();
+
+    // password handling
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Save new user
+    const newUser = new User({
+      name,
+      organization,
+      email,
+      password: hashedPassword,
+      id,
+      approved: false,
+      address,
+      country,
+      organizationType,
+      city,
+      zip,
+      industrySector,
+      state,
+      websiteLink,
+      phoneNumber,
+      designation,
+      username,
+      certificatesIssued: 0
+    });
+
+    const savedUser = await newUser.save();
+    await sendWelcomeMail(email);
+
+    res.json({
+      status: "SUCCESS",
+      message: "Signup successful",
+      data: savedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.json({
+      status: "FAILED",
+      message: "An error occurred",
+    });
   }
 };
+
 
 // Login
 const login = async (req, res) => {

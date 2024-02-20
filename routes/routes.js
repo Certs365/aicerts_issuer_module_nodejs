@@ -29,6 +29,39 @@ const tasksController = require('../controller/controller');
  *               password:
  *                 type: string
  *                 description: User's password (at least 8 characters long)
+ *               address:
+ *                 type: string
+ *                 description: User's address (optional)
+ *               country:
+ *                 type: string
+ *                 description: User's country (optional)
+ *               organizationType:
+ *                 type: string
+ *                 description: User's organization type (optional)
+ *               city:
+ *                 type: string
+ *                 description: User's city (optional)
+ *               zip:
+ *                 type: string
+ *                 description: User's ZIP code (optional)
+ *               industrySector:
+ *                 type: string
+ *                 description: User's industry sector (optional)
+ *               state:
+ *                 type: string
+ *                 description: User's state (optional)
+ *               websiteLink:
+ *                 type: string
+ *                 description: User's website link (optional)
+ *               phoneNumber:
+ *                 type: string
+ *                 description: User's phone number (optional)
+ *               designation:
+ *                 type: string
+ *                 description: User's designation (optional)
+ *               username:
+ *                 type: string
+ *                 description: User's username (optional)
  *             required:
  *               - name
  *               - organization
@@ -80,6 +113,7 @@ const tasksController = require('../controller/controller');
  *                   type: string
  *                   description: A message describing the error
  */
+
 
 router.post('/signup', tasksController.signup);
 

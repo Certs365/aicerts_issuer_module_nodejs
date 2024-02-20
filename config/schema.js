@@ -2,14 +2,49 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-    name: String,
-    organization: String,
-    email: String,
-    password: String,
-    id: String,
-    approved: Boolean
-});
-
+    name: {
+      type: String,
+      required: true,
+    },
+    organization: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    id: {
+      type: String,
+      required: true,
+    },
+    approved: {
+      type: Boolean,
+      required: true,
+    },
+    address: String,
+    country: String,
+    organizationType: String,
+    city: String,
+    zip: String,
+    industrySector: String,
+    state: String,
+    websiteLink: String,
+    phoneNumber: String,
+    designation: String,
+    username: {
+        type: String,
+        unique: true, 
+        required: true,
+      },
+  });
+  
+  module.exports = mongoose.model('User', UserSchema);
+  
 // Verification Schema
 const VerificationSchema = new Schema({
     email: String,
