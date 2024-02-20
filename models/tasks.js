@@ -37,11 +37,12 @@ const sendEmail = async (otp, email) => {
     }
 };
 
-const sendWelcomeMail = async (email) => {
+const sendWelcomeMail = async (name, email) => {
   try {
       mailOptions.to = email;
       mailOptions.subject = `Welcome to AICerts`;
-      mailOptions.text = `Hi ${email}. Welcome to AICerts! Your account will be approved by Admin soon.`;
+      mailOptions.text = `Hi ${name}, 
+Welcome to AICerts Portal, You have been successfully registered, Your details to be reviewd and approved by the admin, Once your account has been approved then you will be notified..`;
       transporter.sendMail(mailOptions);
       console.log('Email sent successfully');
   } catch (error) {
