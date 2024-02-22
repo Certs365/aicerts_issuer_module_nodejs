@@ -36,11 +36,7 @@ const UserSchema = new Schema({
     websiteLink: String,
     phoneNumber: String,
     designation: String,
-    username: {
-        type: String,
-        unique: true, 
-        required: true,
-      },
+    username: String
   });
   
   module.exports = mongoose.model('User', UserSchema);
