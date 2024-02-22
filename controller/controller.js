@@ -98,7 +98,7 @@ const signup = async (req, res) => {
 
     // Checking if user already exists
     const existingUser = await User.findOne({ email });
-    const existingUsername = await User.findOne({ username });
+  
 
     if (existingUser) {
       res.json({
@@ -107,27 +107,6 @@ const signup = async (req, res) => {
       });
       return; // Stop execution if user already exists
     }
-
-    if (existingUsername) {
-      res.json({
-        status: "FAILED",
-        message: "User with the provided username already exists",
-      });
-      return; // Stop execution if user with the same username already exists
-    }
-
-    // generate OTP and sending to the email
-    const generatedOtp = generateOTP();
-    await sendEmail(generatedOtp, email);
-
-    // Save verification details
-    const newVerification = new Verification({
-      email,
-      code: generatedOtp,
-      verified: false,
-    });
-
-    const savedVerification = await newVerification.save();
 
     // password handling
     const saltRounds = 10;
@@ -388,38 +367,48 @@ const resetPassword = async (req, res) => {
         message: 'User not found (or) User not approved!',
       });
     }
-    // password handling
+
+    // Check if the new password is the same as the previous one
+    const isSamePassword = await bcrypt.compare(password, user.password);
+    if (isSamePassword) {
+      return res.json({
+        status: 'FAILED',
+        message: 'Password cannot be the same as the previous one!',
+      });
+    }
+
+    // Proceed with password handling
     const saltRounds = 10;
-            bcrypt
-              .hash(password, saltRounds)
-              .then((hashedPassword) => {
-                user.password = hashedPassword;
-                user
-                  .save()
-                  .then(() => {
-                    res.json({
-                      status: "SUCCESS",
-                      message: "Password reset successful"
-                    });
-                  })
-                  .catch((err) => {
-                    res.json({
-                      status: "FAILED",
-                      message: "An error occurred while saving user account!",
-                    });
-                  });
-              })
-              .catch((err) => {
-                res.json({
-                  status: "FAILED",
-                  message: "An error occurred while hashing password!",
-                });
-              });
+    bcrypt
+      .hash(password, saltRounds)
+      .then((hashedPassword) => {
+        user.password = hashedPassword;
+        user
+          .save()
+          .then(() => {
+            res.json({
+              status: "SUCCESS",
+              message: "Password reset successful"
+            });
+          })
+          .catch((err) => {
+            res.json({
+              status: "FAILED",
+              message: "An error occurred while saving user account!",
+            });
+          });
+      })
+      .catch((err) => {
+        res.json({
+          status: "FAILED",
+          message: "An error occurred while hashing password!",
+        });
+      });
 
   } catch (error) {
     res.json({
       status: 'FAILED',
-      message: 'An error occurred during password reset process!',
+      message: 'An error occurred during the password reset process!',
     });
   }
 };
