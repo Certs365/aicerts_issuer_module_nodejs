@@ -108,17 +108,6 @@ const signup = async (req, res) => {
       return; // Stop execution if user already exists
     }
 
-          // generate OTP and sending to the email
-          const generatedOtp = generateOTP();
- 
-          // Save verification details
-          const newVerification = new Verification({
-            email,
-            code: generatedOtp,
-            verified: false,
-          });
-     
-          const savedVerification = await newVerification.save();
     // password handling
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -289,7 +278,6 @@ const twoFactor = async (req, res) => {
   }
 };
 
-
 const verifyIssuer = async (req, res) => {
   let { email, code } = req.body;
   console.log(req.body)
@@ -334,24 +322,30 @@ const verifyIssuer = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   let { email } = req.body;
-  console.log(email)
-  const verify = await Verification.findOne({ email });
   const generatedOtp = generateOTP();
   try {
+    const verify = await Verification.findOne({ email });
+
     const user = await User.findOne({ email });
-console.log(user,"user")
+
     if (!user || !user.approved) {
       return res.json({
         status: 'FAILED',
         message: 'User not found (or) User not approved!',
       });
     }
+    
+    if (!verify ){
+       // Save verification details
+       const newVerification = new Verification({
+          email,
+          code: generatedOtp,
+          verified: false,
+        });
+      const savedVerification = await newVerification.save();
+    }
     // password handling
     sendEmail(generatedOtp, email);
-
-    // Save verification details
-    verify.code = generatedOtp;
-    verify.save();
 
     return res.json({
         status: 'PASSED',
@@ -368,7 +362,6 @@ console.log(user,"user")
 
 const resetPassword = async (req, res) => {
   let { email, password } = req.body;
-  console.log("Reset email", email);
   try {
     const user = await User.findOne({ email });
 
