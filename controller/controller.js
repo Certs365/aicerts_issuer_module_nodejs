@@ -108,6 +108,17 @@ const signup = async (req, res) => {
       return; // Stop execution if user already exists
     }
 
+          // generate OTP and sending to the email
+          const generatedOtp = generateOTP();
+ 
+          // Save verification details
+          const newVerification = new Verification({
+            email,
+            code: generatedOtp,
+            verified: false,
+          });
+     
+          const savedVerification = await newVerification.save();
     // password handling
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
