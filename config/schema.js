@@ -22,10 +22,7 @@ const UserSchema = new Schema({
       type: String,
       required: true,
     },
-    approved: {
-      type: Boolean,
-      required: true,
-    },
+    approved: Boolean,
     address: String,
     country: String,
     organizationType: String,
