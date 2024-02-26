@@ -6,7 +6,7 @@ const express = require("express");
 const Web3 = require('web3');
 const web3 = new Web3(process.env.RPC_URL);
 // mongodb user model
-const { User, Verification, Issues } = require("../config/schema");
+const { User, Verification, Blacklist } = require("../config/schema");
 
 const { sendEmail, generateAccount, generateOTP , isDBConncted, sendWelcomeMail } = require('../models/tasks');
 
@@ -96,9 +96,19 @@ const signup = async (req, res) => {
       console.log("Database connection is ready");
     }
 
+    // Checking iff user was blocked
+    const blockedUser = await Blacklist.findOne({ email });
+
+    if (blockedUser) {
+      res.json({
+        status: "FAILED",
+        message: "Access has been restricted, please try with another email",
+      });
+      return; // Stop execution if user already blacklisted
+    }
+
     // Checking if user already exists
-    const existingUser = await User.findOne({ email });
-  
+    const existingUser = await User.findOne({ email });  
 
     if (existingUser) {
       res.json({
