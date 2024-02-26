@@ -120,6 +120,7 @@ const signup = async (req, res) => {
       password: hashedPassword,
       id,
       approved: false,
+      status: 0,
       address,
       country,
       organizationType,
@@ -131,6 +132,7 @@ const signup = async (req, res) => {
       phoneNumber,
       designation,
       username,
+      rejectedDate: null,
       certificatesIssued: 0
     });
 

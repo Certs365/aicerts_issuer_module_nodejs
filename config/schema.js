@@ -23,6 +23,7 @@ const UserSchema = new Schema({
       required: true,
     },
     approved: Boolean,
+    status: Number,
     address: String,
     country: String,
     organizationType: String,
@@ -33,7 +34,8 @@ const UserSchema = new Schema({
     websiteLink: String,
     phoneNumber: String,
     designation: String,
-    username: String
+    username: String,
+    rejectedDate: Date
   });
   
   module.exports = mongoose.model('User', UserSchema);
