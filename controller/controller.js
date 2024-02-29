@@ -163,6 +163,67 @@ const signup = async (req, res) => {
 };
 
 
+//Update Issuer
+
+// Update Issuer
+const updateIssuer = async (req, res) => {
+  // Get id from req.body instead of req.query
+  const { id } = req.body; 
+  const updateFields = req.body;
+
+  try {
+    // Check mongoose connection
+    const dbState = await isDBConncted();
+    if (dbState === false) {
+      console.error("Database connection is not ready");
+      res.json({
+        status: "FAILED",
+        message: "Database connection is not ready",
+      });
+      return;
+    } else {
+      console.log("Database connection is ready");
+    }
+
+    // Find the issuer by id
+    console.log(id)
+    const existingIssuer = await User.findById(id);
+    console.log(existingIssuer)
+
+    if (!existingIssuer) {
+      res.json({
+        status: "FAILED",
+        message: "Issuer not found",
+      });
+      return;
+    }
+
+    // Update specific fields
+    for (const key in updateFields) {
+      if (Object.hasOwnProperty.call(updateFields, key)) {
+        existingIssuer[key] = updateFields[key];
+      }
+    }
+
+    // Save the updated issuer
+    const updatedIssuer = await existingIssuer.save();
+
+    res.json({
+      status: "SUCCESS",
+      message: "Issuer updated successfully",
+      data: updatedIssuer,
+    });
+  } catch (error) {
+    console.error(error);
+    res.json({
+      status: "FAILED",
+      message: "An error occurred",
+    });
+  }
+};
+
+
+
 // Login
 const login = async (req, res) => {
   let { email, password } = req.body;
@@ -432,6 +493,7 @@ module.exports = {
     twoFactor,
     forgotPassword,
     resetPassword,
-    verifyIssuer
+    verifyIssuer,
+    updateIssuer
 }
 
