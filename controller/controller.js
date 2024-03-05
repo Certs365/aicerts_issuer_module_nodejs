@@ -32,7 +32,7 @@ const signup = async (req, res) => {
     websiteLink,
     phoneNumber,
     designation,
-    username,
+    username
   } = req.body;
 
   const accountDetails = await generateAccount();

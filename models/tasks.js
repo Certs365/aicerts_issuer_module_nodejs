@@ -70,10 +70,7 @@ const generateOTP = () => {
 
 const isDBConncted = async () => {
     try {
-      await mongoose.connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      await mongoose.connect(process.env.MONGODB_URI);
       return true;
     } catch (error) {
       console.log(error);

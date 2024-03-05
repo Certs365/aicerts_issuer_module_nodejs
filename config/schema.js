@@ -34,8 +34,12 @@ const UserSchema = new Schema({
     websiteLink: String,
     phoneNumber: String,
     designation: String,
-    username: String,
-    rejectedDate: Date
+    username: {
+      type: String,
+      unique: true
+    },
+    rejectedDate: Date,
+    certificatesIssued: Number
   });
   
   module.exports = mongoose.model('User', UserSchema);
