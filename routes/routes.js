@@ -538,7 +538,7 @@ router.post('/verify-issuer', tasksController.verifyIssuer);
  *                   type: string
  *                   example: An error occurred during the verification
  */
-
+router.post('/login-with-phone', tasksController.loginPhoneNumber);
 router.post('/two-factor-auth', tasksController.twoFactor);
 
 
