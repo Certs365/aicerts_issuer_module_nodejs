@@ -198,9 +198,7 @@ router.post('/update-issuer', tasksController.updateIssuer);
  *   post:
  *     summary: User Login
  *     tags: [Login]
- *     description: |
- *       Logs in a user with the provided email and password. Generates and sends an OTP for verification.
- *
+ *     description: Logs in a user with the provided email and password.
  *     requestBody:
  *       description: User email and password
  *       required: true
