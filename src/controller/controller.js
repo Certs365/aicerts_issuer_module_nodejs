@@ -36,6 +36,12 @@ admin.initializeApp({
 });
 
 
+/**
+ * API call for Signup issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const signup = async (req, res) => {
   let {
     name,
@@ -192,7 +198,13 @@ const signup = async (req, res) => {
     });
   }
 };
-// login with Phone Number
+
+/**
+ * API call for issuer login with Phone Number.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 async function loginPhoneNumber(req, res) {
   const { idToken, email } = req.body;
 
@@ -245,10 +257,12 @@ async function loginPhoneNumber(req, res) {
   }
 }
 
-
-//Update Issuer
-
-// Update Issuer
+/**
+ * API call for Update issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const updateIssuer = async (req, res) => {
   // Get id from req.body instead of req.query
   const { id } = req.body; 
@@ -305,16 +319,16 @@ const updateIssuer = async (req, res) => {
   }
 };
 
-
-
-// Login
+/**
+ * API call for Login issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const login = async (req, res) => {
   let { email, password } = req.body;
   email = email.trim();
   password = password.trim();
-
-  // const verify = await Verification.findOne({ email });
-  // const generatedOtp = generateOTP();
 
   if (email == "" || password == "") {
     res.json({
@@ -333,12 +347,6 @@ const login = async (req, res) => {
             .then((result) => {
               const JWTToken =  generateJwtToken()
               if (result) {
-                 // generate OTP and sending to the email
-                // sendEmail(generatedOtp, email);
-
-                // Save verification details
-                // verify.code = generatedOtp;
-                // verify.save();
 
                 // Password match
                 res.json({
@@ -413,8 +421,12 @@ const login = async (req, res) => {
 
 // };
 
-
-
+/**
+ * API call for 2 Factor Authentication issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const twoFactor = async (req, res) => {
   let { email } = req.body;
   const verificationCode = generateOTP();
@@ -446,15 +458,21 @@ const twoFactor = async (req, res) => {
   }
 };
 
+/**
+ * API call for verify issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const verifyIssuer = async (req, res) => {
   let { email, code } = req.body;
-  console.log(req.body)
+  // console.log(req.body);
   try {
     const verify = await Verification.findOne({ email });
 
     Verification.find({ email })
       .then((result) => {
-        console.log(result,"res")
+        // console.log(result,"res");
         if (result.length && verify.code == code) {
           // A email already exists
           res.json({
@@ -488,6 +506,12 @@ const verifyIssuer = async (req, res) => {
   }
 };
 
+/**
+ * API call for issuer forget password.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const forgotPassword = async (req, res) => {
   let { email } = req.body;
   const generatedOtp = generateOTP();
@@ -511,6 +535,11 @@ const forgotPassword = async (req, res) => {
           verified: false,
         });
       const savedVerification = await newVerification.save();
+    } else {
+      // Update verification details
+      verify.code = generatedOtp;
+      verify.verified = true;
+      await verify.save();
     }
     // password handling
     sendEmail(generatedOtp, email);
@@ -528,6 +557,12 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+/**
+ * API call for reset Issuer password.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const resetPassword = async (req, res) => {
   let { email, password } = req.body;
   try {
@@ -584,8 +619,6 @@ const resetPassword = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
     signup,
