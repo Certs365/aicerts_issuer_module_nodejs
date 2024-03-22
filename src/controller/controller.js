@@ -356,7 +356,8 @@ const login = async (req, res) => {
                     JWTToken:JWTToken,
                     name:data[0]?.name,
                     organization:data[0]?.organization,
-                    email:data[0]?.email
+                    email:data[0]?.email,
+                    certificatesIssued:data[0]?.certificatesIssued
                   }
                 });
               } else {
