@@ -2,7 +2,7 @@ require('dotenv').config();
 
 // mongodb user model
 const { User, Verification, } = require("../config/schema");
-const { sendEmail, generateOTP , isDBConncted } = require('../models/tasks');
+const { sendEmail, generateOTP , isDBConnected } = require('../models/tasks');
 const bcrypt = require("bcrypt");
 
 const forgotPassword = async (req, res) => {
@@ -119,18 +119,10 @@ const forgotPassword = async (req, res) => {
     const updateFields = req.body;
   
     try {
-      // Check mongoose connection
-      const dbState = await isDBConncted();
-      if (dbState === false) {
-        console.error("Database connection is not ready");
-        res.json({
-          status: "FAILED",
-          message: "Database connection is not ready",
-        });
-        return;
-      } else {
-        console.log("Database connection is ready");
-      }
+        // Check mongoose connection
+        const dbStatus = await isDBConnected();
+        const dbStatusMessage = (dbStatus == true) ? "Database connection is Ready" : "Database connection is Not Ready";
+        console.log(dbStatusMessage);
   
       // Find the issuer by IssuerId
       const existingIssuer = await User.findById({issuerId: id});

@@ -4,6 +4,7 @@ const verifyIssuer = async (req, res) => {
     let { email, code } = req.body;
     try {
         const verify = await Verification.findOne({ email });
+
         
         if (!verify) {
             return res.status(400).json({
@@ -12,7 +13,7 @@ const verifyIssuer = async (req, res) => {
             });
         }
 
-        if (verify.code !== code) {
+        if (verify.code != code) {
             return res.status(400).json({
                 status: "FAILED",
                 message: "Verification code does not match",

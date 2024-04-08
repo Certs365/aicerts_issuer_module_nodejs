@@ -4,7 +4,7 @@ require('dotenv').config();
 const { User, Verification } = require("../config/schema");
 var admin = require("firebase-admin");
 // var serviceAccount = require("../config/firebaseConfig");
-const { sendEmail, generateAccount, generateOTP , isDBConncted, sendWelcomeMail } = require('../models/tasks');
+const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail } = require('../models/tasks');
 // const serviceAccount = JSON.parse(process.env.CONFIG);
 // Password handler
 const bcrypt = require("bcrypt");
@@ -107,18 +107,10 @@ const signup = async (req, res) => {
     return;
   }
   try {
-    // Check mongoose connection
-    const dbState = await isDBConncted();
-    if (dbState === false) {
-      console.error("Database connection is not ready");
-      res.json({
-        status: "FAILED",
-        message: "Database connection is not ready",
-      });
-      return;
-    } else {
-      console.log("Database connection is ready");
-    }
+     // Check mongoose connection
+     const dbStatus = await isDBConnected();
+     const dbStatusMessage = (dbStatus == true) ? "Database connection is Ready" : "Database connection is Not Ready";
+     console.log(dbStatusMessage);
 
     // Checking if user already exists
     const existingUser = await User.findOne({ email });  

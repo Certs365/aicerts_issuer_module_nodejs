@@ -68,14 +68,24 @@ const generateOTP = () => {
   return otp; // Convert to string if you need a string representation
 };
 
-const isDBConncted = async () => {
-    try {
-      await mongoose.connect(process.env.MONGODB_URI);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
+const isDBConnected = async () => {
+    let retryCount = 0; // Initialize retry count
+    var maxRetries = 3;
+    while (retryCount < maxRetries) {
+      try {
+        // Attempt to establish a connection to the MongoDB database using the provided URI
+        await mongoose.connect(process.env.MONGODB_URI);
+        // console.log('Connected to MongoDB successfully!');
+        return true; // Return true if the connection is successful
+      } catch (error) {
+        console.error('Error connecting to MongoDB:', error.message);
+        retryCount++; // Increment retry count
+        console.log(`Retrying connection (${retryCount}/${maxRetries}) in 1.5 seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait for 1.5 seconds before retrying
+      }
     }
+    console.error('Failed to connect to MongoDB after maximum retries.');
+    return false; // Return false if unable to connect after maximum retries
   };
 
-module.exports={sendEmail, generateAccount, generateOTP, isDBConncted, sendWelcomeMail}
+module.exports={sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail}
