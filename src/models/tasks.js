@@ -50,22 +50,33 @@ Welcome to AICerts Portal, You have been successfully registered, Your details t
   }
 };
 
+
+
 // Function to generate a new Ethereum account with a private key
 const generateAccount = async () => {
-    
+  try {
     const id = crypto.randomBytes(32).toString('hex');
-    const privateKey = "0x"+id;
+    const privateKey = "0x" + id;
     const wallet = new ethers.Wallet(privateKey);
     const addressWithoutPrefix = wallet.address; // Remove '0x' from the address
     // const addressWithoutPrefix = wallet.address.substring(2); // Remove '0x' from the address
     return addressWithoutPrefix;
     // return wallet.address;
-};
+  } catch (error) {
+    console.error("Error generating Ethereum account:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
+}
 
 const generateOTP = () => {
-  // Generate a random 6-digit number
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  return otp; // Convert to string if you need a string representation
+  try {
+    // Generate a random 6-digit number
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    return otp; // Convert to string if you need a string representation
+  } catch (error) {
+    console.error("Error generating OTP:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
 };
 
 const isDBConnected = async () => {
