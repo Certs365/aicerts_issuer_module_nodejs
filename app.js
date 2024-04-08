@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const tasksRoutes = require('./src/routes/routes');
+const tasksRoutes = require('./src/routes/index');
 
 const app = express();
 const port = process.env.PORT || 8000;
