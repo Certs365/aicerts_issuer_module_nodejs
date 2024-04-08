@@ -54,7 +54,7 @@ const signup = async (req, res) => {
   organization = organization.trim();
   email = email.trim();
   password = password.trim();
-  id = accountDetails;
+  issuerId = accountDetails;
   approved = false;
 
   // Validation for mandatory fields
@@ -141,7 +141,7 @@ const signup = async (req, res) => {
       organization,
       email,
       password: hashedPassword,
-      id,
+      issuerId,
       approved: false,
       status: 0,
       address,

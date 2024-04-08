@@ -132,10 +132,8 @@ const forgotPassword = async (req, res) => {
         console.log("Database connection is ready");
       }
   
-      // Find the issuer by id
-      console.log(id)
-      const existingIssuer = await User.findById(id);
-      console.log(existingIssuer)
+      // Find the issuer by IssuerId
+      const existingIssuer = await User.findById({issuerId: id});
   
       if (!existingIssuer) {
         res.json({
