@@ -1,11 +1,24 @@
 require('dotenv').config();
 
+const { validationResult } = require("express-validator");
+var messageCode = require("../common/codes");
+
 // mongodb user model
 const { User, Verification, } = require("../config/schema");
 const { sendEmail, generateOTP , isDBConnected } = require('../models/tasks');
 const bcrypt = require("bcrypt");
 
+  /**
+   * API call for forget Issuer password.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
 const forgotPassword = async (req, res) => {
+    var validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+      return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    }
     let { email } = req.body;
     const generatedOtp = generateOTP();
     try {
@@ -16,7 +29,7 @@ const forgotPassword = async (req, res) => {
       if (!user || !user.approved) {
         return res.json({
           status: 'FAILED',
-          message: 'User not found (or) User not approved!',
+          message: messageCode.msgIssuerNotFound,
         });
       }
       
@@ -39,13 +52,13 @@ const forgotPassword = async (req, res) => {
   
       return res.json({
           status: 'PASSED',
-          message: 'User found!',
+          message: messageCode.msgIssuerFound,
         });
   
     } catch (error) {
       res.json({
         status: 'FAILED',
-        message: 'An error occurred during password reset process!',
+        message: messageCode.msgErroOnPwdReset,
       });
     }
   };
@@ -57,14 +70,22 @@ const forgotPassword = async (req, res) => {
    * @param {Object} res - Express response object.
    */
   const resetPassword = async (req, res) => {
+    var validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    }
     let { email, password } = req.body;
     try {
+     // Check mongoose connection
+     const dbStatus = await isDBConnected();
+     const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+     console.log(dbStatusMessage);
       const user = await User.findOne({ email });
   
       if (!user || !user.approved) {
         return res.json({
           status: 'FAILED',
-          message: 'User not found (or) User not approved!',
+          message: messageCode.msgIssuerNotFound
         });
       }
   
@@ -73,7 +94,7 @@ const forgotPassword = async (req, res) => {
       if (isSamePassword) {
         return res.json({
           status: 'FAILED',
-          message: 'Password cannot be the same as the previous one!',
+          message: messageCode.msgPwdNotSame
         });
       }
   
@@ -88,32 +109,42 @@ const forgotPassword = async (req, res) => {
             .then(() => {
               res.json({
                 status: "SUCCESS",
-                message: "Password reset successful"
+                message: messageCode.msgPwdReset
               });
             })
             .catch((err) => {
               res.json({
                 status: "FAILED",
-                message: "An error occurred while saving user account!",
+                message: messageCode.msgErrorOnSaveUser
               });
             });
         })
         .catch((err) => {
           res.json({
             status: "FAILED",
-            message: "An error occurred while hashing password!",
+            message: messageCode.msgErrorOnPwdHash
           });
         });
   
     } catch (error) {
       res.json({
         status: 'FAILED',
-        message: 'An error occurred during the password reset process!',
+        message: messageCode.msgErroOnPwdReset
       });
     }
   };
 
+  /**
+   * API call for update Issuer details.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
   const updateIssuer = async (req, res) => {
+    var validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+      return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    }
     // Get id from req.body instead of req.query
     const { id } = req.body; 
     const updateFields = req.body;
@@ -121,7 +152,7 @@ const forgotPassword = async (req, res) => {
     try {
         // Check mongoose connection
         const dbStatus = await isDBConnected();
-        const dbStatusMessage = (dbStatus == true) ? "Database connection is Ready" : "Database connection is Not Ready";
+        const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
         console.log(dbStatusMessage);
   
       // Find the issuer by IssuerId
@@ -130,7 +161,7 @@ const forgotPassword = async (req, res) => {
       if (!existingIssuer) {
         res.json({
           status: "FAILED",
-          message: "Issuer not found",
+          message: messageCode.msgIssuerNotFound,
         });
         return;
       }
@@ -147,14 +178,14 @@ const forgotPassword = async (req, res) => {
   
       res.json({
         status: "SUCCESS",
-        message: "Issuer updated successfully",
+        message: messageCode.msgIssuerUpdated,
         data: updatedIssuer,
       });
     } catch (error) {
       console.error(error);
       res.json({
         status: "FAILED",
-        message: "An error occurred",
+        message: messageCode.msgInternalError,
       });
     }
   };

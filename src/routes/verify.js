@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const verifyController = require('../controller/verify');
+const validationRoute = require("../common/validationRoutes");
 
 /**
  * @swagger
@@ -22,7 +23,7 @@ const verifyController = require('../controller/verify');
  *                 type: string
  *                 example: 123456
  *     responses:
- *       200:
+ *       '200':
  *         description: Verification successful
  *         content:
  *           application/json:
@@ -35,7 +36,7 @@ const verifyController = require('../controller/verify');
  *                 message:
  *                   type: string
  *                   example: Verification successful
- *       400:
+ *       '400':
  *         description: Bad Request - Invalid email or code
  *         content:
  *           application/json:
@@ -48,7 +49,21 @@ const verifyController = require('../controller/verify');
  *                 message:
  *                   type: string
  *                   example: Verification failed
- *       500:
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -63,6 +78,6 @@ const verifyController = require('../controller/verify');
  *                   example: An error occurred during the verification
  */
 
-router.post('/verify-issuer', verifyController.verifyIssuer);
+router.post('/verify-issuer', validationRoute.verifyIssuer, verifyController.verifyIssuer);
 
 module.exports=router;
