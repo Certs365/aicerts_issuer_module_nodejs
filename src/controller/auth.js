@@ -9,6 +9,8 @@ const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken } = require('../utils/authUtils');
+const { validationResult } = require("express-validator");
+var messageCode = require("../common/codes");
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -29,8 +31,17 @@ admin.initializeApp({
   })
 });
 
-
+  /**
+   * API call for Signup Issuer.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
 const signup = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+  }
   let {
     name,
     organization,
@@ -68,48 +79,24 @@ const signup = async (req, res) => {
   ) {
     res.json({
       status: "FAILED",
-      message: "Empty input fields!",
+      message: messageCode.msgNonEmpty,
     });
     return;
-  } else if (!/^[a-zA-Z ]*$/.test(name)) {
-    res.json({
-      status: "FAILED",
-      message: "Invalid name entered",
-    });
-    return;
-  } else if (!/^[a-zA-Z ]*$/.test(organization)) {
-    res.json({
-      status: "FAILED",
-      message: "Invalid organization entered",
-    });
-    return;
-  } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
-    res.json({
-      status: "FAILED",
-      message: "Invalid email entered",
-    });
-    return;
-  } else if (password.length < 8) {
-    res.json({
-      status: "FAILED",
-      message: "Password is too short!",
-    });
-    return;
-  }else if (
+  } else if (
     
     !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email) ||
     blacklistedEmailDomains.some(domain => email.endsWith('@' + domain))
   ) {
     res.json({
       status: "FAILED",
-      message: "Please Enter Your Organisation Email",
+      message: messageCode.msgEnterOrgEmail,
     });
     return;
   }
   try {
      // Check mongoose connection
      const dbStatus = await isDBConnected();
-     const dbStatusMessage = (dbStatus == true) ? "Database connection is Ready" : "Database connection is Not Ready";
+     const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
      console.log(dbStatusMessage);
 
     // Checking if user already exists
@@ -118,7 +105,7 @@ const signup = async (req, res) => {
     if (existingUser) {
       res.json({
         status: "FAILED",
-        message: "User with the provided email already exists",
+        message: messageCode.msgExistEmail,
       });
       return; // Stop execution if user already exists
     }
@@ -156,28 +143,40 @@ const signup = async (req, res) => {
 
     res.json({
       status: "SUCCESS",
-      message: "Signup successful",
+      message: messageCode.msgSignupSuccess,
       data: savedUser,
     });
   } catch (error) {
     console.error(error);
     res.json({
       status: "FAILED",
-      message: "An error occurred",
+      message: messageCode.msgInternalError,
     });
   }
 };
 
-
-
-async function loginPhoneNumber(req, res) {
+  /**
+   * API call for login with phone Number.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
+const loginPhoneNumber = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+  }
   const { idToken, email } = req.body;
 
   try {
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+    console.log(dbStatusMessage);
     if (!idToken) {
       return res.json({
         status: "FAILED",
-        message: "Invalid OTP."
+        message: messageCode.msgInvalidOtp
       });
     }
 
@@ -189,12 +188,16 @@ async function loginPhoneNumber(req, res) {
     const data = await User.findOne({ email });
 
     if (!data) {
-      throw new Error("User not found");
+      erro.log(messageCode.msgIssuerNotFound);
+      res.status(400).json({
+        status: "FAILED",
+        message: messageCode.msgIssuerNotFound
+      });
     }
 
-    res.json({
+    res.status(200).json({
       status: "SUCCESS",
-      message: "Valid User Credentials",
+      message: messageCode.msgValidCredentials,
       data: {
         JWTToken: JWTToken,
         name: data.name,
@@ -204,27 +207,36 @@ async function loginPhoneNumber(req, res) {
       }
     });
   } catch (error) {
-    console.error("Error during login:", error.message);
+    console.error(messageCode.msgErrorOnLogin, error.message);
 
     // Handle specific errors
     if (error.code === "auth/id-token-expired") {
       return res.status(401).json({
         status: "FAILED",
-        message: "Invalid OTP."
+        message: messageCode.msgInvalidOtp
       });
     }
 
     // Handle other errors
     res.status(500).json({
       status: "FAILED",
-      message: "Internal Server Error. Please try again later."
+      message: messageCode.msgInternalError
     });
   }
 }
 
-
-
+  /**
+   * API call for Issuer login.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
 const login = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+  }
+
   let { email, password } = req.body;
   email = email.trim();
   password = password.trim();
@@ -232,7 +244,7 @@ const login = async (req, res) => {
   if (email == "" || password == "") {
     res.json({
       status: "FAILED",
-      message: "Empty credentials supplied",
+      message: messageCode.msgNonEmpty,
     });
   } else {
     // Checking if user exists  
@@ -250,7 +262,7 @@ const login = async (req, res) => {
                 // Password match
                 res.json({
                   status: "SUCCESS",
-                  message: "Valid User Credentials",
+                  message: messageCode.msgValidCredentials,
                   data:{
                     JWTToken:JWTToken,
                     name:data[0]?.name,
@@ -264,14 +276,14 @@ const login = async (req, res) => {
                  if (data[0]?.phoneNumber) {
                   res.json({
                     status: "FAILED",
-                    message: "Invalid password entered!",
+                    message: messageCode.msgInvalidPhone,
                     isPhoneNumber: true,
                     phoneNumber: data[0]?.phoneNumber,
                   });
                 } else {
                   res.json({
                     status: "FAILED",
-                    message: "Invalid password entered!",
+                    message: messageCode.msgInvalidPassword,
                     isPhoneNumber: false,
                   });
                 }
@@ -280,36 +292,42 @@ const login = async (req, res) => {
             .catch((err) => {
               res.json({
                 status: "FAILED",
-                message: "An error occurred while comparing passwords",
+                message: messageCode.msgErrorOnComparePassword,
               });
             });
           
         } else {
           res.json({
             status: "FAILED",
-            message: "Invalid credentials entered! (or) User not approved!",
+            message: messageCode.msgInvalidOrUnapproved,
           });
         }
       })
       .catch((err) => {
         res.json({
           status: "FAILED",
-          message: "An error occurred while checking for existing user",
+          message: messageCode.msgExistingUserError,
         });
       });
   }
 };
 
-
-
-
+  /**
+   * API call for two factor authentication.
+   *
+   * @param {Object} req - Express request object.
+   * @param {Object} res - Express response object.
+   */
 const twoFactor = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+  }
   let { email } = req.body;
   const verificationCode = generateOTP();
 
   try {
     const verify = await Verification.findOne({ email });
-
     if (verify) {
       verify.code = verificationCode;
       verify.save();
@@ -318,22 +336,21 @@ const twoFactor = async (req, res) => {
 
       res.status(200).json({
         status: "SUCCESS",
-        message: "OTP sent to the email",
+        message: messageCode.msgOtpSent,
       })
     } else {
       res.status(404).json({
         status: "FAILED",
-        message: "User not found",
+        message: messageCode.msgIssuerNotFound,
       })
     }
   } catch (error) {
     res.status(500).json({
       status: "FAILED",
-      message: "An error occurred while sending OTP",
+      message: messageCode.msgErrorOnOtp,
     })
   }
 };
-
 
 module.exports = {
     signup,

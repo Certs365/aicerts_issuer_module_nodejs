@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const tasksController = require('../controller/auth');
-
+const validationRoute = require("../common/validationRoutes");
 
 
 /**
@@ -100,7 +100,20 @@ const tasksController = require('../controller/auth');
  *                 message:
  *                   type: string
  *                   description: A message describing the error
- *
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *       '500':
  *         description: Internal server error
  *         content:
@@ -115,11 +128,7 @@ const tasksController = require('../controller/auth');
  *                   type: string
  *                   description: A message describing the error
  */
-
-
-router.post('/signup', tasksController.signup);
-
-
+router.post('/signup', validationRoute.signUp,tasksController.signup);
 
 /**
  * @openapi
@@ -186,6 +195,20 @@ router.post('/signup', tasksController.signup);
  *                 message:
  *                   type: string
  *                   description: A message describing the error
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *
  *       '500':
  *         description: Internal server error
@@ -201,9 +224,7 @@ router.post('/signup', tasksController.signup);
  *                   type: string
  *                   description: A message describing the error
  */
-
-router.post('/login', tasksController.login);
-
+router.post('/login', validationRoute.credentials, tasksController.login);
 
 /**
  * @swagger
@@ -224,7 +245,7 @@ router.post('/login', tasksController.login);
  *             required:
  *               - email
  *     responses:
- *       200:
+ *       '200':
  *         description: Two-factor authentication code sent successfully
  *         content:
  *           application/json:
@@ -237,7 +258,7 @@ router.post('/login', tasksController.login);
  *                      message:
  *                          type: string
  *                          example: OTP sent to the email
- *       404:
+ *       '404':
  *         description: User not found
  *         content:
  *           application/json:
@@ -250,7 +271,21 @@ router.post('/login', tasksController.login);
  *                      message:
  *                          type: string
  *                          example: User not found
- *       500:
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -264,7 +299,8 @@ router.post('/login', tasksController.login);
  *                   type: string
  *                   example: An error occurred during the verification
  */
-router.post('/login-with-phone', tasksController.loginPhoneNumber);
+router.post('/login-with-phone', validationRoute.loginPhone, tasksController.loginPhoneNumber);
+
 /**
  * @swagger
  * /api/login-with-phone:
@@ -288,7 +324,7 @@ router.post('/login-with-phone', tasksController.loginPhoneNumber);
  *               - idToken
  *               - email
  *     responses:
- *       200:
+ *       '200':
  *         description: Successful login with valid credentials
  *         content:
  *           application/json:
@@ -319,7 +355,7 @@ router.post('/login-with-phone', tasksController.loginPhoneNumber);
  *                     phoneNumber:
  *                       type: string
  *                       example: +1234567890
- *       401:
+ *       '401':
  *         description: Invalid OTP or expired token
  *         content:
  *           application/json:
@@ -332,6 +368,20 @@ router.post('/login-with-phone', tasksController.loginPhoneNumber);
  *                 message:
  *                   type: string
  *                   example: Invalid OTP or expired token
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *       404:
  *         description: User not found
  *         content:
@@ -345,7 +395,7 @@ router.post('/login-with-phone', tasksController.loginPhoneNumber);
  *                 message:
  *                   type: string
  *                   example: User not found
- *       500:
+ *       '500':
  *         description: Internal Server Error
  *         content:
  *           application/json:
@@ -359,7 +409,6 @@ router.post('/login-with-phone', tasksController.loginPhoneNumber);
  *                   type: string
  *                   example: Internal Server Error. Please try again later.
  */
-
-router.post('/two-factor-auth', tasksController.twoFactor);
+router.post('/two-factor-auth', validationRoute.emailCheck, tasksController.twoFactor);
 
 module.exports=router;

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controller/user');
+const validationRoute = require("../common/validationRoutes");
+
 
 /**
  * @openapi
@@ -61,6 +63,20 @@ const userController = require('../controller/user');
  *                 message:
  *                   type: string
  *                   description: A message describing the error
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *       '500':
  *         description: Internal server error
  *         content:
@@ -76,7 +92,7 @@ const userController = require('../controller/user');
  *                   description: A message describing the error
  */
 
-router.post('/update-issuer', userController.updateIssuer);
+router.post('/update-issuer', validationRoute.update, userController.updateIssuer);
 
 /**
  * @openapi
@@ -128,6 +144,20 @@ router.post('/update-issuer', userController.updateIssuer);
  *                 message:
  *                   type: string
  *                   description: A message describing the error
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *
  *       '500':
  *         description: Internal server error
@@ -144,8 +174,7 @@ router.post('/update-issuer', userController.updateIssuer);
  *                   description: A message describing the error
  */
 
-router.post('/forgot-password', userController.forgotPassword);
-
+router.post('/forgot-password', validationRoute.emailCheck, userController.forgotPassword);
 
 /**
  * @openapi
@@ -200,6 +229,20 @@ router.post('/forgot-password', userController.forgotPassword);
  *                 message:
  *                   type: string
  *                   description: A message describing the error
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *
  *       '500':
  *         description: Internal server error
@@ -216,7 +259,7 @@ router.post('/forgot-password', userController.forgotPassword);
  *                   description: A message describing the error
  */
 
-router.post('/reset-password', userController.resetPassword);
+router.post('/reset-password', validationRoute.credentials, userController.resetPassword);
 
 
 module.exports=router;
