@@ -333,7 +333,6 @@ const twoFactor = async (req, res) => {
       verify.save();
 
       await sendEmail(verificationCode, email);
-
       res.status(200).json({
         status: "SUCCESS",
         message: messageCode.msgOtpSent,
