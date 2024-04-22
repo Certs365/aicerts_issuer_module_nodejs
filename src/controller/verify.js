@@ -38,7 +38,7 @@ const verifyIssuer = async (req, res) => {
 
         res.json({
             status: "PASSED",
-            message: msgVerfySuccess.msgVerfySuccess
+            message: messageCode.msgVerfySuccess
         });
 
     } catch (error) {
