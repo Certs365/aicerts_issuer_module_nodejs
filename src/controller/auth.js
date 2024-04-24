@@ -276,7 +276,7 @@ const login = async (req, res) => {
                  if (data[0]?.phoneNumber) {
                   res.json({
                     status: "FAILED",
-                    message: messageCode.msgInvalidPhone,
+                    message: messageCode.msgInvalidPassword,
                     isPhoneNumber: true,
                     phoneNumber: data[0]?.phoneNumber,
                   });
@@ -333,7 +333,6 @@ const twoFactor = async (req, res) => {
       verify.save();
 
       await sendEmail(verificationCode, email);
-
       res.status(200).json({
         status: "SUCCESS",
         message: messageCode.msgOtpSent,
