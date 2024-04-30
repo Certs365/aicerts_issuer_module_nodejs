@@ -21,7 +21,8 @@ module.exports = {
     msgOrgMaxLength : "Entered Organization must not exceed 40 characters",
     msgUnameMaxLength : "Entered Username must not exceed 40 characters",
     msgPwdMaxLength : "Entered password must between 8 to 30 characters",
-
+    msgNoSpecialCharacters : "No special characters are allowed in name",
+    
     //Issuer Messages
     msgValidCredentials : "Valid Issuer Credentials",
     msgInvalidPassword : "Invalid password entered!",

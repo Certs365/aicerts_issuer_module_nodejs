@@ -22,8 +22,7 @@ const UserSchema = new Schema({
   designation: { type:String },
   username: { type: String, unique: true },
   rejectedDate: { type: Date, default: null },
-  certificatesIssued: { type: Number },
-  certificatesRenewed: { type: Number }
+  certificatesIssued: { type: Number }
 });
   
 // Verification Schema
@@ -52,9 +51,14 @@ const BatchIssuesSchema = new Schema({
     issuerId: { type: String, required: true },
     batchId: { type: Number, required: true },
     proofHash: [String],
+    encodedProof: { type: String, required: true },
     transactionHash: { type: String, required: true },
     certificateHash: { type: String, required: true },
     certificateNumber: { type: String, required: true },
+    name: { type: String, required: true },
+    course: { type: String, required: true },
+    grantDate: { type: String, required: true },
+    expirationDate: { type: String, required: true },
     issueDate: { type: Date, default: Date.now }
 });
 
