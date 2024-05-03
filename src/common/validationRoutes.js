@@ -6,14 +6,14 @@ const specialCharsRegex = /[!@#$%^&*(),.?":{}|<>]/; // Regular expression for sp
 
 const validationRoutes = {
     signUp: [
-        body("name").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).not().matches(specialCharsRegex).withMessage(messageCode.msgNoSpecialCharacters).isLength({ max: 40 }).withMessage(messageCode.msgNameMaxLength),
+        body("name").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ max: 40 }).withMessage(messageCode.msgNameMaxLength),
         body("organization").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ max: 40 }).withMessage(messageCode.msgOrgMaxLength),
         body("username").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ max: 40 }).withMessage(messageCode.msgUnameMaxLength),
         body("password").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ min: 8, max: 30 }).withMessage(messageCode.msgPwdMaxLength),
         body("email").notEmpty().trim().isEmail().withMessage(messageCode.msgInvalidEmail).not().equals("string").withMessage(messageCode.msgInvalidEmail)
     ],
     update: [
-        body("name").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).not().matches(specialCharsRegex).withMessage(messageCode.msgNoSpecialCharacters).isLength({ max: 40 }).withMessage(messageCode.msgNameMaxLength),
+        body("name").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ max: 40 }).withMessage(messageCode.msgNameMaxLength),
         body("id").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength(42).withMessage(messageCode.msgInvalidEthereum),
         body("phoneNumber").notEmpty().trim().isNumeric().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength(10).withMessage(messageCode.msgPhoneNumberLimit),
         body("email").notEmpty().trim().isEmail().withMessage(messageCode.msgInvalidEmail)
