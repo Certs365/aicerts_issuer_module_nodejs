@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 var messageCode = require("../common/codes");
 
 // mongodb user model
-const { User, Verification, } = require("../config/schema");
+const { User, Verification } = require("../config/schema");
 const { sendEmail, generateOTP , isDBConnected } = require('../models/tasks');
 const bcrypt = require("bcrypt");
 

@@ -268,7 +268,8 @@ const login = async (req, res) => {
                     name:data[0]?.name,
                     organization:data[0]?.organization,
                     email:data[0]?.email,
-                    certificatesIssued:data[0]?.certificatesIssued
+                    certificatesIssued:data[0]?.certificatesIssued,
+                    issuerId:data[0]?.issuerId
                   }
                 });
               } else {
