@@ -337,12 +337,14 @@ const twoFactor = async (req, res) => {
       res.status(200).json({
         status: "SUCCESS",
         message: messageCode.msgOtpSent,
-      })
+      });
+      return;
     } else {
       res.status(404).json({
         status: "FAILED",
         message: messageCode.msgIssuerNotFound,
-      })
+      });
+      return;
     }
   } catch (error) {
     res.status(500).json({
