@@ -8,9 +8,10 @@ const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail
 // const serviceAccount = JSON.parse(process.env.CONFIG);
 // Password handler
 const bcrypt = require("bcrypt");
-const { generateJwtToken } = require('../utils/authUtils');
+const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
 const { validationResult } = require("express-validator");
 var messageCode = require("../common/codes");
+const jwt = require('jsonwebtoken');
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -137,7 +138,7 @@ const signup = async (req, res) => {
       rejectedDate: null,
       certificatesIssued: 0
     });
-
+      newUser.refreshToken = generateRefreshToken();
       const savedUser = await newUser.save();
       await sendWelcomeMail(name, email);
 
@@ -255,16 +256,22 @@ const login = async (req, res) => {
           const hashedPassword = data[0].password;
           bcrypt
             .compare(password, hashedPassword)
-            .then((result) => {
+            .then(async(result) => {
               const JWTToken =  generateJwtToken()
-              if (result) {
+              const refreshToken = generateRefreshToken(data[0]);
 
+              await User.findOneAndUpdate(
+                { email },          // Filter to find the user by their unique ID
+                { $set: { refreshToken: refreshToken } },  // Update the refreshToken field
+              );
+              if (result) {
                 // Password match
                 res.json({
                   status: "SUCCESS",
                   message: messageCode.msgValidCredentials,
                   data:{
                     JWTToken:JWTToken,
+                    refreshToken: refreshToken,
                     name:data[0]?.name,
                     organization:data[0]?.organization,
                     email:data[0]?.email,
@@ -354,10 +361,70 @@ const twoFactor = async (req, res) => {
   }
 };
 
+/**
+ * Api for the refresh token
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const refreshToken = async (req, res) => {
+  const refreshToken = req.body.token;
+
+  console.log(refreshToken);
+
+  if (!refreshToken) return res.status(401).send('Unauthorized');
+
+  try {
+    const foundUser = await User.findOne({ refreshToken: refreshToken });
+
+    if (!foundUser) { // Handle invalid or blacklisted refresh token
+      return res.status(401).send('Unauthorized');
+    }
+    console.log(process.env.REFRESH_TOKEN)
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN,
+      async (err, decoded) => {
+        console.log('err',err)
+        console.log('decoded', decoded)
+        if (err) {
+          foundUser.refreshtoken = generateRefreshToken(foundUser)
+          const result = await foundUser.save();
+        }
+        if (err || foundUser._id.toString() !== decoded.userId) {
+          return res.status(403).send('Token invalid');
+        }
+        //refreshtoken still valid
+        const JWTToken = generateJwtToken();
+  
+        const newRefreshToken = generateRefreshToken(foundUser)
+        foundUser.refreshtoken = newRefreshToken
+        const result = await foundUser.save();
+        res.json({
+          status: "SUCCESS",
+          message: messageCode.msgValidCredentials,
+          data:{
+            JWTToken:JWTToken,
+            refreshToken: newRefreshToken,
+            name:foundUser.name,
+            organization:foundUser.organization,
+            email:foundUser.email,
+            certificatesIssued:foundUser.certificatesIssued,
+            issuerId:foundUser.issuerId
+          }
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(401).send('Unauthorized');
+  }
+}
 module.exports = {
     signup,
     login,
     twoFactor,
-    loginPhoneNumber
+    loginPhoneNumber,
+    refreshToken
 }
 
