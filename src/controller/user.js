@@ -156,7 +156,7 @@ const forgotPassword = async (req, res) => {
         console.log(dbStatusMessage);
   
       // Find the issuer by IssuerId
-      const existingIssuer = await User.findById({issuerId: id});
+      const existingIssuer = await User.findOne({issuerId: id});
   
       if (!existingIssuer) {
         res.json({

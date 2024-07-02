@@ -3,9 +3,7 @@ require('dotenv').config();
 // mongodb user model
 const { User, Verification } = require("../config/schema");
 var admin = require("firebase-admin");
-// var serviceAccount = require("../config/firebaseConfig");
 const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail } = require('../models/tasks');
-// const serviceAccount = JSON.parse(process.env.CONFIG);
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken } = require('../utils/authUtils');

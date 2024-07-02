@@ -23,21 +23,15 @@ const swaggerOptions = {
     info: {
       title: 'User module apis',
       version: '1.0.0',
-      description: 'API documentation for User Module API',
+      description: 'API documentation for Issuer Module API',
     },
   },
   apis: ['./src/routes/*.js'], // Update the path to match your actual routes folder
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-// Configure CORS with whitelisted routes
-// const corsOptions = {
-//   origin: ['https://example.com'], // Add allowed origins
-//   methods: ['GET', 'POST'], // Add allowed methods
-// };
 
 // Middleware
-// app.use(cors(corsOptions)); // Use CORS middleware with custom options
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -46,7 +40,7 @@ app.use('/api', tasksRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  setTimeout(function () { next(); }, 120000); // 120 seconds
+  setTimeout(function () { next(); }, 1200000); // 120 seconds
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
