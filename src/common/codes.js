@@ -28,7 +28,7 @@ module.exports = {
     msgInvalidPassword : "Invalid password entered!",
     msgInvalidPhone : "Invalid phone number entered!",
     msgErrorOnComparePassword : "An error occurred while comparing passwords",
-    msgInvalidOrUnapproved : "Invalid credentials entered! (or) Issuer not approved!",
+    msgInvalidOrUnapproved : "Invalid credentials entered (or) Issuer not approved",
     msgExistingUserError : "An error occurred while checking for existing user",
     msgInvalidOtp : "Invalid OTP entered / bad format.",
     msgErrorOnLogin : "Error Occured during the Login",
