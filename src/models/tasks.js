@@ -42,7 +42,9 @@ const sendWelcomeMail = async (name, email) => {
       mailOptions.to = email;
       mailOptions.subject = `Welcome to AICerts`;
       mailOptions.text = `Hi ${name}, 
-Welcome to AICerts Portal, You have been successfully registered, Your details to be reviewed and approved by the admin, Once your account has been approved then you will be notified..`;
+Welcome to AICerts Portal, You have been successfully registered, 
+Your details to be reviewed and approved by the admin, 
+Once your account has been approved then you will be notified..`;
       transporter.sendMail(mailOptions);
       console.log('Email sent successfully');
   } catch (error) {
