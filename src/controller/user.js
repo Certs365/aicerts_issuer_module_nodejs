@@ -141,7 +141,7 @@ const forgotPassword = async (req, res) => {
    * @param {Object} res - Express response object.
    */
   const updateIssuer = async (req, res) => {
-    var validResult = validationResult(req);
+    let validResult = validationResult(req);
     if (!validResult.isEmpty()) {
       return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
     }
