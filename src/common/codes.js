@@ -40,7 +40,6 @@ module.exports = {
     msgSignupSuccess : "User signup successful",
     msgEnterOrgEmail : "Please Enter Your Organisation Email",
     msgIssuerUpdated : "Issuer updated successfully",
-    msgIssuerNotFound : "User not found (or) User not approved!",
     msgErroOnPwdReset : "An error occurred during password reset process!",
     msgPwdNotSame : "Password cannot be the same as the previous one!",
     msgPwdReset : "Password reset successful",
