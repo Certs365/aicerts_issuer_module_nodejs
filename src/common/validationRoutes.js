@@ -15,7 +15,6 @@ const validationRoutes = {
     update: [
         body("name").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength({ max: 40 }).withMessage(messageCode.msgNameMaxLength),
         body("id").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength(42).withMessage(messageCode.msgInvalidEthereum),
-        body("phoneNumber").notEmpty().trim().isNumeric().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide).isLength(10).withMessage(messageCode.msgPhoneNumberLimit),
         body("email").notEmpty().trim().isEmail().withMessage(messageCode.msgInvalidEmail)
     ],
     credentials: [
