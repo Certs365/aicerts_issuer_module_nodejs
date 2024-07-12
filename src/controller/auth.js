@@ -133,7 +133,8 @@ const signup = async (req, res) => {
       designation,
       username,
       rejectedDate: null,
-      certificatesIssued: 0
+      certificatesIssued: 0,
+      credits: 0
     });
 
       const savedUser = await newUser.save();
