@@ -1,9 +1,9 @@
 
 require('dotenv').config();
 // mongodb user model
-const { User, Verification } = require("../config/schema");
+const { User, Verification, IssuerCredits } = require("../config/schema");
 var admin = require("firebase-admin");
-const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail } = require('../models/tasks');
+const { sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail } = require('../models/tasks');
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken } = require('../utils/authUtils');
@@ -17,7 +17,7 @@ admin.initializeApp({
     private_key_id: process.env.PRIVATE_KEY_ID,
     private_key: process?.env?.PRIVATE_KEY?.replace(
       /\\n/g,
-     '\n',
+      '\n',
     ),
     client_email: process.env.CLIENT_EMAIL,
     client_id: process.env.CLIENT_ID,
@@ -29,16 +29,16 @@ admin.initializeApp({
   })
 });
 
-  /**
-   * API call for Signup Issuer.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for Signup Issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const signup = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   let {
     name,
@@ -81,7 +81,7 @@ const signup = async (req, res) => {
     });
     return;
   } else if (
-    
+
     !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email) ||
     blacklistedEmailDomains.some(domain => email.endsWith('@' + domain))
   ) {
@@ -92,13 +92,13 @@ const signup = async (req, res) => {
     return;
   }
   try {
-     // Check mongoose connection
-     const dbStatus = await isDBConnected();
-     const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
-     console.log(dbStatusMessage);
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+    console.log(dbStatusMessage);
 
     // Checking if user already exists
-    const existingUser = await User.findOne({ email });  
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       res.json({
@@ -137,8 +137,18 @@ const signup = async (req, res) => {
       credits: 0
     });
 
-      const savedUser = await newUser.save();
-      await sendWelcomeMail(name, email);
+    // Initialise credits
+    const newCredits = new IssuerCredits({
+      email: email,
+      credits: 0,
+      verified: false
+    });
+
+    await newCredits.save();
+    const savedUser = await newUser.save();
+
+
+    await sendWelcomeMail(name, email);
 
     res.json({
       status: "SUCCESS",
@@ -154,16 +164,16 @@ const signup = async (req, res) => {
   }
 };
 
-  /**
-   * API call for login with phone Number.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for login with phone Number.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const loginPhoneNumber = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   const { idToken, email } = req.body;
 
@@ -224,16 +234,16 @@ const loginPhoneNumber = async (req, res) => {
   }
 }
 
-  /**
-   * API call for Issuer login.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for Issuer login.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const login = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
 
   let { email, password } = req.body;
@@ -255,25 +265,25 @@ const login = async (req, res) => {
           bcrypt
             .compare(password, hashedPassword)
             .then((result) => {
-              const JWTToken =  generateJwtToken()
+              const JWTToken = generateJwtToken()
               if (result) {
 
                 // Password match
                 res.json({
                   status: "SUCCESS",
                   message: messageCode.msgValidCredentials,
-                  data:{
-                    JWTToken:JWTToken,
-                    name:data[0]?.name,
-                    organization:data[0]?.organization,
-                    email:data[0]?.email,
-                    certificatesIssued:data[0]?.certificatesIssued,
-                    issuerId:data[0]?.issuerId
+                  data: {
+                    JWTToken: JWTToken,
+                    name: data[0]?.name,
+                    organization: data[0]?.organization,
+                    email: data[0]?.email,
+                    certificatesIssued: data[0]?.certificatesIssued,
+                    issuerId: data[0]?.issuerId
                   }
                 });
               } else {
-                 // Check if user has a phone number
-                 if (data[0]?.phoneNumber) {
+                // Check if user has a phone number
+                if (data[0]?.phoneNumber) {
                   res.json({
                     status: "FAILED",
                     message: messageCode.msgInvalidPassword,
@@ -295,7 +305,7 @@ const login = async (req, res) => {
                 message: messageCode.msgErrorOnComparePassword,
               });
             });
-          
+
         } else {
           res.json({
             status: "FAILED",
@@ -312,16 +322,16 @@ const login = async (req, res) => {
   }
 };
 
-  /**
-   * API call for two factor authentication.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for two factor authentication.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const twoFactor = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   let { email } = req.body;
   const verificationCode = generateOTP();
@@ -354,9 +364,9 @@ const twoFactor = async (req, res) => {
 };
 
 module.exports = {
-    signup,
-    login,
-    twoFactor,
-    loginPhoneNumber
+  signup,
+  login,
+  twoFactor,
+  loginPhoneNumber
 }
 

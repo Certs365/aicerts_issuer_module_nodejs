@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Define the schema for the User/Isseur model
-const UserSchema = new Schema({
+const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   organization: { type: String, required: true },
   email: { type: String, required: true },
@@ -25,9 +25,15 @@ const UserSchema = new Schema({
   certificatesIssued: { type: Number },
   credits: { type: Number }
 });
+
+const IssuerCreditsSchema = new mongoose.Schema({
+  email: { type: String, required: true }, // Email field is of type String and is required
+  credits: {type: Number, default: 0},
+  verified: { type: Boolean }
+});
   
 // Verification Schema
-const VerificationSchema = new Schema({
+const VerificationSchema = new mongoose.Schema({
     email: { type: String, required: true },
     code: { type: Number, required: true },
     verified: { type: Boolean }
@@ -48,7 +54,7 @@ const IssuesSchema = new mongoose.Schema({
 });
 
 // Batch Issues Schema
-const BatchIssuesSchema = new Schema({
+const BatchIssuesSchema = new mongoose.Schema({
     issuerId: { type: String, required: true },
     batchId: { type: Number, required: true },
     proofHash: [String],
@@ -64,6 +70,7 @@ const BatchIssuesSchema = new Schema({
 });
 
 const User = mongoose.model('User', UserSchema);
+const IssuerCredits = mongoose.model('IssuerCredits', IssuerCreditsSchema);
 const Verification = mongoose.model('Verification', VerificationSchema);
 const Issues = mongoose.model('Issues', IssuesSchema);
 const BatchIssues = mongoose.model('BatchIssues', BatchIssuesSchema);
@@ -71,6 +78,7 @@ const BatchIssues = mongoose.model('BatchIssues', BatchIssuesSchema);
 
 module.exports = {
     User,
+    IssuerCredits,
     Verification,
     Issues,
     BatchIssues
