@@ -1,7 +1,7 @@
 
 require('dotenv').config();
 // mongodb user model
-const { User, Verification, IssuerCredits } = require("../config/schema");
+const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
 const { sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail } = require('../models/tasks');
 // Password handler
@@ -65,6 +65,16 @@ const signup = async (req, res) => {
   password = password.trim();
   issuerId = accountDetails;
   approved = false;
+
+  // Define a mapping object for credits to service names
+  const creditToServiceName = {
+    1: 'issue',
+    2: 'renew',
+    3: 'revoke',
+    4: 'reactivate'
+  };
+
+  const todayDate = new Date();
 
   // Validation for mandatory fields
   const blacklistedEmailDomains = process.env.BLACKLISTED_EMAIL_DOMAINS.split(',');
@@ -133,19 +143,35 @@ const signup = async (req, res) => {
       designation,
       username,
       rejectedDate: null,
-      certificatesIssued: 0,
-      credits: 0
+      certificatesIssued: 0
     });
-
-    // Initialise credits
-    const newCredits = new IssuerCredits({
-      email: email,
-      credits: 0,
-      verified: false
-    });
-
-    await newCredits.save();
     const savedUser = await newUser.save();
+    try {
+      let insertPromises = [];
+      for (let count = 1; count < 5; count++) {
+        let serviceName = creditToServiceName[count];
+        // Initialise credits
+        let newServiceAccountQuota = new ServiceAccountQuotas({
+          issuerId: issuerId,
+          serviceId: serviceName,
+          limit: 0,
+          status: true,
+          createdAt: todayDate,
+          updatedAt: todayDate
+        });
+
+        // await newServiceAccountQuota.save();
+        insertPromises.push(newServiceAccountQuota.save());
+      }
+      // Wait for all insert promises to resolve
+      await Promise.all(insertPromises);
+
+    } catch (error) {
+      res.json({
+        status: "FAILED",
+        message: messageCode.msgInternalError,
+      });
+    }
 
 
     await sendWelcomeMail(name, email);
