@@ -10,16 +10,16 @@ const UserSchema = new Schema({
   issuerId: { type: String, required: true },
   approved: { type: Boolean },
   status: { type: Number },
-  address: { type:String },
-  country: { type:String },
-  organizationType: { type:String },
-  city: { type:String },
-  zip: { type:String },
-  industrySector: { type:String },
-  state: { type:String },
-  websiteLink: { type:String },
-  phoneNumber: { type:String },
-  designation: { type:String },
+  address: { type: String },
+  country: { type: String },
+  organizationType: { type: String },
+  city: { type: String },
+  zip: { type: String },
+  industrySector: { type: String },
+  state: { type: String },
+  websiteLink: { type: String },
+  phoneNumber: { type: String },
+  designation: { type: String },
   username: { type: String, unique: true },
   rejectedDate: { type: Date, default: null },
   certificatesIssued: { type: Number },
@@ -32,7 +32,8 @@ const ServiceAccountQuotasSchema = new Schema({
   limit: {type: Number, default: 0},
   status: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  resetAt: { type: Date, default: Date.now }
 });
   
 // Verification Schema

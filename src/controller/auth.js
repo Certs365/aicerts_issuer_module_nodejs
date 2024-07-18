@@ -10,6 +10,8 @@ const { generateJwtToken } = require('../utils/authUtils');
 const { validationResult } = require("express-validator");
 var messageCode = require("../common/codes");
 
+const serviceLimit = parseInt(process.env.SERVICE_LIMIT) || 10;
+
 admin.initializeApp({
   credential: admin.credential.cert({
     type: process.env.TYPE,
@@ -143,7 +145,8 @@ const signup = async (req, res) => {
       designation,
       username,
       rejectedDate: null,
-      certificatesIssued: 0
+      certificatesIssued: 0,
+      certificatesRenewed: 0
     });
     const savedUser = await newUser.save();
     try {
@@ -154,10 +157,11 @@ const signup = async (req, res) => {
         let newServiceAccountQuota = new ServiceAccountQuotas({
           issuerId: issuerId,
           serviceId: serviceName,
-          limit: 0,
+          limit: serviceLimit,
           status: true,
           createdAt: todayDate,
-          updatedAt: todayDate
+          updatedAt: todayDate,
+          resetAt: todayDate
         });
 
         // await newServiceAccountQuota.save();
@@ -172,7 +176,6 @@ const signup = async (req, res) => {
         message: messageCode.msgInternalError,
       });
     }
-
 
     await sendWelcomeMail(name, email);
 
