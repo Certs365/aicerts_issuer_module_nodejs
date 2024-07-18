@@ -22,7 +22,8 @@ const UserSchema = new Schema({
   designation: { type:String },
   username: { type: String, unique: true },
   rejectedDate: { type: Date, default: null },
-  certificatesIssued: { type: Number }
+  certificatesIssued: { type: Number },
+  refreshToken: { type: String, default: null}
 });
   
 // Verification Schema
