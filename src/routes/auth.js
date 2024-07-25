@@ -411,4 +411,7 @@ router.post('/login-with-phone', validationRoute.loginPhone, tasksController.log
  */
 router.post('/two-factor-auth', validationRoute.emailCheck, tasksController.twoFactor);
 
+router.post("/refresh", tasksController.refreshToken)
+
+
 module.exports=router;
