@@ -407,14 +407,15 @@ const twoFactor = async (req, res) => {
  */
 const refreshToken = async (req, res) => {
   const refreshToken = req.body.token;
+  const email = req.body.email;
 
   console.log(refreshToken);
 
   if (!refreshToken) return res.status(401).send('Unauthorized');
 
   try {
-    const foundUser = await User.findOne({ refreshToken: refreshToken });
-
+    const foundUser = await User.findOne({ email: email });
+console.log(foundUser,"fd")
     if (!foundUser) { // Handle invalid or blacklisted refresh token
       return res.status(401).send('Unauthorized');
     }
