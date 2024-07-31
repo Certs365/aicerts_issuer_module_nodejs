@@ -10,19 +10,31 @@ const UserSchema = new Schema({
   issuerId: { type: String, required: true },
   approved: { type: Boolean },
   status: { type: Number },
-  address: { type:String },
-  country: { type:String },
-  organizationType: { type:String },
-  city: { type:String },
-  zip: { type:String },
-  industrySector: { type:String },
-  state: { type:String },
-  websiteLink: { type:String },
-  phoneNumber: { type:String },
-  designation: { type:String },
+  address: { type: String },
+  country: { type: String },
+  organizationType: { type: String },
+  city: { type: String },
+  zip: { type: String },
+  industrySector: { type: String },
+  state: { type: String },
+  websiteLink: { type: String },
+  phoneNumber: { type: String },
+  designation: { type: String },
   username: { type: String, unique: true },
   rejectedDate: { type: Date, default: null },
-  certificatesIssued: { type: Number }
+  certificatesIssued: { type: Number },
+  certificatesRenewed: { type: Number },
+});
+
+const ServiceAccountQuotasSchema = new Schema({
+  issuerId: { type: String, required: true }, // Issuer Id field is of type String and is required
+  serviceId: { type: String, required: true }, // Service Id field is of type String and is required
+  limit: {type: Number, default: 0},
+  status: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  resetAt: { type: Date, default: Date.now },
+  refreshToken: { type: String, default: null}
 });
   
 // Verification Schema
@@ -33,7 +45,7 @@ const VerificationSchema = new Schema({
 });
 
 // Define the schema for the Issues model
-const IssuesSchema = new mongoose.Schema({
+const IssuesSchema = new Schema({
   issuerId: { type: String, required: true }, // ID field is of type String and is required
   transactionHash: { type: String, required: true }, // TransactionHash field is of type String and is required
   certificateHash: { type: String, required: true }, // CertificateHash field is of type String and is required
@@ -63,6 +75,7 @@ const BatchIssuesSchema = new Schema({
 });
 
 const User = mongoose.model('User', UserSchema);
+const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
 const Verification = mongoose.model('Verification', VerificationSchema);
 const Issues = mongoose.model('Issues', IssuesSchema);
 const BatchIssues = mongoose.model('BatchIssues', BatchIssuesSchema);
@@ -70,6 +83,7 @@ const BatchIssues = mongoose.model('BatchIssues', BatchIssuesSchema);
 
 module.exports = {
     User,
+    ServiceAccountQuotas,
     Verification,
     Issues,
     BatchIssues

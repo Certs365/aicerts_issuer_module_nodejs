@@ -1,14 +1,17 @@
 
 require('dotenv').config();
 // mongodb user model
-const { User, Verification } = require("../config/schema");
+const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
-const { sendEmail, generateAccount, generateOTP , isDBConnected, sendWelcomeMail } = require('../models/tasks');
+const { sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail } = require('../models/tasks');
 // Password handler
 const bcrypt = require("bcrypt");
-const { generateJwtToken } = require('../utils/authUtils');
+const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
 const { validationResult } = require("express-validator");
 var messageCode = require("../common/codes");
+const jwt = require('jsonwebtoken');
+
+const serviceLimit = parseInt(process.env.SERVICE_LIMIT) || 10;
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -17,7 +20,7 @@ admin.initializeApp({
     private_key_id: process.env.PRIVATE_KEY_ID,
     private_key: process?.env?.PRIVATE_KEY?.replace(
       /\\n/g,
-     '\n',
+      '\n',
     ),
     client_email: process.env.CLIENT_EMAIL,
     client_id: process.env.CLIENT_ID,
@@ -29,16 +32,16 @@ admin.initializeApp({
   })
 });
 
-  /**
-   * API call for Signup Issuer.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for Signup Issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const signup = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   let {
     name,
@@ -66,6 +69,16 @@ const signup = async (req, res) => {
   issuerId = accountDetails;
   approved = false;
 
+  // Define a mapping object for credits to service names
+  const creditToServiceName = {
+    1: 'issue',
+    2: 'renew',
+    3: 'revoke',
+    4: 'reactivate'
+  };
+
+  const todayDate = new Date();
+
   // Validation for mandatory fields
   const blacklistedEmailDomains = process.env.BLACKLISTED_EMAIL_DOMAINS.split(',');
   if (
@@ -81,7 +94,7 @@ const signup = async (req, res) => {
     });
     return;
   } else if (
-    
+
     !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email) ||
     blacklistedEmailDomains.some(domain => email.endsWith('@' + domain))
   ) {
@@ -92,13 +105,13 @@ const signup = async (req, res) => {
     return;
   }
   try {
-     // Check mongoose connection
-     const dbStatus = await isDBConnected();
-     const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
-     console.log(dbStatusMessage);
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+    console.log(dbStatusMessage);
 
     // Checking if user already exists
-    const existingUser = await User.findOne({ email });  
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       res.json({
@@ -133,11 +146,39 @@ const signup = async (req, res) => {
       designation,
       username,
       rejectedDate: null,
-      certificatesIssued: 0
+      certificatesIssued: 0,
+      certificatesRenewed: 0
     });
+    const savedUser = await newUser.save();
+    try {
+      let insertPromises = [];
+      for (let count = 1; count < 5; count++) {
+        let serviceName = creditToServiceName[count];
+        // Initialise credits
+        let newServiceAccountQuota = new ServiceAccountQuotas({
+          issuerId: issuerId,
+          serviceId: serviceName,
+          limit: serviceLimit,
+          status: true,
+          createdAt: todayDate,
+          updatedAt: todayDate,
+          resetAt: todayDate
+        });
 
-      const savedUser = await newUser.save();
-      await sendWelcomeMail(name, email);
+        // await newServiceAccountQuota.save();
+        insertPromises.push(newServiceAccountQuota.save());
+      }
+      // Wait for all insert promises to resolve
+      await Promise.all(insertPromises);
+
+    } catch (error) {
+      res.json({
+        status: "FAILED",
+        message: messageCode.msgInternalError,
+      });
+    }
+
+    await sendWelcomeMail(name, email);
 
     res.json({
       status: "SUCCESS",
@@ -153,16 +194,16 @@ const signup = async (req, res) => {
   }
 };
 
-  /**
-   * API call for login with phone Number.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for login with phone Number.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const loginPhoneNumber = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   const { idToken, email } = req.body;
 
@@ -223,16 +264,16 @@ const loginPhoneNumber = async (req, res) => {
   }
 }
 
-  /**
-   * API call for Issuer login.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for Issuer login.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const login = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
 
   let { email, password } = req.body;
@@ -253,16 +294,22 @@ const login = async (req, res) => {
           const hashedPassword = data[0].password;
           bcrypt
             .compare(password, hashedPassword)
-            .then((result) => {
+            .then(async(result) => {
               const JWTToken =  generateJwtToken()
-              if (result) {
+              const refreshToken = generateRefreshToken(data[0]);
 
+              await User.findOneAndUpdate(
+                { email },          // Filter to find the user by their unique ID
+                { $set: { refreshToken: refreshToken } },  // Update the refreshToken field
+              );
+              if (result) {
                 // Password match
                 res.json({
                   status: "SUCCESS",
                   message: messageCode.msgValidCredentials,
                   data:{
                     JWTToken:JWTToken,
+                    refreshToken: refreshToken,
                     name:data[0]?.name,
                     organization:data[0]?.organization,
                     email:data[0]?.email,
@@ -271,8 +318,8 @@ const login = async (req, res) => {
                   }
                 });
               } else {
-                 // Check if user has a phone number
-                 if (data[0]?.phoneNumber) {
+                // Check if user has a phone number
+                if (data[0]?.phoneNumber) {
                   res.json({
                     status: "FAILED",
                     message: messageCode.msgInvalidPassword,
@@ -294,7 +341,7 @@ const login = async (req, res) => {
                 message: messageCode.msgErrorOnComparePassword,
               });
             });
-          
+
         } else {
           res.json({
             status: "FAILED",
@@ -311,16 +358,16 @@ const login = async (req, res) => {
   }
 };
 
-  /**
-   * API call for two factor authentication.
-   *
-   * @param {Object} req - Express request object.
-   * @param {Object} res - Express response object.
-   */
+/**
+ * API call for two factor authentication.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const twoFactor = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   let { email } = req.body;
   const verificationCode = generateOTP();
@@ -352,10 +399,71 @@ const twoFactor = async (req, res) => {
   }
 };
 
+/**
+ * Api for the refresh token
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const refreshToken = async (req, res) => {
+  const refreshToken = req.body.token;
+  const email = req.body.email;
+
+  console.log(refreshToken);
+
+  if (!refreshToken) return res.status(401).send('Unauthorized');
+
+  try {
+    const foundUser = await User.findOne({ email: email });
+console.log(foundUser,"fd")
+    if (!foundUser) { // Handle invalid or blacklisted refresh token
+      return res.status(401).send('Unauthorized');
+    }
+    console.log(process.env.REFRESH_TOKEN)
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN,
+      async (err, decoded) => {
+        console.log('err',err)
+        console.log('decoded', decoded)
+        if (err) {
+          foundUser.refreshtoken = generateRefreshToken(foundUser)
+          const result = await foundUser.save();
+        }
+        if (err || foundUser._id.toString() !== decoded.userId) {
+          return res.status(403).send('Token invalid');
+        }
+        //refreshtoken still valid
+        const JWTToken = generateJwtToken();
+  
+        const newRefreshToken = generateRefreshToken(foundUser)
+        foundUser.refreshtoken = newRefreshToken
+        const result = await foundUser.save();
+        res.json({
+          status: "SUCCESS",
+          message: messageCode.msgValidCredentials,
+          data:{
+            JWTToken:JWTToken,
+            refreshToken: newRefreshToken,
+            name:foundUser.name,
+            organization:foundUser.organization,
+            email:foundUser.email,
+            certificatesIssued:foundUser.certificatesIssued,
+            issuerId:foundUser.issuerId
+          }
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(401).send('Unauthorized');
+  }
+}
 module.exports = {
     signup,
     login,
     twoFactor,
-    loginPhoneNumber
+    loginPhoneNumber,
+    refreshToken
 }
 
