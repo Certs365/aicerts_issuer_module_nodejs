@@ -50,4 +50,8 @@ module.exports = {
     msgVerfySuccess : "Verification successful",
     msgVerifyError : "An error occurred during the verification process",
 
+    //Authr Messages
+    msgInvalidToken: "Provided invalid token",
+    msgTokenExpired: "Invalid OTP or Token Expired",
+
 };
