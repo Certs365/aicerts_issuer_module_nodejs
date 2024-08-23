@@ -28,8 +28,15 @@ const mailOptions = {
 const sendEmail = async (otp, email) => {
     try {
         mailOptions.to = email;
-        mailOptions.subject = `Auth OTP`;
-        mailOptions.text = `Your OTP is ${otp}. Please enter it to complete authentication.`;
+        mailOptions.subject = `Your Authentication OTP`;
+        mailOptions.text = `Hi,
+
+Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
+
+If you did not request this code, please ignore this message.
+        
+Best regards,
+The AICerts Team`;
         transporter.sendMail(mailOptions);
         console.log('Email sent successfully');
     } catch (error) {
