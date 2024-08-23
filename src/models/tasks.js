@@ -52,8 +52,6 @@ Once your account has been approved then you will be notified..`;
   }
 };
 
-
-
 // Function to generate a new Ethereum account with a private key
 const generateAccount = async () => {
   try {
