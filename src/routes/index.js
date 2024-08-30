@@ -4,10 +4,11 @@ const router = express.Router();
 let auth = require("./auth")
 let user = require("./user")
 let verify = require("./verify")
-
+let health = require("./health");
 
 router.use(auth);
 router.use(user);
 router.use(verify);
+router.use(health);
 
 module.exports = router

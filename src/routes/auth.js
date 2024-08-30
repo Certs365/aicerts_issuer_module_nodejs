@@ -411,7 +411,120 @@ router.post('/login-with-phone', validationRoute.loginPhone, tasksController.log
  */
 router.post('/two-factor-auth', validationRoute.emailCheck, tasksController.twoFactor);
 
-router.post("/refresh", tasksController.refreshToken)
+
+/**
+ * @swagger
+ * /api/refresh:
+ *   post:
+ *     summary: Refresh for the Issuer authorization/authentication
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: The ID refresh token obtained from the user during the authentication.
+ *               email:
+ *                 type: string
+ *                 description: The email address of the user for login/authentication.
+ *             required:
+ *               - token
+ *               - email
+ *     responses:
+ *       '200':
+ *         description: Successful login with valid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 message:
+ *                   type: string
+ *                   example: Valid User Credentials
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     JWTToken:
+ *                       type: string
+ *                       example: <JWT_TOKEN>
+ *                     refreshToken:
+ *                       type: string
+ *                       example: <JWT_TOKEN>
+ *                     name:
+ *                       type: string
+ *                       example: John Doe
+ *                     organization:
+ *                       type: string
+ *                       example: ABC Corporation
+ *                     email:
+ *                       type: string
+ *                       example: john.doe@example.com
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: +1234567890
+ *       '401':
+ *         description: Invalid OTP or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: Invalid OTP or expired token
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '403':
+ *         description: User provided invalid Token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: User provided invalid Token.
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: Internal Server Error. Please try again later.
+ */
+router.post("/refresh", validationRoute.refreshToken, tasksController.refreshToken)
 
 
 module.exports=router;

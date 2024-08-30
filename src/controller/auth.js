@@ -8,7 +8,7 @@ const { sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail 
 const bcrypt = require("bcrypt");
 const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
 const { validationResult } = require("express-validator");
-var messageCode = require("../common/codes");
+const messageCode = require("../common/codes");
 const jwt = require('jsonwebtoken');
 
 const serviceLimit = parseInt(process.env.SERVICE_LIMIT) || 10;
@@ -406,32 +406,35 @@ const twoFactor = async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const refreshToken = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
   const refreshToken = req.body.token;
   const email = req.body.email;
 
-  console.log(refreshToken);
-
-  if (!refreshToken) return res.status(401).send('Unauthorized');
+  // Handle invalid or blacklisted refresh token
+  if (!refreshToken) return res.status(401).send({ status: "FAILED", message: messageCode.msgInvalidToken });
 
   try {
     const foundUser = await User.findOne({ email: email });
-console.log(foundUser,"fd")
-    if (!foundUser) { // Handle invalid or blacklisted refresh token
-      return res.status(401).send('Unauthorized');
+// console.log(foundUser,"fd")
+    if (!foundUser) { 
+      return res.status(401).send({ status:"FAILED", message: messageCode.msgIssuerNotFound, details: email });
     }
-    console.log(process.env.REFRESH_TOKEN)
+    // console.log(process.env.REFRESH_TOKEN)
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN,
       async (err, decoded) => {
-        console.log('err',err)
-        console.log('decoded', decoded)
+        // console.log('err',err)
+        // console.log('decoded', decoded)
         if (err) {
           foundUser.refreshtoken = generateRefreshToken(foundUser)
           const result = await foundUser.save();
         }
         if (err || foundUser._id.toString() !== decoded.userId) {
-          return res.status(403).send('Token invalid');
+          return res.status(403).send({ status: "FAILED", message: messageCode.msgInvalidToken });
         }
         //refreshtoken still valid
         const JWTToken = generateJwtToken();
@@ -439,7 +442,7 @@ console.log(foundUser,"fd")
         const newRefreshToken = generateRefreshToken(foundUser)
         foundUser.refreshtoken = newRefreshToken
         const result = await foundUser.save();
-        res.json({
+        return res.json({
           status: "SUCCESS",
           message: messageCode.msgValidCredentials,
           data:{
@@ -456,7 +459,7 @@ console.log(foundUser,"fd")
     );
   } catch (error) {
     console.error(error);
-    res.status(401).send('Unauthorized');
+    return res.status(401).send({ status:"FAILED", message: messageCode.msgTokenExpired });
   }
 }
 module.exports = {
