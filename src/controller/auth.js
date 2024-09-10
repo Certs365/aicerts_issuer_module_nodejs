@@ -371,6 +371,14 @@ const twoFactor = async (req, res) => {
   }
   let { email } = req.body;
   const verificationCode = generateOTP();
+  const issuer = await User.findOne({ email });
+
+  if (!issuer || !issuer.approved) {
+    return res.json({
+      status: 'FAILED',
+      message: messageCode.msgIssuerNotFound,
+    });
+  }
 
   try {
     const verify = await Verification.findOne({ email });
@@ -378,7 +386,7 @@ const twoFactor = async (req, res) => {
       verify.code = verificationCode;
       verify.save();
 
-      await sendEmail(verificationCode, email);
+      await sendEmail(verificationCode, email, issuer.name);
       res.status(200).json({
         status: "SUCCESS",
         message: messageCode.msgOtpSent,
