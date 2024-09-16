@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 // mongodb user model
 const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
@@ -147,7 +146,8 @@ const signup = async (req, res) => {
       username,
       rejectedDate: null,
       certificatesIssued: 0,
-      certificatesRenewed: 0
+      certificatesRenewed: 0,
+      approveDate: null,
     });
     const savedUser = await newUser.save();
     try {

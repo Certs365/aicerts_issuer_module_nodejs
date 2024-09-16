@@ -54,4 +54,9 @@ module.exports = {
     msgInvalidToken: "Provided invalid token",
     msgTokenExpired: "Invalid OTP or Token Expired",
 
+    //Migrated Fetching APIs Messages
+    msgAllIssuersFetched: "All Issuer details fetched successfully",
+    msgErrorOnFetching: "Unable to fetch Issuer details, Please try again",
+   
+
 };
