@@ -61,4 +61,72 @@ const userController = require('../controller/fetch');
 
 router.get('/get-all-issuers', userController.getAllIssuers);
 
+/**
+ * @swagger
+ * /api/get-admin-graph-details/{year}:
+ *   get:
+ *     summary: Fetch graph data based on a year
+ *     description: Retrieve graph data based on the provided year-YYYY & email.
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: year
+ *         description: The value used to fetch graph data. Must be a year-YYYY (number).
+ *         required: true
+ *         schema:
+ *           type: number
+ *     responses:
+ *       '200':
+ *         description: Successfully fetched graph data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: number
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Indicates if the request was successful.
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the result of the operation.
+ *                 data:
+ *                   type: number
+ *                   description: The fetched graph data.
+ *             example:
+ *               status: "SUCCESS"
+ *               message: Graph data fetched successfully.
+ *               data: []
+ *       '400':
+ *         description: Invalid request due to missing or invalid parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Invalid request due to missing or invalid parameters.
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Internal Server Error.
+ */
+
+router.get('/get-admin-graph-details/:year', userController.getAdminGraphDetails);
+
+
 module.exports=router;

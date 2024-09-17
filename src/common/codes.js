@@ -5,7 +5,7 @@ module.exports = {
     msgDbNotReady : "Database connection is Not Ready",
     
     // Response code messages
-    msgInternalError : "Internal server error. Please try again later.",
+    msgInternalError : "Unable to reach the server, Please try again...",
 
     // Validation Error codes Issues (Route)
     msgInvalidFile : "Invalid file uploaded / Please Try again ...",
@@ -57,6 +57,8 @@ module.exports = {
     //Migrated Fetching APIs Messages
     msgAllIssuersFetched: "All Issuer details fetched successfully",
     msgErrorOnFetching: "Unable to fetch Issuer details, Please try again",
+    msgGraphDataFetched: "Graph data fetched successfully",
+    msgInvalidGraphInput: "Please provide valid Graph Input",
    
 
 };
