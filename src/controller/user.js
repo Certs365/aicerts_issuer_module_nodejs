@@ -48,7 +48,7 @@ const forgotPassword = async (req, res) => {
         await verify.save();
       }
       // password handling
-      sendEmail(generatedOtp, email);
+      sendEmail(generatedOtp, email, user.name);
   
       return res.json({
           status: 'PASSED',

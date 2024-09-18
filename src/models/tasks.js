@@ -25,11 +25,11 @@ const mailOptions = {
     text: '',
 };
 
-const sendEmail = async (otp, email) => {
+const sendEmail = async (otp, email, name) => {
     try {
         mailOptions.to = email;
         mailOptions.subject = `Your Authentication OTP`;
-        mailOptions.text = `Hi,
+        mailOptions.text = `Hi ${name},
 
 Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
 
@@ -50,11 +50,11 @@ const sendWelcomeMail = async (name, email) => {
       mailOptions.subject = `Welcome to AICerts`;
       mailOptions.text = `Hi ${name},
 
-Welcome to the AICerts Portal! Your registration is now complete.
+Welcome to the AICerts Portal, Your registration is now complete.
 
 Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.
 
-Thank you for joining us!
+Thank you for joining us.
 
 Best regards,
 The AICerts Team.`;
