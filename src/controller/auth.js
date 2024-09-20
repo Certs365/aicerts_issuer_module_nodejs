@@ -145,6 +145,7 @@ const signup = async (req, res) => {
       designation,
       username,
       rejectedDate: null,
+      transactionFee: 0,
       certificatesIssued: 0,
       certificatesRenewed: 0,
       approveDate: null,

@@ -56,9 +56,15 @@ module.exports = {
 
     //Migrated Fetching APIs Messages
     msgAllIssuersFetched: "All Issuer details fetched successfully",
-    msgErrorOnFetching: "Unable to fetch Issuer details, Please try again",
+    msgErrorOnFetching: "Unable to process requested details, Please try again",
     msgGraphDataFetched: "Graph data fetched successfully",
     msgInvalidGraphInput: "Please provide valid Graph Input",
+    msgMatchFound: "Requested results found",
+    msgNoMatchFound: "No matching results found",
+    msgOperationSuccess: "Uploaded successfully",
+    msgAdminMailNotExist: "Admin with the provided email not exist",
+    msgInvalidIssuer: "Invalid / Inactive Issuer email",
+    msgUnableToProcessRequest: "Unable to process the request"
    
 
 };

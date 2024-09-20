@@ -7,8 +7,12 @@ const {
   isDBConnected // Function to check if the database connection is established
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
+const {
+  getAggregatedCertsDetails,
+} = require('../utils/customModules');
+
 // Import MongoDB models
-const { User, Issues, BatchIssues, IssueStatus, VerificationLog, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues } = require("../config/schema");
+const { Admin, User, Issues, BatchIssues, IssueStatus, VerificationLog, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails } = require("../config/schema");
 
 const messageCode = require("../common/codes");
 /**
@@ -26,8 +30,15 @@ const getAllIssuers = async (req, res) => {
 
     // Fetch all users from the database
     // Fetch all users from the database
-    const allIssuers = await User.find({ status: [0,1,2] }).select('-password');
+    const allIssuers = await User.find({ status: [0, 1, 2] }).select('-password');
     const allIssuerCount = allIssuers.length;
+    if (!allIssuers) {
+      return res.json({
+        code: 400,
+        status: 'FAILED',
+        message: messageCode.msgNoMatchFound
+      });
+    }
 
     const statusCounts = allIssuers.reduce((counts, item) => {
       if (item.status === 0) counts.status0++;
@@ -40,20 +51,26 @@ const getAllIssuers = async (req, res) => {
     const activeIssuerCount = statusCounts.status1;
     const inactiveIssuerCount = statusCounts.status2;
 
+    let totalMaticSpent = allIssuers.reduce((total, item) => total + item.transactionFee, 0);
+    // Restrict to 10 decimal places
+    let maticSpent = parseFloat(totalMaticSpent.toFixed(10));
+
     res.json({
       code: 200,
       status: 'SUCCESS',
+      message: messageCode.msgAllIssuersFetched,
       allIssuers: allIssuerCount,
       activeIssuers: activeIssuerCount,
       inactiveIssuers: inactiveIssuerCount,
       pendingIssuers: pendingIssuerCount,
-      data: allIssuers,
-      message: messageCode.msgAllIssuersFetched
+      maticSpent: maticSpent,
+      data: allIssuers
     });
+    return;
   } catch (error) {
     // Error occurred while fetching user details, respond with failure message
-    res.json({
-      code: 400,
+    return res.json({
+      code: 500,
       status: 'FAILED',
       message: messageCode.msgErrorOnFetching
     });
@@ -61,7 +78,96 @@ const getAllIssuers = async (req, res) => {
 };
 
 /**
-* API to do Health Check.
+* API to get server details.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const fetchServerDetails = async ( req, res ) => {
+  try {
+    const getServeDetails = await ServerDetails.find({ email : { $ne : null}});
+
+    if(!getServeDetails || getServeDetails.length == 0){
+      return res.json({
+        code: 400,
+        status: 'FAILED',
+        message: messageCode.msgNoMatchFound
+      });
+    }
+
+    return res.json({
+      code: 200,
+      status: 'SUCCESS',
+      message: messageCode.msgMatchFound,
+      data: getServeDetails
+    });
+
+  } catch (error) {
+    console.error("An error occured", error);
+    return res.json({
+      code: 500,
+      status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
+* API to put server details.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const uploadServerDetails = async ( req, res ) => {
+  const { email, serverName, serverEndpoint, serverAddress} = req.body;
+
+  if(!email || !serverName || !serverEndpoint || !serverAddress){
+    return res.json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgEnterInvalid
+    });
+  }
+    await isDBConnected();
+
+    const isAdminExist = await Admin.findOne({ email: email});
+    if(!isAdminExist){
+      return res.json({
+        code: 400,
+        status: 'FAILED',
+        message: messageCode.msgAdminMailNotExist
+      });
+    }
+
+  try {
+    const uploadDetails = new ServerDetails({
+      email: email,
+      serverName: serverName,
+      serverEndpoint: serverEndpoint,
+      serverAddress: serverAddress,
+      lastUpdate: Date.now()
+    });
+    await uploadDetails.save();
+
+    return res.json({
+      code: 200,
+      status: 'SUCCESS',
+      message: messageCode.msgOperationSuccess,
+      data: uploadDetails
+    });
+
+  } catch (error) {
+    console.error("An error occured", error);
+    return res.json({
+      code: 500,
+      status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
+* API to get Issues/Issuers count on month wise.
 *
 * @param {Object} req - Express request object.
 * @param {Object} res - Express response object.
@@ -72,7 +178,7 @@ const getAdminGraphDetails = async (req, res) => {
   const year = parseInt(_year);
   // Check if value is between 1 and 12 and equal to 2024
   if ((year !== null && year !== '') && // Check if value is not null or empty
-    (year < 2000 || year > 9999)) {
+    (year < 2020 || year > 2099)) {
     // Send the fetched graph data as a response
     return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidGraphInput, details: year });
   }
@@ -93,6 +199,10 @@ const getAdminGraphDetails = async (req, res) => {
     var fetchAnnualIssuers = await User.find({
       approveDate: { $ne: null }
     }).lean();
+
+    if (!fetchAnnualIssues && !fetchAnnualIssuers) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgDbNotReady });
+    }
 
     var getIssuersDetailsMonthCount = await getAggregatedCertsDetails(fetchAnnualIssuers, year, 1);
     var getIssuesDetailsMonthCount = await getAggregatedCertsDetails(fetchAnnualIssues, year, 2);
@@ -116,46 +226,127 @@ const getAdminGraphDetails = async (req, res) => {
   }
 };
 
+const addCertificateTemplate = async (req, res) => {
 
-const getAggregatedCertsDetails = async (data, year, type) => {
-  // Function to extract month and year from lastUpdate field
-  const getMonthYear = (entry) => {
-    const date = moment(entry.lastUpdate);
-    const year = date.year();
-    return year;
-  };
-  // Filter data for the specified year
-  const dataYear = data.filter(entry => {
-    const entryYear = getMonthYear(entry);
-    return entryYear === year;
-  });
+  let { url, email,designFields  } = req.body;
+  try {
+      const user = await User.findOne({ email:email , status:1});
+      
+      if (!user) {
+          return res.status(400).json({
+              status: "FAILED",
+              message: messageCode.msgInvalidIssuer,
+          });
+      }
 
-  // Count occurrences of each month
-  var monthCounts = {};
-  var month;
-  if (type == 2) {
-    dataYear.forEach(entry => {
-      month = moment(entry.lastUpdate).month() + 1; // Adding 1 because moment.js months are 0-indexed
-      monthCounts[month] = (monthCounts[month] || 0) + 1;
+      const templateDetails =new CrediantialTemplate({
+        email: email,
+        designFields: designFields,
+        url: url
+      })
+      const savedTemplate = await templateDetails.save();
+      
+
+      res.json({
+          code: 200,
+          status: "SUCCESS",
+          message: messageCode.msgOperationSuccess,
+          data:savedTemplate
+      });
+
+  } catch (error) {
+      console.error(messageCode.msgInternalError, error);
+      res.status(500).json({
+          code: 400,
+          status: 'FAILED',
+          message: messageCode.msgInternalError
+      });
+  }
+};
+
+const getCertificateTemplates = async (req, res) => {
+  const { email } = req.body;  // Expecting email in the request body
+
+  try {
+    // Find all templates associated with the provided email
+    const templates = await CrediantialTemplate.find({ email });
+
+    // If no templates are found, return an appropriate response
+    if (!templates.length) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No templates found for the provided email.",
+      });
+    }
+
+    // Return the found templates
+    res.json({
+      status: "SUCCESS",
+      message: "Templates fetched successfully.",
+      data: templates,
     });
-  } else {
-    dataYear.forEach(entry => {
-      month = moment(entry.approveDate).month() + 1; // Adding 1 because moment.js months are 0-indexed
-      monthCounts[month] = (monthCounts[month] || 0) + 1;
+    
+  } catch (error) {
+    console.error("Error fetching templates:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error fetching templates.',
     });
   }
+};
 
-  // Create array with counts for all months in the specified year
-  const monthCountsArray = [];
-  for (let i = 1; i <= 12; i++) {
-    monthCountsArray.push({ month: i, count: monthCounts[i] || 0 });
+const updateCertificateTemplate = async (req, res) => {
+  const { id, url, designFields } = req.body; // Expecting template ID and update details
+
+  try {
+    // Find the template by its ID
+    const template = await CrediantialTemplate.findById(id);
+
+    if (!template) {
+      return res.status(404).json({
+        code: 404,
+        status: "FAILED",
+        message: "Template not found.",
+      });
+    }
+
+    // Update the template fields
+    template.url = url || template.url; // Only update if a new URL is provided
+    template.designFields = designFields || template.designFields; // Update designFields if provided
+
+    // Save the updated template
+    const updatedTemplate = await template.save();
+
+    // Respond with the updated template
+    res.json({
+      code: 200,
+      status: "SUCCESS",
+      message: "Template updated successfully.",
+      data: updatedTemplate,
+    });
+
+  } catch (error) {
+    console.error("Error updating template:", error);
+    res.status(500).json({
+      status: "FAILED",
+      message: "Error updating template.",
+    });
   }
-  return monthCountsArray;
 };
 
 module.exports = {
-  // Function to do Health Check
+  // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
 
-  getAdminGraphDetails
+  fetchServerDetails,
+
+  uploadServerDetails,
+
+  getAdminGraphDetails,
+
+  updateCertificateTemplate,
+
+  addCertificateTemplate,
+
+  getCertificateTemplates
 };
