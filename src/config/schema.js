@@ -172,6 +172,12 @@ const DynamicParamsSchema = new mongoose.Schema({
   modifiedDate: { type: Date, default: Date.now } // issueDate field is of type Date and defaults to the current date/time
 });
 
+const CrediantialTemplateSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  designFields: { type: Object},
+  url: { type: String }
+});
+
 const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
 const User = mongoose.model('User', UserSchema);
 const Issues = mongoose.model('Issues', IssuesSchema);
@@ -182,6 +188,7 @@ const DynamicBatchIssues = mongoose.model('DynamicBatchIssues', DynamicBatchIssu
 const VerificationLog = mongoose.model('VerificationLog', VerificationLogSchema);
 const ShortUrl = mongoose.model('ShortUrl', ShortUrlSchema);
 const DynamicParameters = mongoose.model('DynamicParameters', DynamicParamsSchema);
+const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTemplateSchema);
 
 module.exports = {
   ServiceAccountQuotas,
@@ -193,5 +200,6 @@ module.exports = {
   DynamicBatchIssues,
   VerificationLog,
   ShortUrl,
-  DynamicParameters
+  DynamicParameters,
+  CrediantialTemplate
 };
