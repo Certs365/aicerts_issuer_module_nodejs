@@ -39,7 +39,7 @@ const getAllIssuers = async (req, res) => {
 
     // Fetch all users from the database
     // Fetch all users from the database
-    const allIssuers = await User.find({ status: [0, 1, 2] }).select('-password');
+    const allIssuers = await User.find({ status: [0, 1, 2, 3] }).select('-password');
     const allIssuerCount = allIssuers.length;
     if (!allIssuers) {
       return res.json({
@@ -53,12 +53,14 @@ const getAllIssuers = async (req, res) => {
       if (item.status === 0) counts.status0++;
       if (item.status === 1) counts.status1++;
       if (item.status === 2) counts.status2++;
+      if (item.status === 3) counts.status3++;
       return counts;
-    }, { status0: 0, status1: 0, status2: 0 });
+    }, { status0: 0, status1: 0, status2: 0, status3: 0 });
 
     const pendingIssuerCount = statusCounts.status0;
     const activeIssuerCount = statusCounts.status1;
     const inactiveIssuerCount = statusCounts.status2;
+    const rejectedIssuerCount = statusCounts.status3;
 
     let totalMaticSpent = allIssuers.reduce((total, item) => total + item.transactionFee, 0);
     // Restrict to 10 decimal places
@@ -72,6 +74,7 @@ const getAllIssuers = async (req, res) => {
       activeIssuers: activeIssuerCount,
       inactiveIssuers: inactiveIssuerCount,
       pendingIssuers: pendingIssuerCount,
+      rejectedIssuers: rejectedIssuerCount,
       maticSpent: maticSpent,
       data: allIssuers
     });
