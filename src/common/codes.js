@@ -64,7 +64,8 @@ module.exports = {
     msgOperationSuccess: "Uploaded successfully",
     msgAdminMailNotExist: "Admin with the provided email not exist",
     msgInvalidIssuer: "Invalid / Inactive Issuer email",
-    msgUnableToProcessRequest: "Unable to process the request"
+    msgUnableToProcessRequest: "Unable to process the request",
+    msgProvideValidFlag: "Please provide valid flag value as 1, 2",
    
 
 };

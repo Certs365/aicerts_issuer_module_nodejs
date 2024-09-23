@@ -39,6 +39,8 @@ const getAggregatedCertsDetails = async (data, year, type) => {
     return monthCountsArray;
 };
 
+
+
 module.exports = {
     // Function to get aggregated details month wise
     getAggregatedCertsDetails,

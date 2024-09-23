@@ -4,6 +4,9 @@ const ethers = require('ethers');
 const crypto = require('crypto');
 const mongoose = require("mongoose");
 
+// Import the Issues models from the schema defined in "../config/schema"
+const { User, Issues, BatchIssues, IssueStatus, VerificationLog, ShortUrl, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
+
 const transporter = nodemailer.createTransport({
         service:  process.env.MAIL_SERVICE,
         host: process.env.MAIL_HOST,
@@ -65,6 +68,24 @@ The AICerts Team.`;
   }
 };
 
+// Function to verify the Issuer email
+const isValidIssuer = async (email) => {
+  if (!email) {
+    return null;
+  }
+  try {
+    var validIssuer = await User.findOne({
+      email: email,
+      status: 1
+    }).select('-password');
+
+    return validIssuer;
+  } catch (error) {
+    console.log("An error occured", error);
+    return null;
+  }
+};
+
 // Function to generate a new Ethereum account with a private key
 const generateAccount = async () => {
   try {
@@ -110,6 +131,15 @@ const isDBConnected = async () => {
     }
     console.error('Failed to connect to MongoDB after maximum retries.');
     return false; // Return false if unable to connect after maximum retries
-  };
+};
 
-module.exports={sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail}
+
+module.exports={
+  // Function to validate issuer by email
+  isValidIssuer,
+  sendEmail, 
+  generateAccount, 
+  generateOTP, 
+  isDBConnected, 
+  sendWelcomeMail
+}

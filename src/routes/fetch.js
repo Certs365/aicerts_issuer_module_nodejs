@@ -421,7 +421,6 @@ router.post('/get-certificate-templates', userController.getCertificateTemplates
  */
 router.post('/add-certificate-template', userController.addCertificateTemplate);
 
-
 /**
  * @swagger
  * /api/update-certificate-template:
@@ -504,4 +503,88 @@ router.post('/add-certificate-template', userController.addCertificateTemplate);
  */
 
 router.put('/update-certificate-template', userController.updateCertificateTemplate);
+
+/**
+ * @swagger
+ * /api/generate-excel-report:
+ *   post:
+ *     summary: API to generate the Excel report as per Issuer input, Start date and End date. 
+ *     description: API to generate the Excel report as per Issuer input, Start date and End date. 
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email associated with the issuer.
+ *               value:
+ *                 type: number
+ *                 description: the flag value.
+ *               startDate:
+ *                 type: string
+ *                 description: The valid start date in (MM/DD/YYYY) format.
+ *               endDate:
+ *                 type: string
+ *                 description: The valid end date in (MM/DD/YYYY) format.
+ *     responses:
+ *       '200':
+ *         description: Successfully generated the report.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: number
+ *                   description: Indicates if the request code.
+ *                 status:
+ *                   type: string
+ *                   description: Indicates if the request was successful.
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the result of the operation.
+ *                 data:
+ *                   type: object
+ *                   description: The generated the report.
+ *             example:
+ *               code: 200
+ *               status: "SUCCESS"
+ *               message: "Template saved successfully."
+ *       '400':
+ *         description: Invalid request due to missing or invalid parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 400
+ *               status: "FAILED"
+ *               message: "Unable to fetch/generate report"
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 500
+ *               status: "FAILED"
+ *               message: "Internal Server Error."
+ */
+router.post('/generate-excel-report', userController.generateExcelReport);
+
 module.exports = router;
