@@ -133,6 +133,50 @@ const isDBConnected = async () => {
     return false; // Return false if unable to connect after maximum retries
 };
 
+const readableDateFormat = async (dateInput) => {
+  let date;
+  // Check if the input is in the ISO format
+  if (dateInput.includes("T")) {
+    date = new Date(dateInput);
+  }
+  // Check if the input is in the MM/DD/YYYY or M/D/YYYY format
+  else {
+    const [month, day, year] = dateInput.split('/');
+    date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00.000Z`);
+  }
+  // If the date is in the future, replace it with today's date
+  const today = new Date();
+  if (date > today) {
+    date = today;
+  }
+  // Format the date to MM/DD/YYYY
+  const formattedMonth = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const formattedDay = String(date.getUTCDate()).padStart(2, '0');
+  const formattedYear = date.getUTCFullYear();
+  return `${formattedMonth}/${formattedDay}/${formattedYear}`;
+};
+
+const parseDate = async (dateInput) => {
+  let date;
+  // Check if the input is in the ISO format
+  if (dateInput.includes("T")) {
+    date = new Date(dateInput);
+  }
+  // Check if the input is in the MM/DD/YYYY or M/D/YYYY format
+  else {
+    const [month, day, year] = dateInput.split('/').map(num => num.padStart(2, '0'));
+    date = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+  }
+  // Check if the date is in the future
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set to the start of the day for comparison
+  if (date > today) {
+    return today.toISOString();
+  }
+  // Return the date in ISO format
+  return date.toISOString();
+};
+
 
 module.exports={
   // Function to validate issuer by email
@@ -141,5 +185,7 @@ module.exports={
   generateAccount, 
   generateOTP, 
   isDBConnected, 
-  sendWelcomeMail
+  sendWelcomeMail,
+  parseDate,
+  readableDateFormat
 }

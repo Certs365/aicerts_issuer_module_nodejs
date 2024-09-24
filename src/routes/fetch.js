@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controller/fetch');
+const validationRoute = require('../common/validationRoutes');
 
 /**
  * @swagger
@@ -509,7 +510,7 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  * /api/generate-excel-report:
  *   post:
  *     summary: API to generate the Excel report as per Issuer input, Start date and End date. 
- *     description: API to generate the Excel report as per Issuer input, Start date and End date. 
+ *     description: API to generate the Excel report as per Issuer input, Start date and End date, Example Date 2024-09-20T23:59:59.999Z. 
  *     tags: [Fetch/Upload]
  *     security:
  *       - BearerAuth: []
@@ -585,6 +586,6 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *               status: "FAILED"
  *               message: "Internal Server Error."
  */
-router.post('/generate-excel-report', userController.generateExcelReport);
+router.post('/generate-excel-report', validationRoute.generateExcel, userController.generateExcelReport);
 
 module.exports = router;

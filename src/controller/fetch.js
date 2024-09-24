@@ -7,20 +7,23 @@ const fs = require("fs");
 const ExcelJS = require("exceljs");
 const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const { Readable } = require('stream');
+const { validationResult } = require("express-validator");
 // Importing functions from a custom module
 const {
   isValidIssuer,
-  isDBConnected // Function to check if the database connection is established
+  isDBConnected, // Function to check if the database connection is established
+  parseDate,
+  readableDateFormat,
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
 const {
   getAggregatedCertsDetails,
+  addHeading,
+  generateChartImage
 } = require('../utils/customModules');
 
-
-
 // Import MongoDB models
-const { Admin, User, Issues, BatchIssues, IssueStatus, VerificationLog, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails } = require("../config/schema");
+const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails } = require("../config/schema");
 
 const messageCode = require("../common/codes");
 
@@ -372,23 +375,17 @@ const updateCertificateTemplate = async (req, res) => {
  */
 
 const generateExcelReport = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
   try {
     const { startDate, endDate, email, value } = req.body;
-
     if (!startDate || !endDate || !email || !value) {
       return res.status(400).json({
         code: 400,
         status: "FAILED",
-        message: "Missing required parameters.",
-      });
-    }
-
-    // Check if the value is valid
-    if (![1, 2].includes(value)) {
-      return res.status(400).json({
-        code: 400,
-        status: "FAILED",
-        message: "Invalid value provided.",
+        message: messageCode.msgInputProvide,
       });
     }
 
@@ -397,26 +394,35 @@ const generateExcelReport = async (req, res) => {
       return res.status(500).json({
         code: 500,
         status: "FAILED",
-        message: "Database connection error.",
+        message: messageCode.msgDbNotReady,
       });
     }
 
-    const isEmailExist = await User.findOne({ email });
+    const isEmailExist = await User.findOne({ email: email });
     if (!isEmailExist) {
       return res.status(400).json({
         code: 400,
         status: "FAILED",
-        message: "User email not found.",
+        message: messageCode.msgInvalidEmail,
         details: email,
       });
     }
-
     const issuerId = isEmailExist.issuerId;
-    const start = startDate;
-    const end = endDate;
-    // const start = parseDate(startDate);
-    // const end = parseDate(endDate);
-    // end.setUTCHours(23, 59, 59, 999);
+    const start = await parseDate(startDate);
+    const end = await parseDate(endDate);
+
+    if(start > end){
+      return res.status(400).json({
+        code: 400,
+        status: "FAILED",
+        message: messageCode.msgStartDateShouldOld,
+        details: `Start Date : ${start}, End date: ${end}`,
+      });
+    }
+
+    console.log("the data input", startDate, endDate, email, start, end, start < end);
+    const readableStartDate = await readableDateFormat(startDate);
+    const readableEndDate = await readableDateFormat(endDate);
 
     const [
       issuesFetch,
@@ -444,10 +450,13 @@ const generateExcelReport = async (req, res) => {
         return array.filter((item) => item.certificateStatus === status).length;
       }
     };
+
     const data = {
       issuername: isEmailExist.name,
       issuerId,
       email,
+      organization: isEmailExist.organization,
+      designation: isEmailExist.designation,
       startDate,
       endDate,
       withpdfreactivate: getCount(issuesFetch, "withpdf", 4),
@@ -623,8 +632,7 @@ const generateExcelReport = async (req, res) => {
       ],
     };
 
-    if (value === 1) {
-
+    if (value == 1) {
       const workbook = new ExcelJS.Workbook();
       const worksheet1 = workbook.addWorksheet("Report");
 
@@ -735,9 +743,7 @@ const generateExcelReport = async (req, res) => {
 
       function addHeading(text, worksheet) {
         const row = worksheet.addRow([text]);
-
         row.alignment = { horizontal: "center" };
-
         for (let i = 1; i <= 6; i++) {
           const cell = row.getCell(i);
           cell.fill = {
@@ -746,20 +752,21 @@ const generateExcelReport = async (req, res) => {
             fgColor: { argb: "FFFFF033" }, // Yellow color
           };
         }
-
         worksheet.mergeCells(`A${row.number}:F${row.number}`);
         row.font = { bold: true, size: 15 };
         return row;
       }
 
-
       addHeading("Issuer Details", worksheet1);
+
       const issuerDetails = [
         ["Issuer Name", data.issuername],
+        ["Organization", data.organization],
+        ["Designation", data.designation],
         ["Issuer ID", data.issuerId],
         ["Email", data.email],
-        ["Start Date", data.startDate],
-        ["End Date", data.endDate],
+        ["Start Date", readableStartDate],
+        ["End Date", readableEndDate],
       ];
 
       issuerDetails.forEach((row) => {
@@ -775,7 +782,7 @@ const generateExcelReport = async (req, res) => {
 
       worksheet1.addRow([]);
 
-      let row = addHeading("Usage", worksheet1);
+      let row = await addHeading("Usage", worksheet1);
 
       const headers = [
         "",
@@ -976,7 +983,7 @@ const generateExcelReport = async (req, res) => {
 
       // End the response after sending the file
       res.end();
-    } else if (value === 2) {
+    } else if (value == 2) {
 
       function addHeading(text, worksheet) {
         const row = worksheet.addRow([text]);
@@ -1084,7 +1091,7 @@ const generateExcelReport = async (req, res) => {
       res.status(400).json({
         code: 400,
         status: "FAILED",
-        message: "Invalid value.",
+        message: messageCode.msgEnterInvalid,
       });
     }
   } catch (error) {
@@ -1092,29 +1099,9 @@ const generateExcelReport = async (req, res) => {
     res.status(500).json({
       code: 500,
       status: "FAILED",
-      message: "An error occurred while generating the report.",
+      message: messageCode.msgUnableToGenerateRepoert,
     });
   }
-};
-
-const _parseDate = async (dateStr) => {
-  console.log("The data", dateStr);
-  const [day, month, year] = dateStr.split("-").map(Number);
-  console.log("The formatted date", new Date(Date.UTC(year, month - 1, day)));
-  return new Date(Date.UTC(year, month - 1, day)); // Create UTC date
-};
-
-const parseDate = async (dateStr) => {
-  console.log("The data", dateStr);
-  // Create a Date object from the input string
-  const date = new Date(dateStr);
-  console.log("The formatted date", date);
-  // Define end variable as a new Date object based on the parsed date
-  const end = new Date(date); // Copy the date object
-  // Set end to the end of the day
-  end.setUTCHours(23, 59, 59, 999);
-  console.log("The end date", end);
-  return end; // Return the adjusted date
 };
 
 module.exports = {

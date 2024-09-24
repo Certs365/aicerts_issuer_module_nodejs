@@ -66,6 +66,8 @@ module.exports = {
     msgInvalidIssuer: "Invalid / Inactive Issuer email",
     msgUnableToProcessRequest: "Unable to process the request",
     msgProvideValidFlag: "Please provide valid flag value as 1, 2",
+    msgStartDateShouldOld: "Provided Start date must not be future date to the End date",
+    msgUnableToGenerateRepoert: "Unable to generating the report, Please try again...",
    
 
 };
