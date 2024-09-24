@@ -537,26 +537,14 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *       '200':
  *         description: Successfully generated the report.
  *         content:
- *           application/json:
+ *           application/excel:
  *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: number
- *                   description: Indicates if the request code.
- *                 status:
- *                   type: string
- *                   description: Indicates if the request was successful.
- *                 message:
- *                   type: string
- *                   description: A message indicating the result of the operation.
- *                 data:
- *                   type: object
- *                   description: The generated the report.
+ *               type: string
+ *               format: binary
  *             example:
  *               code: 200
  *               status: "SUCCESS"
- *               message: "Template saved successfully."
+ *               message: "Report saved successfully."
  *       '400':
  *         description: Invalid request due to missing or invalid parameters.
  *         content:
@@ -570,6 +558,21 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *               code: 400
  *               status: "FAILED"
  *               message: "Unable to fetch/generate report"
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 422.
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
  *       '500':
  *         description: Internal Server Error
  *         content:
@@ -587,5 +590,85 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *               message: "Internal Server Error."
  */
 router.post('/generate-excel-report', validationRoute.generateExcel, userController.generateExcelReport);
+
+/**
+ * @swagger
+ * /api/generate-invoice-report:
+ *   post:
+ *     summary: API to generate the pdf invoice as per Issuer email, input (optional). 
+ *     description: API to generate the Excel report as per Issuer email, input (optional). 
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Email associated with the issuer.
+ *               input:
+ *                 type: string
+ *                 description: The optional input.
+ *     responses:
+ *       '200':
+ *         description: Successfully generated the invoice.
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example:
+ *               code: 200
+ *               status: "SUCCESS"
+ *               message: "invoice saved successfully."
+ *       '400':
+ *         description: Invalid request due to missing or invalid parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 400
+ *               status: "FAILED"
+ *               message: "Unable to generate invoice"
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 422.
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 500
+ *               status: "FAILED"
+ *               message: "Internal Server Error."
+ */
+router.post('/generate-invoice-report', validationRoute.generateInvoice, userController.generateInvoiceDocument);
 
 module.exports = router;

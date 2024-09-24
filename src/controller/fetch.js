@@ -18,8 +18,6 @@ const {
 
 const {
   getAggregatedCertsDetails,
-  addHeading,
-  generateChartImage
 } = require('../utils/customModules');
 
 // Import MongoDB models
@@ -373,7 +371,6 @@ const updateCertificateTemplate = async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-
 const generateExcelReport = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
@@ -411,7 +408,7 @@ const generateExcelReport = async (req, res) => {
     const start = await parseDate(startDate);
     const end = await parseDate(endDate);
 
-    if(start > end){
+    if (start > end) {
       return res.status(400).json({
         code: 400,
         status: "FAILED",
@@ -1104,6 +1101,225 @@ const generateExcelReport = async (req, res) => {
   }
 };
 
+/**
+ * API call to generate invoice in pdf format.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const generateInvoiceDocument = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  try {
+    const { email, input } = req.body
+    if (!email) {
+      return res.status(400).json({
+        code: 400,
+        status: "FAILED",
+        message: messageCode.msgEnterInvalid,
+      });
+    }
+    const dbStatus = isDBConnected();
+    if (!dbStatus) {
+      return res.status(500).json({
+        code: 500,
+        status: "FAILED",
+        message: messageCode.msgDbNotReady,
+      });
+    }
+
+    const issuer = await User.findOne({ email });
+    if (!issuer) {
+      return res.status(400).json({
+        code: 400,
+        status: "FAILED",
+        message: messageCode.msgInvalidEmail,
+        details: email,
+      });
+    }
+
+    // Dynamically add user info (for "Bill To" section)
+    const { name, address, city, state, country, designation, phoneNumber, organization } = issuer;
+    let tableheaders = ['Item', 'Quantity', 'Price Per Unit', 'Amount']; // Dynamic headers
+    let datarows = [
+      ['Subscription', '0', '0$', '0$'], // Row 1
+      ['Product A', '5', '10$', '50$'],  // Row 2
+      ['Product B', '2', '15$', '30$'],  // Row 3
+    ]; // Dynamic rows
+
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create();
+
+    // Embed the logo image (assuming you have a PNG file)
+    const logoBytes = fs.readFileSync("https://certs365-live.s3.amazonaws.com/logo.png");
+    const logoImage = await pdfDoc.embedPng(logoBytes);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const page = pdfDoc.addPage([595, 842]);
+
+    // Add the logo
+    const logoDims = logoImage.scale(0.5);
+    page.drawImage(logoImage, { x: 50, y: 780, width: logoDims.width, height: logoDims.height });
+
+    const black = rgb(0, 0, 0);
+    let white = rgb(1, 1, 1)
+    const gray = rgb(207 / 255, 169 / 255, 53 / 255);
+
+
+
+    // Add the text for the header
+    page.drawText('AICERTs', { x: 50, y: 750, size: 15, font: boldFont, color: black });
+    page.drawText('New York', { x: 50, y: 730, size: 12, font, color: black });
+    page.drawText('US', { x: 50, y: 710, size: 12, font, color: black });
+
+    page.drawText('Bill To:', { x: 360, y: 750, size: 12, font: boldFont, color: black });
+    page.drawText('Name:', { x: 360, y: 730, size: 12, font: boldFont, color: black });
+    page.drawText(`${name}` || 'N/A', { x: 450, y: 730, size: 12, font, color: black });
+    page.drawText('Designation:', { x: 360, y: 710, size: 12, font: boldFont, color: black });
+    page.drawText(`${designation}` || 'Address Not Available', { x: 450, y: 710, size: 12, font, color: black });
+    page.drawText('Organization:', { x: 360, y: 690, size: 12, font: boldFont, color: black });
+    page.drawText(`${organization}`, { x: 450, y: 690, size: 12, font, color: black });
+
+    // Add Invoice Header
+    page.drawText('Invoice -', { x: 50, y: 670, size: 18, font: boldFont, color: black });
+    page.drawText('INV-001', { x: 125, y: 670, size: 18, font, color: black });
+
+    // Date and Payment Mode
+    page.drawText('Date:', { x: 360, y: 650, size: 12, font: boldFont, color: black });
+    page.drawText('Oct 2, 2022', { x: 450, y: 650, size: 12, font, color: black });
+    page.drawText('Payment Mode:', { x: 360, y: 630, size: 12, font: boldFont, color: black });
+    page.drawText('Online', { x: 450, y: 630, size: 12, font, color: black });
+    page.drawText('Balance Due:', { x: 360, y: 610, size: 12, font: boldFont, color: black });
+    page.drawText('0$', { x: 450, y: 610, size: 12, font, color: black });
+    page.drawText('Billing Address:', { x: 50, y: 650, size: 12, font: boldFont, color: black });
+    page.drawText(`Ph No: ${phoneNumber}`, { x: 50, y: 630, size: 12, font, color: black });
+    page.drawText(address || 'Address Not Available', { x: 50, y: 610, size: 12, font, color: black });
+    page.drawText(`${city}, ${state}, ${country}`, { x: 50, y: 590, size: 12, font, color: black });
+
+    // Function to draw table borders dynamically
+    const drawDynamicBorders = (xPositions, yPosition, rowHeight, page) => {
+      xPositions.forEach((xPos) => {
+        page.drawLine({
+          start: { x: xPos, y: yPosition },
+          end: { x: xPos, y: yPosition - rowHeight },
+          thickness: 1,
+          color: black
+        });
+      });
+    };
+
+    // Function to draw horizontal borders (top and bottom of a row)
+    const drawHorizontalBorders = (xStart, xEnd, yPosition, page) => {
+      page.drawLine({ start: { x: xStart, y: yPosition }, end: { x: xEnd, y: yPosition }, thickness: 1, color: black });
+    };
+
+    // Function to calculate xPositions dynamically based on column widths
+    const getColumnXPositions = (startX, colWidths) => {
+      let xPositions = [startX];
+      colWidths.forEach((width) => {
+        xPositions.push(xPositions[xPositions.length - 1] + width);
+      });
+      return xPositions;
+    };
+
+    // Dynamic table drawing function
+    const drawTable = (startX, startY, colWidths, headers, rows, page) => {
+      const rowHeight = 20;
+      const tableWidth = colWidths.reduce((sum, width) => sum + width, 0); // Total table width
+      const xPositions = getColumnXPositions(startX, colWidths); // Get X positions dynamically
+
+      // Draw header background
+      page.drawRectangle({
+        x: startX,
+        y: startY,
+        width: tableWidth,
+        height: rowHeight,
+        color: gray,
+      });
+
+      // Draw headers and borders
+      headers.forEach((header, index) => {
+        page.drawText(header, { x: xPositions[index] + 5, y: startY + 5, size: 12, font: boldFont, color: white });
+      });
+
+      // Draw horizontal borders for the header row (top and bottom)
+      drawHorizontalBorders(startX, startX + tableWidth, startY, page);
+      drawHorizontalBorders(startX, startX + tableWidth, startY - rowHeight, page);
+      // Draw vertical borders for the header row
+      drawDynamicBorders(xPositions, startY, rowHeight, page);
+
+      // Draw each data row dynamically
+      let currentY = startY - rowHeight;
+      rows.forEach((row, rowIndex) => {
+        const itemY = startY - (rowIndex + 1) * rowHeight;
+
+        row.forEach((item, index) => {
+          page.drawText(item, { x: xPositions[index] + 5, y: itemY + 5, size: 12, font: font, color: black });
+        });
+
+        // Draw horizontal borders for each row
+        drawHorizontalBorders(startX, startX + tableWidth, itemY, page);
+        drawHorizontalBorders(startX, startX + tableWidth, itemY - rowHeight, page);
+        // Draw vertical borders for each row
+        drawDynamicBorders(xPositions, itemY, rowHeight, page);
+
+        currentY = itemY - rowHeight; // Update currentY after each row
+      });
+
+      // Total section
+      const totalAmount = rows.reduce((sum, row) => sum + parseFloat(row[3].replace('$', '')), 0); // Calculate total from last column
+      page.drawRectangle({ x: 400, y: currentY, width: 150, height: 20, color: gray });
+      page.drawText('Total:', { x: 405, y: currentY + 5, size: 12, font: boldFont, color: white });
+      page.drawText(`${totalAmount}$`, { x: 440, y: currentY + 5, size: 12, font: boldFont, color: white });
+
+      // Notes and Terms
+      currentY -= rowHeight + 40;
+      page.drawText('Notes:', { x: 50, y: currentY, size: 12, font: boldFont, color: black });
+      page.drawText('Thank you for your business.', { x: 50, y: currentY - 20, size: 12, font: font, color: black });
+      currentY -= rowHeight + 40;
+      page.drawText('Terms:', { x: 50, y: currentY, size: 12, font: boldFont, color: black });
+      page.drawText('This invoice is auto generated at the time of delivery', { x: 50, y: currentY - 20, size: 12, font: font, color: black });
+
+      return currentY; // Return final Y position for any additional content
+    };
+
+    // Usage example
+    const startX = 50;
+    const startY = 550;
+    const colWidths = [100, 100, 150, 150]; // Dynamic column widths
+
+    // Call the drawTable function
+    drawTable(startX, startY, colWidths, tableheaders, datarows, page);
+
+
+    // Save the PDF bytes
+    const pdfBytes = await pdfDoc.save();
+
+    const pdfStream = new Readable();
+    pdfStream.push(pdfBytes);
+    pdfStream.push(null); // Signal the end of the stream
+
+    // Set the response content type and headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${Date.now()}.pdf`);
+
+    // Stream the PDF to the response
+    pdfStream.pipe(res);
+  }
+  catch (error) {
+    console.error("Internal server error:", error);
+    res.status(500).json({
+      code: 500,
+      status: "FAILED",
+      message: "An error occurred while generating the report.",
+    });
+  }
+
+};
+
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
@@ -1120,5 +1336,7 @@ module.exports = {
 
   getCertificateTemplates,
 
-  generateExcelReport
+  generateExcelReport,
+
+  generateInvoiceDocument
 };
