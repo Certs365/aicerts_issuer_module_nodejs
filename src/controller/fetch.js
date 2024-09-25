@@ -224,6 +224,56 @@ const uploadServerDetails = async (req, res) => {
 };
 
 /**
+ * API to fetch Service limits details of Issuer .
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getServiceLimitsByEmail = async (req, res) => {
+  let validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  try {
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+    console.log(dbStatusMessage);
+
+    const { email } = req.body;
+
+    const issuerExist = await User.findOne({ email : email });
+    if (!issuerExist || !issuerExist.issuerId) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
+    }
+
+    var fetchServiceQuota = await ServiceAccountQuotas.find({
+      issuerId: issuerExist.issuerId
+    });
+
+    if (!fetchServiceQuota || fetchServiceQuota.length < 1) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgMatchLimitsNotFound, details: email });
+    }
+
+    // Transform the original response
+    let transformedResponse = fetchServiceQuota.map(item => ({
+      serviceId: item.serviceId,
+      limit: item.limit,
+      status: item.status
+    }));
+
+    return res.status(200).json({ code: 200, status: "SUCCESS", message: messageCode.msgMatchLimitsFound, details: transformedResponse });
+
+  } catch (error) {
+    res.json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
 * API to get Issues/Issuers count on month wise.
 *
 * @param {Object} req - Express request object.
@@ -1165,6 +1215,7 @@ const generateInvoiceDocument = async (req, res) => {
         message: messageCode.msgEnterInvalid,
       });
     }
+
     const dbStatus = isDBConnected();
     if (!dbStatus) {
       return res.status(500).json({
@@ -1185,7 +1236,7 @@ const generateInvoiceDocument = async (req, res) => {
     }
 
     // Dynamically add user info (for "Bill To" section)
-    const { name, address, city, state, country, designation, phoneNumber, organization } = issuer;
+    const { name, address, city, state, country, designation, phoneNumber, organization, treansactionFee, approveDate } = issuer;
     let tableheaders = ['Item', 'Quantity', 'Price Per Unit', 'Amount']; // Dynamic headers
     let datarows = [
       ['Subscription', '0', '0$', '0$'], // Row 1
@@ -1197,7 +1248,7 @@ const generateInvoiceDocument = async (req, res) => {
     const pdfDoc = await PDFDocument.create();
 
     // Embed the logo image (assuming you have a PNG file)
-    const logoBytes = fs.readFileSync("https://certs365-live.s3.amazonaws.com/logo.png");
+    const logoBytes = fs.readFileSync("logo.png");
     const logoImage = await pdfDoc.embedPng(logoBytes);
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -1211,8 +1262,6 @@ const generateInvoiceDocument = async (req, res) => {
     const black = rgb(0, 0, 0);
     let white = rgb(1, 1, 1)
     const gray = rgb(207 / 255, 169 / 255, 53 / 255);
-
-
 
     // Add the text for the header
     page.drawText('AICERTs', { x: 50, y: 750, size: 15, font: boldFont, color: black });
@@ -1233,7 +1282,7 @@ const generateInvoiceDocument = async (req, res) => {
 
     // Date and Payment Mode
     page.drawText('Date:', { x: 360, y: 650, size: 12, font: boldFont, color: black });
-    page.drawText('Oct 2, 2022', { x: 450, y: 650, size: 12, font, color: black });
+    page.drawText(`${Date.now()}`, { x: 450, y: 650, size: 12, font, color: black });
     page.drawText('Payment Mode:', { x: 360, y: 630, size: 12, font: boldFont, color: black });
     page.drawText('Online', { x: 450, y: 630, size: 12, font, color: black });
     page.drawText('Balance Due:', { x: 360, y: 610, size: 12, font: boldFont, color: black });
@@ -1338,7 +1387,6 @@ const generateInvoiceDocument = async (req, res) => {
     // Call the drawTable function
     drawTable(startX, startY, colWidths, tableheaders, datarows, page);
 
-
     // Save the PDF bytes
     const pdfBytes = await pdfDoc.save();
 
@@ -1361,7 +1409,6 @@ const generateInvoiceDocument = async (req, res) => {
       message: "An error occurred while generating the report.",
     });
   }
-
 };
 
 
@@ -1385,5 +1432,7 @@ module.exports = {
 
   generateExcelReport,
 
-  generateInvoiceDocument
+  generateInvoiceDocument,
+
+  getServiceLimitsByEmail
 };

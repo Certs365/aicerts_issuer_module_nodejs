@@ -270,6 +270,86 @@ router.get('/get-server-details', userController.fetchServerDetails);
 
 /**
  * @swagger
+ * /api/get-credits-by-email:
+ *   post:
+ *     summary: Get issuer sevice credit limits by email
+ *     description: API to Fetch Issuer service credit limits details on email request.
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Issuer's email address
+ *     responses:
+ *       '200':
+ *         description: Issuer fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: object
+ *                   description: Issuer details
+ *                 message:
+ *                   type: string
+ *                   example: Issuer fetched successfully
+ *       '400':
+ *         description: Bad request or issuer not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: Issuer not found (or) Bad request!
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred during the process!
+ */
+
+router.post('/get-credits-by-email', validationRoute.emailCheck, userController.getServiceLimitsByEmail);
+
+/**
+ * @swagger
  * /api/upload-server-details:
  *   post:
  *     summary: API call for upload server details
@@ -500,6 +580,7 @@ router.post('/get-certificate-templates', userController.getCertificateTemplates
  *               status: "FAILED"
  *               message: "Internal Server Error."
  */
+
 router.post('/add-certificate-template', userController.addCertificateTemplate);
 
 /**
@@ -669,6 +750,7 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *               status: "FAILED"
  *               message: "Internal Server Error."
  */
+
 router.post('/generate-excel-report', validationRoute.generateExcel, userController.generateExcelReport);
 
 /**
@@ -749,6 +831,7 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  *               status: "FAILED"
  *               message: "Internal Server Error."
  */
+
 router.post('/generate-invoice-report', validationRoute.generateInvoice, userController.generateInvoiceDocument);
 
 module.exports = router;
