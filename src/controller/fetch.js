@@ -91,6 +91,50 @@ const getAllIssuers = async (req, res) => {
 };
 
 /**
+ * API to fetch details of Issuer.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getIssuerByEmail = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  try {
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
+    console.log(dbStatusMessage);
+
+    const { email } = req.body;
+
+    const issuer = await User.findOne({ email : email }).select('-password');
+
+    if (issuer) {
+      res.json({
+        code: 200,
+        status: 'SUCCESS',
+        data: issuer,
+        message: `Issuer with email ${email} fetched successfully`
+      });
+    } else {
+      res.json({
+        code: 400,
+        status: 'FAILED',
+        message: `Issuer with email ${email} not found`
+      });
+    }
+  } catch (error) {
+    res.json({
+      code: 500,
+      status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
 * API to get server details.
 *
 * @param {Object} req - Express request object.
@@ -1320,9 +1364,12 @@ const generateInvoiceDocument = async (req, res) => {
 
 };
 
+
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
+
+  getIssuerByEmail,
 
   fetchServerDetails,
 
