@@ -11,7 +11,12 @@ var messageCode = require("../common/codes");
 const verifyIssuer = async (req, res) => {
     var validResult = validationResult(req);
     if (!validResult.isEmpty()) {
-      return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+      return res.status(422).json({
+        code: 422, 
+        status: "FAILED", 
+        message: messageCode.msgEnterInvalid ,
+        details: validResult.array() 
+    });
     }
     let { email, code } = req.body;
     try {
@@ -19,6 +24,7 @@ const verifyIssuer = async (req, res) => {
         
         if (!verify) {
             return res.status(400).json({
+                code: 400,
                 status: "FAILED",
                 message: messageCode.msgNoRecordFound,
             });
@@ -26,6 +32,7 @@ const verifyIssuer = async (req, res) => {
 
         if (verify.code != code) {
             return res.status(400).json({
+                code: 400,
                 status: "FAILED",
                 message: messageCode.msgCodeNotMatch
             });
@@ -36,14 +43,16 @@ const verifyIssuer = async (req, res) => {
             await verify.save();
         }
 
-        res.json({
-            status: "PASSED",
+        return res.json({
+            code: 200,
+            status: "SUCCESS",
             message: messageCode.msgVerfySuccess
         });
 
     } catch (error) {
         console.error(messageCode.msgVerifyError, error);
-        res.status(500).json({
+        return res.status(500).json({
+            code: 500,
             status: 'FAILED',
             message: messageCode.msgVerifyError
         });

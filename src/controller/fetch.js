@@ -110,7 +110,7 @@ const getIssuerByEmail = async (req, res) => {
 
     const { email } = req.body;
 
-    const issuer = await User.findOne({ email : email }).select('-password');
+    const issuer = await User.findOne({ email: email }).select('-password');
 
     if (issuer) {
       res.json({
@@ -243,7 +243,7 @@ const getServiceLimitsByEmail = async (req, res) => {
 
     const { email } = req.body;
 
-    const issuerExist = await User.findOne({ email : email });
+    const issuerExist = await User.findOne({ email: email });
     if (!issuerExist || !issuerExist.issuerId) {
       return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
     }
@@ -1236,6 +1236,26 @@ const generateInvoiceDocument = async (req, res) => {
       });
     }
 
+    // Define a mapping object for credits to service names
+    const creditToServiceName = {
+      1: 'issue',
+      2: 'renew',
+      3: 'revoke',
+      4: 'reactivate'
+    };
+
+    // Get all service IDs
+    const serviceIds = Object.values(creditToServiceName);
+
+    const getCredits = await ServiceAccountQuotas.find({
+      issuerId: issuer.issuerId,
+      serviceId: { $in: serviceIds } // Use $in to match any of the service IDs
+    });
+
+    // Sum the limit values
+    const totalLimit = getCredits.reduce((sum, credits) => sum + credits.limit, 0);
+    // console.log("Total Limit:", totalLimit);
+
     // Dynamically add user info (for "Bill To" section)
     const { name, address, city, state, country, designation, phoneNumber, organization, treansactionFee, approveDate } = issuer;
     let tableheaders = ['Item', 'Quantity', 'Price Per Unit', 'Amount']; // Dynamic headers
@@ -1243,13 +1263,22 @@ const generateInvoiceDocument = async (req, res) => {
       ['Subscription', '0', '0$', '0$'], // Row 1
       ['Product A', '5', '10$', '50$'],  // Row 2
       ['Product B', '2', '15$', '30$'],  // Row 3
+      ['Product D', '2', '25$', '50$'],  // Row 4
     ]; // Dynamic rows
 
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
 
     const formattedTodayDate = await formatDate();
-    const invoiceNumber = await cerateInvoiceNumber(issuer.issuerId, issuer.invoiceNumber, formattedTodayDate);
+    let issuerInvoiceSerial = issuer.invoiceNumber;
+    const invoiceNumber = await cerateInvoiceNumber(issuer.issuerId, issuerInvoiceSerial, formattedTodayDate);
+    // console.log("The final invoice", invoiceNumber);
+    if (!issuer.invoiceNumber) {
+      issuer.invoiceNumber = 1;
+    } else {
+      issuer.invoiceNumber = issuerInvoiceSerial + 1;
+    }
+    await issuer.save();
 
     // Embed the logo image (assuming you have a PNG file)
     const logoBytes = fs.readFileSync("logo.png");
@@ -1281,16 +1310,18 @@ const generateInvoiceDocument = async (req, res) => {
     page.drawText(`${organization}`, { x: 450, y: 690, size: 12, font, color: black });
 
     // Add Invoice Header
-    page.drawText('Invoice -', { x: 50, y: 670, size: 18, font: boldFont, color: black });
-    page.drawText('INV-001', { x: 125, y: 670, size: 18, font, color: black });
+    page.drawText('Invoice -', { x: 50, y: 670, size: 16, font: boldFont, color: black });
+    page.drawText(`${invoiceNumber}`, { x: 125, y: 670, size: 16, font, color: black });
 
     // Date and Payment Mode
     page.drawText('Date:', { x: 360, y: 650, size: 12, font: boldFont, color: black });
     page.drawText(`${formattedTodayDate}`, { x: 450, y: 650, size: 12, font, color: black });
     page.drawText('Payment Mode:', { x: 360, y: 630, size: 12, font: boldFont, color: black });
     page.drawText('Online', { x: 450, y: 630, size: 12, font, color: black });
-    page.drawText('Balance Due:', { x: 360, y: 610, size: 12, font: boldFont, color: black });
-    page.drawText('0$', { x: 450, y: 610, size: 12, font, color: black });
+    page.drawText('Credits:', { x: 360, y: 610, size: 12, font: boldFont, color: black });
+    page.drawText(`${totalLimit}`, { x: 450, y: 610, size: 12, font, color: black });
+    page.drawText('Balance Due:', { x: 360, y: 590, size: 12, font: boldFont, color: black });
+    page.drawText('0$', { x: 450, y: 590, size: 12, font, color: black });
     page.drawText('Billing Address:', { x: 50, y: 650, size: 12, font: boldFont, color: black });
     page.drawText(`Ph No: ${phoneNumber}`, { x: 50, y: 630, size: 12, font, color: black });
     page.drawText(address || 'Address Not Available', { x: 50, y: 610, size: 12, font, color: black });
@@ -1400,8 +1431,9 @@ const generateInvoiceDocument = async (req, res) => {
 
     // Set the response content type and headers
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${Date.now()}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=Invoice_${invoiceNumber}.pdf`);
 
+    console.log("The invoice report generated with number: ", invoiceNumber);
     // Stream the PDF to the response
     pdfStream.pipe(res);
   }

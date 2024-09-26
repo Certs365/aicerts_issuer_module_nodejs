@@ -2,7 +2,14 @@ require('dotenv').config();
 // mongodb user model
 const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
-const { sendEmail, generateAccount, generateOTP, isDBConnected, sendWelcomeMail } = require('../models/tasks');
+const { 
+  sendEmail, 
+  generateAccount, 
+  generateOTP, 
+  isDBConnected, 
+  sendWelcomeMail, 
+  isValidIssuer 
+} = require('../models/tasks');
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
@@ -40,7 +47,7 @@ admin.initializeApp({
 const signup = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   let {
     name,
@@ -88,6 +95,7 @@ const signup = async (req, res) => {
     username == ""
   ) {
     res.json({
+      code: 400,
       status: "FAILED",
       message: messageCode.msgNonEmpty,
     });
@@ -98,6 +106,7 @@ const signup = async (req, res) => {
     blacklistedEmailDomains.some(domain => email.endsWith('@' + domain))
   ) {
     res.json({
+      code: 400,
       status: "FAILED",
       message: messageCode.msgEnterOrgEmail,
     });
@@ -114,6 +123,7 @@ const signup = async (req, res) => {
 
     if (existingUser) {
       res.json({
+        code: 400,
         status: "FAILED",
         message: messageCode.msgExistEmail,
       });
@@ -176,7 +186,8 @@ const signup = async (req, res) => {
       await Promise.all(insertPromises);
 
     } catch (error) {
-      res.json({
+      return res.json({
+        code: 400,
         status: "FAILED",
         message: messageCode.msgInternalError,
       });
@@ -184,14 +195,16 @@ const signup = async (req, res) => {
 
     await sendWelcomeMail(name, email);
 
-    res.json({
+    return res.json({
+      code: 200,
       status: "SUCCESS",
       message: messageCode.msgSignupSuccess,
       data: savedUser,
     });
   } catch (error) {
     console.error(error);
-    res.json({
+    return res.json({
+      code: 500,
       status: "FAILED",
       message: messageCode.msgInternalError,
     });
@@ -207,7 +220,7 @@ const signup = async (req, res) => {
 const loginPhoneNumber = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   const { idToken, email } = req.body;
 
@@ -218,6 +231,7 @@ const loginPhoneNumber = async (req, res) => {
     console.log(dbStatusMessage);
     if (!idToken) {
       return res.json({
+        code: 400,
         status: "FAILED",
         message: messageCode.msgInvalidOtp
       });
@@ -232,13 +246,15 @@ const loginPhoneNumber = async (req, res) => {
 
     if (!data) {
       erro.log(messageCode.msgIssuerNotFound);
-      res.status(400).json({
+      return res.status(400).json({
+        code: 400,
         status: "FAILED",
         message: messageCode.msgIssuerNotFound
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
+      code: 200,
       status: "SUCCESS",
       message: messageCode.msgValidCredentials,
       data: {
@@ -255,6 +271,7 @@ const loginPhoneNumber = async (req, res) => {
     // Handle specific errors
     if (error.code === "auth/id-token-expired") {
       return res.status(401).json({
+        code: 401,
         status: "FAILED",
         message: messageCode.msgInvalidOtp
       });
@@ -262,6 +279,7 @@ const loginPhoneNumber = async (req, res) => {
 
     // Handle other errors
     res.status(500).json({
+      code: 500,
       status: "FAILED",
       message: messageCode.msgInternalError
     });
@@ -277,7 +295,7 @@ const loginPhoneNumber = async (req, res) => {
 const login = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
 
   let { email, password } = req.body;
@@ -286,6 +304,7 @@ const login = async (req, res) => {
 
   if (email == "" || password == "") {
     res.json({
+      code: 400,
       status: "FAILED",
       message: messageCode.msgNonEmpty,
     });
@@ -308,7 +327,8 @@ const login = async (req, res) => {
               );
               if (result) {
                 // Password match
-                res.json({
+                return res.json({
+                  code: 200,
                   status: "SUCCESS",
                   message: messageCode.msgValidCredentials,
                   data:{
@@ -324,14 +344,16 @@ const login = async (req, res) => {
               } else {
                 // Check if user has a phone number
                 if (data[0]?.phoneNumber) {
-                  res.json({
+                  return res.json({
+                    code: 400,
                     status: "FAILED",
                     message: messageCode.msgInvalidPassword,
                     isPhoneNumber: true,
                     phoneNumber: data[0]?.phoneNumber,
                   });
                 } else {
-                  res.json({
+                  return res.json({
+                    code: 400,
                     status: "FAILED",
                     message: messageCode.msgInvalidPassword,
                     isPhoneNumber: false,
@@ -340,21 +362,24 @@ const login = async (req, res) => {
               }
             })
             .catch((err) => {
-              res.json({
+              return res.json({
+                code: 400,
                 status: "FAILED",
                 message: messageCode.msgErrorOnComparePassword,
               });
             });
 
         } else {
-          res.json({
+          return res.json({
+            code: 400,
             status: "FAILED",
             message: messageCode.msgInvalidOrUnapproved,
           });
         }
       })
       .catch((err) => {
-        res.json({
+        return res.json({
+          code: 400,
           status: "FAILED",
           message: messageCode.msgExistingUserError,
         });
@@ -373,31 +398,33 @@ const twoFactor = async (req, res) => {
   if (!validResult.isEmpty()) {
     return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
-  let { email } = req.body;
+  const { email } = req.body;
   const verificationCode = generateOTP();
-  const issuer = await User.findOne({ email });
+  const issuer = await User.findOne({ email : email });
 
   if (!issuer || !issuer.approved) {
     return res.json({
+      code: 400,
       status: 'FAILED',
       message: messageCode.msgIssuerNotFound,
     });
   }
-
   try {
-    const verify = await Verification.findOne({ email });
+    const verify = await Verification.findOne({ email : email });
     if (verify) {
       verify.code = verificationCode;
       verify.save();
 
       await sendEmail(verificationCode, email, issuer.name);
       res.status(200).json({
+        code:200,
         status: "SUCCESS",
         message: messageCode.msgOtpSent,
       });
       return;
     } else {
       res.status(404).json({
+        code: 404,
         status: "FAILED",
         message: messageCode.msgIssuerNotFound,
       });
@@ -405,6 +432,7 @@ const twoFactor = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({
+      code: 500,
       status: "FAILED",
       message: messageCode.msgErrorOnOtp,
     })
@@ -420,19 +448,19 @@ const twoFactor = async (req, res) => {
 const refreshToken = async (req, res) => {
   var validResult = validationResult(req);
   if (!validResult.isEmpty()) {
-    return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   const refreshToken = req.body.token;
   const email = req.body.email;
 
   // Handle invalid or blacklisted refresh token
-  if (!refreshToken) return res.status(401).send({ status: "FAILED", message: messageCode.msgInvalidToken });
+  if (!refreshToken) return res.status(401).send({ code: 401, status: "FAILED", message: messageCode.msgInvalidToken });
 
   try {
     const foundUser = await User.findOne({ email: email });
 // console.log(foundUser,"fd")
     if (!foundUser) { 
-      return res.status(401).send({ status:"FAILED", message: messageCode.msgIssuerNotFound, details: email });
+      return res.status(401).send({ code: 401, status:"FAILED", message: messageCode.msgIssuerNotFound, details: email });
     }
     // console.log(process.env.REFRESH_TOKEN)
     jwt.verify(
@@ -446,7 +474,7 @@ const refreshToken = async (req, res) => {
           const result = await foundUser.save();
         }
         if (err || foundUser._id.toString() !== decoded.userId) {
-          return res.status(403).send({ status: "FAILED", message: messageCode.msgInvalidToken });
+          return res.status(403).send({ code: 403, status: "FAILED", message: messageCode.msgInvalidToken });
         }
         //refreshtoken still valid
         const JWTToken = generateJwtToken();
@@ -471,7 +499,7 @@ const refreshToken = async (req, res) => {
     );
   } catch (error) {
     console.error(error);
-    return res.status(401).send({ status:"FAILED", message: messageCode.msgTokenExpired });
+    return res.status(401).send({ code: 401, status:"FAILED", message: messageCode.msgTokenExpired });
   }
 }
 module.exports = {

@@ -33,7 +33,7 @@ module.exports = {
     msgInvalidOtp : "Invalid OTP entered / bad format.",
     msgErrorOnLogin : "Error Occured during the Login",
     msgErrorOnOtp : "An error occurred while sending OTP",
-    msgIssuerNotFound : "Issuer not found",
+    msgIssuerNotFound : "Issuer not found / not Active",
     msgIssuerFound : "Issuer Found",
     msgOtpSent : "OTP sent to the Issuer Email",
     msgExistEmail : "User with the provided email already exists",

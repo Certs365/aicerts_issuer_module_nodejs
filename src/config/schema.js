@@ -163,6 +163,13 @@ const DynamicBatchIssuesSchema = new mongoose.Schema({
   type: { type: String, default: 'dynamic' }
 });
 
+// Verification Schema
+const VerificationSchema = new Schema({
+  email: String,
+  code: Number,
+  verified: Boolean
+});
+
 // Define the schema for the VerificationLog model
 const VerificationLogSchema = new mongoose.Schema({
   email: { type: String, required: true },
@@ -198,6 +205,7 @@ const DynamicParamsSchema = new mongoose.Schema({
 });
 
 const Admin = mongoose.model('Admin', AdminSchema);
+const Verification = mongoose.model('Verification', VerificationSchema);
 const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
 const User = mongoose.model('User', UserSchema);
 const Issues = mongoose.model('Issues', IssuesSchema);
@@ -213,6 +221,7 @@ const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTem
 
 module.exports = {
   Admin,
+  Verification,
   ServerDetails,
   ServiceAccountQuotas,
   User,

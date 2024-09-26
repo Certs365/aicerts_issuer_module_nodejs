@@ -200,7 +200,6 @@ const cerateInvoiceNumber = async (id, number, dateString) => {
   // Crop last 6 digits
   let croppedIssuerId = userId.slice(-6);
   let invoiceNumber = croppedIssuerId + formattedDate + formatSerial;
-  console.log("The final invoice", invoiceNumber);
   return invoiceNumber;
 };
 

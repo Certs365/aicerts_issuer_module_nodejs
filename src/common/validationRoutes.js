@@ -48,7 +48,7 @@ const validationRoutes = {
         body(["startDate", "endDate"]).notEmpty().withMessage(messageCode.msgNonEmpty).trim().isString().not().equals("string").withMessage(messageCode.msgInputProvide),
     ],
     generateInvoice: [
-        body("input").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide),
+        // body("input").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide),
         body("email").notEmpty().trim().isEmail().withMessage(messageCode.msgInvalidEmail)  
     ],
   };
