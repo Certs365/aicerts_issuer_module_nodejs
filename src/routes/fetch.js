@@ -773,8 +773,11 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  *                 type: string
  *                 description: Email associated with the issuer.
  *               input:
- *                 type: string
+ *                 type: number
  *                 description: The optional input.
+ *             required:
+ *               - email
+ *               - input
  *     responses:
  *       '200':
  *         description: Successfully generated the invoice.
@@ -786,7 +789,7 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  *             example:
  *               code: 200
  *               status: "SUCCESS"
- *               message: "invoice saved successfully."
+ *               message: "PDF invoice saved successfully."
  *       '400':
  *         description: Invalid request due to missing or invalid parameters.
  *         content:

@@ -1,6 +1,6 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-const ethers = require('ethers');  
+const ethers = require('ethers');
 const crypto = require('crypto');
 const mongoose = require("mongoose");
 
@@ -8,31 +8,31 @@ const mongoose = require("mongoose");
 const { User, Issues, BatchIssues, IssueStatus, VerificationLog, ShortUrl, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
 
 const transporter = nodemailer.createTransport({
-        service:  process.env.MAIL_SERVICE,
-        host: process.env.MAIL_HOST,
-        port: 587,
-        secure: false,
-        auth: {
-            user: process.env.USER_NAME, 
-            pass: process.env.MAIL_PWD,      
-        },
-    });
+  service: process.env.MAIL_SERVICE,
+  host: process.env.MAIL_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.USER_NAME,
+    pass: process.env.MAIL_PWD,
+  },
+});
 
 const mailOptions = {
-    from: {
-        name: 'AICerts Admin',
-        address: process.env.USER_MAIL,
-    },
-    to: '', 
-    subject: '',
-    text: '',
+  from: {
+    name: 'AICerts Admin',
+    address: process.env.USER_MAIL,
+  },
+  to: '',
+  subject: '',
+  text: '',
 };
 
 const sendEmail = async (otp, email, name) => {
-    try {
-        mailOptions.to = email;
-        mailOptions.subject = `Your Authentication OTP`;
-        mailOptions.text = `Hi ${name},
+  try {
+    mailOptions.to = email;
+    mailOptions.subject = `Your Authentication OTP`;
+    mailOptions.text = `Hi ${name},
 
 Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
 
@@ -40,18 +40,18 @@ If you did not request this code, please ignore this message.
         
 Best regards,
 The AICerts Team`;
-        transporter.sendMail(mailOptions);
-        console.log('Email sent successfully');
-    } catch (error) {
-        console.error('Error sending email:', error);
-    }
+    transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
 };
 
 const sendWelcomeMail = async (name, email) => {
   try {
-      mailOptions.to = email;
-      mailOptions.subject = `Welcome to AICerts`;
-      mailOptions.text = `Hi ${name},
+    mailOptions.to = email;
+    mailOptions.subject = `Welcome to AICerts`;
+    mailOptions.text = `Hi ${name},
 
 Welcome to the AICerts Portal, Your registration is now complete.
 
@@ -61,10 +61,10 @@ Thank you for joining us.
 
 Best regards,
 The AICerts Team.`;
-      transporter.sendMail(mailOptions);
-      console.log('Email sent successfully');
+    transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
   } catch (error) {
-      console.error('Error sending email:', error);
+    console.error('Error sending email:', error);
   }
 };
 
@@ -114,23 +114,23 @@ const generateOTP = () => {
 };
 
 const isDBConnected = async () => {
-    let retryCount = 0; // Initialize retry count
-    var maxRetries = 3;
-    while (retryCount < maxRetries) {
-      try {
-        // Attempt to establish a connection to the MongoDB database using the provided URI
-        await mongoose.connect(process.env.MONGODB_URI);
-        // console.log('Connected to MongoDB successfully!');
-        return true; // Return true if the connection is successful
-      } catch (error) {
-        console.error('Error connecting to MongoDB:', error.message);
-        retryCount++; // Increment retry count
-        console.log(`Retrying connection (${retryCount}/${maxRetries}) in 1.5 seconds...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait for 1.5 seconds before retrying
-      }
+  let retryCount = 0; // Initialize retry count
+  var maxRetries = 3;
+  while (retryCount < maxRetries) {
+    try {
+      // Attempt to establish a connection to the MongoDB database using the provided URI
+      await mongoose.connect(process.env.MONGODB_URI);
+      // console.log('Connected to MongoDB successfully!');
+      return true; // Return true if the connection is successful
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error.message);
+      retryCount++; // Increment retry count
+      console.log(`Retrying connection (${retryCount}/${maxRetries}) in 1.5 seconds...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay)); // Wait for 1.5 seconds before retrying
     }
-    console.error('Failed to connect to MongoDB after maximum retries.');
-    return false; // Return false if unable to connect after maximum retries
+  }
+  console.error('Failed to connect to MongoDB after maximum retries.');
+  return false; // Return false if unable to connect after maximum retries
 };
 
 const readableDateFormat = async (dateInput) => {
@@ -178,14 +178,42 @@ const parseDate = async (dateInput) => {
 };
 
 
-module.exports={
+// Function to format the date
+const formatDate = async () => {
+  let timestamp = Date.now();
+  // Create a new Date object
+  let date = new Date(timestamp);
+  let month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  let day = String(date.getDate()).padStart(2, '0');
+  let year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+};
+
+const cerateInvoiceNumber = async (id, number, dateString) => {
+  let [month, day, year] = dateString.split('/');
+  let formattedYear = year.slice(-4); // Get last two digits of the year
+  let formattedDate = `${month}${formattedYear}`; // Combine month and formatted year
+
+  let userId = (!id) ? '0123456' : id;
+  let serialNumber = (!number) ? 1 : (number + 1);
+  let formatSerial = serialNumber.toString();
+  // Crop last 6 digits
+  let croppedIssuerId = userId.slice(-6);
+  let invoiceNumber = croppedIssuerId + formattedDate + formatSerial;
+  console.log("The final invoice", invoiceNumber);
+  return invoiceNumber;
+};
+
+module.exports = {
   // Function to validate issuer by email
   isValidIssuer,
-  sendEmail, 
-  generateAccount, 
-  generateOTP, 
-  isDBConnected, 
+  sendEmail,
+  generateAccount,
+  generateOTP,
+  isDBConnected,
   sendWelcomeMail,
+  readableDateFormat,
   parseDate,
-  readableDateFormat
+  formatDate,
+  cerateInvoiceNumber,
 }

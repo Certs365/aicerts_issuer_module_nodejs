@@ -10,10 +10,11 @@ const { Readable } = require('stream');
 const { validationResult } = require("express-validator");
 // Importing functions from a custom module
 const {
-  isValidIssuer,
+  formatDate,
   isDBConnected, // Function to check if the database connection is established
   parseDate,
   readableDateFormat,
+  cerateInvoiceNumber,
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
 const {
@@ -1247,6 +1248,9 @@ const generateInvoiceDocument = async (req, res) => {
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
 
+    const formattedTodayDate = await formatDate();
+    const invoiceNumber = await cerateInvoiceNumber(issuer.issuerId, issuer.invoiceNumber, formattedTodayDate);
+
     // Embed the logo image (assuming you have a PNG file)
     const logoBytes = fs.readFileSync("logo.png");
     const logoImage = await pdfDoc.embedPng(logoBytes);
@@ -1282,7 +1286,7 @@ const generateInvoiceDocument = async (req, res) => {
 
     // Date and Payment Mode
     page.drawText('Date:', { x: 360, y: 650, size: 12, font: boldFont, color: black });
-    page.drawText(`${Date.now()}`, { x: 450, y: 650, size: 12, font, color: black });
+    page.drawText(`${formattedTodayDate}`, { x: 450, y: 650, size: 12, font, color: black });
     page.drawText('Payment Mode:', { x: 360, y: 630, size: 12, font: boldFont, color: black });
     page.drawText('Online', { x: 450, y: 630, size: 12, font, color: black });
     page.drawText('Balance Due:', { x: 360, y: 610, size: 12, font: boldFont, color: black });
