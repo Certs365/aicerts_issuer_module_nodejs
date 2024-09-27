@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const tasksController = require('../controller/auth');
 const validationRoute = require("../common/validationRoutes");
+const { decryptRequestBody } = require('../utils/authUtils');
 
 
 /**
@@ -128,7 +129,8 @@ const validationRoute = require("../common/validationRoutes");
  *                   type: string
  *                   description: A message describing the error
  */
-router.post('/signup', validationRoute.signUp,tasksController.signup);
+router.post('/signup',decryptRequestBody, validationRoute.signUp,tasksController.signup);
+
 
 /**
  * @openapi
@@ -224,7 +226,7 @@ router.post('/signup', validationRoute.signUp,tasksController.signup);
  *                   type: string
  *                   description: A message describing the error
  */
-router.post('/login', validationRoute.credentials, tasksController.login);
+router.post('/login',decryptRequestBody, validationRoute.credentials, tasksController.login);
 
 /**
  * @swagger
@@ -524,7 +526,7 @@ router.post('/two-factor-auth', validationRoute.emailCheck, tasksController.twoF
  *                   type: string
  *                   example: Internal Server Error. Please try again later.
  */
-router.post("/refresh", validationRoute.refreshToken, tasksController.refreshToken)
+router.post("/refresh",decryptRequestBody, validationRoute.refreshToken, tasksController.refreshToken)
 
 
 module.exports=router;
