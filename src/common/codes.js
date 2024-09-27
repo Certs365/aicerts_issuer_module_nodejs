@@ -71,6 +71,7 @@ module.exports = {
     msgServerNameExist: "Server name already existed, Please try again with different name",
     msgServerNameNotExist: "Server name not available, Please try again with valid name",
     msgServerDeleted: "Server details deleted succefully",
+    msgFetchedVerificationCourses: "Verification results count fetched successfully with searched course",
    
 
 };

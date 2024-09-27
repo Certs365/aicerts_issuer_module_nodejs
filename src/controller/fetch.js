@@ -22,7 +22,7 @@ const {
 } = require('../utils/customModules');
 
 // Import MongoDB models
-const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails } = require("../config/schema");
+const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails, VerificationLog } = require("../config/schema");
 
 const messageCode = require("../common/codes");
 
@@ -247,11 +247,15 @@ const uploadServerDetails = async (req, res) => {
 * @param {Object} res - Express response object.
 */
 const deleteServerDetails = async (req, res) => {
-  var validResult = validationResult(req);
-  if (!validResult.isEmpty()) {
-    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
-  }
   const { serverName } = req.body;
+
+  if(!serverName){
+    return res.status(400).json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgInputProvide
+    });
+  }
 
   const serverNameExist = await ServerDetails.findOne({ serverName: serverName });
   if (!serverNameExist) {
@@ -323,6 +327,59 @@ const getServiceLimitsByEmail = async (req, res) => {
     res.json({
       code: 400,
       status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
+ * API to fetch details of Verification results input as Course name.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getVerificationDetailsByCourse = async (req, res) => {
+  let validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  try {
+
+    const email = req.body.email;
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+
+    const isEmailExist = await isValidIssuer(email);
+
+    if (!isEmailExist) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgUserEmailNotFound });
+    }
+
+    const verificationCommonResponse = await VerificationLog.findOne({ email: email });
+
+    if (verificationCommonResponse) {
+      var responseCount = verificationCommonResponse.courses;
+      res.status(200).json({
+        code: 200,
+        status: 'SUCCESS',
+        data: responseCount,
+        message: messageCode.msgFetchedVerificationCourses
+      });
+      return;
+    } else {
+      res.status(400).json({
+        code: 400,
+        status: 'FAILED',
+        data: 0,
+        message: messageCode.msgNoMatchFound
+      });
+      return;
+    }
+  } catch (error) {
+    res.status(500).json({
+      code: 500,
+      status: 'FAILED',
+      data: error,
       message: messageCode.msgErrorOnFetching
     });
   }
@@ -1525,5 +1582,7 @@ module.exports = {
 
   generateInvoiceDocument,
 
-  getServiceLimitsByEmail
+  getServiceLimitsByEmail,
+
+  getVerificationDetailsByCourse
 };

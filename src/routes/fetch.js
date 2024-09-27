@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/fetch');
 const validationRoute = require('../common/validationRoutes');
+const { ensureAuthenticated } = require("../config/auth"); // Import authentication middleware
 
 /**
  * @swagger
@@ -446,7 +447,7 @@ router.post('/upload-server-details', validationRoute.setServer, userController.
  *               message: Internal server error.
  */
 
-router.delete('/delete-server-details', validationRoute.checkServerName, userController.deleteServerDetails);
+router.delete('/delete-server-details', ensureAuthenticated, userController.deleteServerDetails);
 
 /**
  * @swagger
@@ -527,6 +528,86 @@ router.delete('/delete-server-details', validationRoute.checkServerName, userCon
  */
 
 router.post('/get-credits-by-email', validationRoute.emailCheck, userController.getServiceLimitsByEmail);
+
+/**
+ * @swagger
+ * /api/get-verification-details:
+ *   post:
+ *     summary: Get Verification details with Issuer email input
+ *     description: API to Fetch Verification details course wise on Issuer email request.
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Provide valid Issuer email.
+ *     responses:
+ *       '200':
+ *         description: Courses wise count searched in verification page details  fetched successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: object
+ *                   description: Response COurse wise count details 
+ *                 message:
+ *                   type: string
+ *                   example: Course search count fetched successfully
+ *       '400':
+ *         description: Bad request or issuer not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: Issuer not found (or) Bad request!
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred during the process!
+ */
+
+router.post('/get-verification-details', validationRoute.emailCheck, userController.getVerificationDetailsByCourse);
 
 
 /**
