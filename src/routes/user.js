@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/user');
 const validationRoute = require("../common/validationRoutes");
+const { decryptRequestBody } = require('../utils/authUtils');
 
 
 /**
@@ -92,7 +93,7 @@ const validationRoute = require("../common/validationRoutes");
  *                   description: A message describing the error
  */
 
-router.post('/update-issuer', validationRoute.update, userController.updateIssuer);
+router.post('/update-issuer',decryptRequestBody, validationRoute.update, userController.updateIssuer);
 
 /**
  * @openapi
@@ -174,7 +175,7 @@ router.post('/update-issuer', validationRoute.update, userController.updateIssue
  *                   description: A message describing the error
  */
 
-router.post('/forgot-password', validationRoute.emailCheck, userController.forgotPassword);
+router.post('/forgot-password',decryptRequestBody, validationRoute.emailCheck, userController.forgotPassword);
 
 /**
  * @openapi
@@ -259,7 +260,7 @@ router.post('/forgot-password', validationRoute.emailCheck, userController.forgo
  *                   description: A message describing the error
  */
 
-router.post('/reset-password', validationRoute.credentials, userController.resetPassword);
+router.post('/reset-password',decryptRequestBody, validationRoute.credentials, userController.resetPassword);
 
 
 module.exports=router;

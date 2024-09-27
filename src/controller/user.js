@@ -21,6 +21,7 @@ const forgotPassword = async (req, res) => {
     }
     let { email } = req.body;
     const generatedOtp = generateOTP();
+    console.log(email,generateOTP(),"ab")
     try {
       const verify = await Verification.findOne({ email });
   
@@ -45,6 +46,7 @@ const forgotPassword = async (req, res) => {
         // Update verification details
         verify.code = generatedOtp;
         verify.verified = true;
+        console.log(verify,"verify")
         await verify.save();
       }
       // password handling
