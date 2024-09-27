@@ -35,6 +35,13 @@ const validationRoutes = {
     checkId: [
         body("id").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide)
     ],
+    checkServerName: [
+        body("serverName").notEmpty().trim().isString().withMessage(messageCode.msgNonEmpty).not().equals("string").withMessage(messageCode.msgInputProvide)
+    ],
+    setServer: [
+        body("email").notEmpty().withMessage(messageCode.msgNonEmpty).trim().isEmail().withMessage(messageCode.msgInvalidEmail),
+        body(["serverName", "serverEndpoint", "serverAddress"]).notEmpty().withMessage(messageCode.msgNonEmpty).trim().isString().not().equals("string").withMessage(messageCode.msgInputProvide),
+    ],
     verifyIssuer: [
         body("code").notEmpty().trim().isNumeric().withMessage(messageCode.msgNonEmpty).isLength(6).withMessage(messageCode.msgInvalidOtp),
         body("email").notEmpty().trim().isEmail().withMessage(messageCode.msgInvalidEmail)  

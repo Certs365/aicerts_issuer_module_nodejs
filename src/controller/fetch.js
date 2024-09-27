@@ -153,6 +153,9 @@ const fetchServerDetails = async (req, res) => {
       });
     }
 
+    // Sort the data based on the 'lastUpdate' date in descending order
+    getServeDetails.sort((b, a) => new Date(a.lastUpdate) - new Date(b.lastUpdate));
+
     return res.json({
       code: 200,
       status: 'SUCCESS',
@@ -177,6 +180,10 @@ const fetchServerDetails = async (req, res) => {
 * @param {Object} res - Express response object.
 */
 const uploadServerDetails = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
   const { email, serverName, serverEndpoint, serverAddress } = req.body;
 
   if (!email || !serverName || !serverEndpoint || !serverAddress) {
@@ -194,6 +201,15 @@ const uploadServerDetails = async (req, res) => {
       code: 400,
       status: 'FAILED',
       message: messageCode.msgAdminMailNotExist
+    });
+  }
+
+  const serverNameExist = await ServerDetails.findOne({ serverName: serverName });
+  if (serverNameExist) {
+    return res.json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgServerNameExist
     });
   }
 
@@ -220,6 +236,44 @@ const uploadServerDetails = async (req, res) => {
       code: 500,
       status: 'FAILED',
       message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
+* API to delete server details.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const deleteServerDetails = async (req, res) => {
+  var validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  const { serverName } = req.body;
+
+  const serverNameExist = await ServerDetails.findOne({ serverName: serverName });
+  if (!serverNameExist) {
+    return res.status(400).json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgServerNameNotExist
+    });
+  }
+  // Delete the found server details
+  try {
+    await ServerDetails.deleteOne({ serverName: serverName });
+    return res.status(200).json({
+      code: 200,
+      status: 'SUCCESS',
+      message: messageCode.msgServerDeleted
+    });
+  } catch (error) {
+    return res.status(500).json({
+      code: 500,
+      status: 'FAILED',
+      message: messageCode.msgInternalError
     });
   }
 };
@@ -1447,7 +1501,6 @@ const generateInvoiceDocument = async (req, res) => {
   }
 };
 
-
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
@@ -1457,6 +1510,8 @@ module.exports = {
   fetchServerDetails,
 
   uploadServerDetails,
+
+  deleteServerDetails,
 
   getAdminGraphDetails,
 

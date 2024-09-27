@@ -10,6 +10,8 @@ const validationRoute = require('../common/validationRoutes');
  *     summary: Get details of all issuers count with Active & Inactive status counts
  *     description: API to fetch all issuer details who are Active/Inactive/Total.
  *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: All user details fetched successfully
@@ -215,7 +217,9 @@ router.get('/get-admin-graph-details/:year', userController.getAdminGraphDetails
  *   get:
  *     summary: Get details of all servers listed by the admin
  *     description: API to fetch all details of all servers listed by the admin.
- *     tags: [Fetch/Upload]
+ *     tags: [Server]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: All details fetched successfully
@@ -267,6 +271,182 @@ router.get('/get-admin-graph-details/:year', userController.getAdminGraphDetails
  */
 
 router.get('/get-server-details', userController.fetchServerDetails);
+
+/**
+ * @swagger
+ * /api/upload-server-details:
+ *   post:
+ *     summary: API call for upload server details
+ *     description: API call for upload server details.
+ *     tags: [Server]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The admin email.
+ *               serverName:
+ *                 type: string
+ *                 description: The server name.
+ *               serverEndpoint:
+ *                 type: string
+ *                 description: The server endpoint name.
+ *               serverAddress:
+ *                 type: string
+ *                 description: The server IP Address or URL.
+ *             required:
+ *               - email
+ *               - serverNamwe
+ *               - serverEndpoint
+ *               - serverAddress
+ *     responses:
+ *       '200':
+ *         description: Server details uploaded Successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *       '400':
+ *         description: Certificate already issued or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 400.
+ *               status: "FAILED"
+ *               message: Error message not getting uploaded.
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 422.
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 500.
+ *               status: "FAILED"
+ *               message: Internal server error.
+ */
+
+router.post('/upload-server-details', validationRoute.setServer, userController.uploadServerDetails);
+
+/**
+ * @swagger
+ * /api/delete-server-details:
+ *   delete:
+ *     summary: API call for delete server details
+ *     description: API call for delete server details.
+ *     tags: [Server]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               serverName:
+ *                 type: string
+ *                 description: The server name.
+ *             required:
+ *               - serverNamwe
+ *     responses:
+ *       '200':
+ *         description: Server details deleted Successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 200.
+ *               status: "SUCCESS"
+ *               message: Server details deleted successfully.
+ *       '400':
+ *         description: Certificate already issued or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 400.
+ *               status: "FAILED"
+ *               message: Error on deleting server.
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 422.
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal Server Error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               code: 500.
+ *               status: "FAILED"
+ *               message: Internal server error.
+ */
+
+router.delete('/delete-server-details', validationRoute.checkServerName, userController.deleteServerDetails);
 
 /**
  * @swagger
@@ -348,85 +528,6 @@ router.get('/get-server-details', userController.fetchServerDetails);
 
 router.post('/get-credits-by-email', validationRoute.emailCheck, userController.getServiceLimitsByEmail);
 
-/**
- * @swagger
- * /api/upload-server-details:
- *   post:
- *     summary: API call for upload server details
- *     description: API call for upload server details.
- *     tags: [Fetch/Upload]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: The admin email.
- *               serverName:
- *                 type: string
- *                 description: The server name.
- *               serverEndpoint:
- *                 type: string
- *                 description: The server endpoint name.
- *               serverAddress:
- *                 type: string
- *                 description: The server IP Address or URL.
- *             required:
- *               - email
- *               - serverNamwe
- *               - serverEndpoint
- *               - serverAddress
- *     responses:
- *       '200':
- *         description: Server details uploaded Successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 qrCodeImage:
- *                   type: string
- *                 polygonLink:
- *                   type: string
- *                 details:
- *                   type: object
- *       '400':
- *         description: Certificate already issued or invalid input
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 message:
- *                   type: string
- *             example:
- *               code: 400.
- *               status: "FAILED"
- *               message: Error message not getting uploaded.
- *       '500':
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 message:
- *                   type: string
- *             example:
- *               code: 500.
- *               status: "FAILED"
- *               message: Internal server error.
- */
-router.post('/upload-server-details', userController.uploadServerDetails);
 
 /**
  * @swagger
@@ -836,5 +937,7 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  */
 
 router.post('/generate-invoice-report', validationRoute.generateInvoice, userController.generateInvoiceDocument);
+
+
 
 module.exports = router;

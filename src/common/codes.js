@@ -68,6 +68,9 @@ module.exports = {
     msgProvideValidFlag: "Please provide valid flag value as 1, 2",
     msgStartDateShouldOld: "Provided Start date must not be future date to the End date",
     msgUnableToGenerateRepoert: "Unable to generating the report, Please try again...",
+    msgServerNameExist: "Server name already existed, Please try again with different name",
+    msgServerNameNotExist: "Server name not available, Please try again with valid name",
+    msgServerDeleted: "Server details deleted succefully",
    
 
 };
