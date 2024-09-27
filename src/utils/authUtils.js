@@ -30,23 +30,24 @@ function generateRefreshToken(user) {
   const decryptRequestBody = (req, res, next) => {
     try {
         const key = process.env.ENCRYPTION_KEY; // Use an environment variable for the encryption key
-        const encryptedData = req.body.data; // Assuming the encrypted data is sent in the request body as 'encryptedData'
+        const encryptedData = req.body.data; // Assuming the encrypted data is sent in the request body as 'data'
 
-        // Decrypt the data
-      console.log(key,"key" )
-      console.log(encryptedData,"encrypt" )
-      const decryptedData = decryptData(encryptedData, key);
-      console.log(decryptedData, "dycrypt" )
-      console.log(req.body.data, "dycrypt" );
+        // Check if 'data' field exists in the request body
+        if (encryptedData) {
+            // Decrypt the data
+            const decryptedData = decryptData(encryptedData, key);
 
+            // Replace the body with decrypted data
+            req.body = decryptedData;
+        }
 
-      req.body =decryptedData;
         // Call the next middleware or controller
         next();
     } catch (error) {
         res.status(400).json({ message: 'Failed to decrypt request data' });
     }
 };
+
 
 // Decrypt function
 const decryptData = (encryptedData, key) => {
