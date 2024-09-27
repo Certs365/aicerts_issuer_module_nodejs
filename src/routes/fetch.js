@@ -609,7 +609,6 @@ router.post('/get-credits-by-email', validationRoute.emailCheck, userController.
 
 router.post('/get-verification-details', validationRoute.emailCheck, userController.getVerificationDetailsByCourse);
 
-
 /**
  * @swagger
  * /api/get-certificate-templates:

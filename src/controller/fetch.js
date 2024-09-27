@@ -356,7 +356,6 @@ const getVerificationDetailsByCourse = async (req, res) => {
     }
 
     const verificationCommonResponse = await VerificationLog.findOne({ email: email });
-console.log("Reached");
     if (verificationCommonResponse) {
       var responseCount = verificationCommonResponse.courses;
       res.status(200).json({
