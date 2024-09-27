@@ -773,7 +773,7 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *   post:
  *     summary: API to generate the Excel report as per Issuer input, Start date and End date. 
  *     description: API to generate the Excel report as per Issuer input, Start date and End date, Example Date 2024-09-20T23:59:59.999Z. 
- *     tags: [Fetch/Upload]
+ *     tags: [Report/Invoice]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -860,7 +860,7 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  *   post:
  *     summary: API to generate the pdf invoice as per Issuer email, input (optional). 
  *     description: API to generate the Excel report as per Issuer email, input (optional). 
- *     tags: [Fetch/Upload]
+ *     tags: [Report/Invoice]
  *     security:
  *       - BearerAuth: []
  *     requestBody:
