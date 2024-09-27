@@ -349,14 +349,14 @@ const getVerificationDetailsByCourse = async (req, res) => {
     // Check mongoose connection
     const dbStatus = await isDBConnected();
 
-    const isEmailExist = await isValidIssuer(email);
+    const isEmailExist = await User.findOne({ email : email });
 
     if (!isEmailExist) {
       return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgUserEmailNotFound });
     }
 
     const verificationCommonResponse = await VerificationLog.findOne({ email: email });
-
+console.log("Reached");
     if (verificationCommonResponse) {
       var responseCount = verificationCommonResponse.courses;
       res.status(200).json({
