@@ -1559,9 +1559,6 @@ const generateInvoiceDocument = async (req, res) => {
 
 
 
-
-
-
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
