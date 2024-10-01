@@ -22,7 +22,7 @@ const serviceLimit = parseInt(process.env.SERVICE_LIMIT) || 10;
 admin.initializeApp({
   credential: admin.credential.cert({
     type: process.env.TYPE,
-    project_id: process.env.PROJECT_ID,
+    project_id: toString(process.env.PROJECT_ID),
     private_key_id: process.env.PRIVATE_KEY_ID,
     private_key: process?.env?.PRIVATE_KEY?.replace(
       /\\n/g,
