@@ -49,7 +49,7 @@ const UserSchema = new Schema({
   websiteLink: { type: String },
   phoneNumber: { type: String },
   designation: { type: String },
-  username: { type: String, unique: true },
+  username: { type: String },
   rejectedDate: { type: Date, default: null },
   invoiceNumber: { type: Number, default: 0 },
   transactionFee: { type: Number, default: 0 },

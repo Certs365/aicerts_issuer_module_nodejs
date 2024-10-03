@@ -1309,8 +1309,8 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  * @swagger
  * /api/generate-excel-report:
  *   post:
- *     summary: API to generate the Excel report as per Issuer input, Start date and End date. 
- *     description: API to generate the Excel report as per Issuer input, Start date and End date, Example Date 2024-09-20T23:59:59.999Z. 
+ *     summary: API to generate the Excel report as per Issuer provided Start date and End date. 
+ *     description: API to generate the Excel report as per Issuer provided Start date and End date, Example Date 09/20/2024 or 2024-09-20T23:59:59.999Z. 
  *     tags: [Report/Invoice]
  *     security:
  *       - BearerAuth: []
@@ -1324,15 +1324,16 @@ router.put('/update-certificate-template', userController.updateCertificateTempl
  *               email:
  *                 type: string
  *                 description: Email associated with the issuer.
- *               value:
- *                 type: number
- *                 description: the flag value.
  *               startDate:
  *                 type: string
  *                 description: The valid start date in (MM/DD/YYYY) format.
  *               endDate:
  *                 type: string
  *                 description: The valid end date in (MM/DD/YYYY) format.
+ *             required:
+ *               - email
+ *               - startDate
+ *               - endDate
  *     responses:
  *       '200':
  *         description: Successfully generated the report.
@@ -1411,12 +1412,16 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  *               email:
  *                 type: string
  *                 description: Email associated with the issuer.
- *               input:
- *                 type: number
- *                 description: The optional input.
+ *               startDate:
+ *                 type: string
+ *                 description: The valid start date in (MM/DD/YYYY) format.
+ *               endDate:
+ *                 type: string
+ *                 description: The valid end date in (MM/DD/YYYY) format.
  *             required:
  *               - email
- *               - input
+ *               - startDate
+ *               - endDate
  *     responses:
  *       '200':
  *         description: Successfully generated the invoice.

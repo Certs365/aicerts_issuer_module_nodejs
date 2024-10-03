@@ -586,8 +586,8 @@ const generateExcelReport = async (req, res) => {
     return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   try {
-    const { startDate, endDate, email, value } = req.body;
-    if (!startDate || !endDate || !email || !value) {
+    const { startDate, endDate, email } = req.body;
+    if (!startDate || !endDate || !email) {
       return res.status(400).json({
         code: 400,
         status: "FAILED",
@@ -838,7 +838,6 @@ const generateExcelReport = async (req, res) => {
       ],
     };
 
-    if (value == 1) {
       const workbook = new ExcelJS.Workbook();
       const worksheet1 = workbook.addWorksheet("Report");
 
@@ -1175,23 +1174,7 @@ const generateExcelReport = async (req, res) => {
       // Add image to the worksheet at a specific position
       worksheet1.addImage(imageId, `A${worksheet1.lastRow.number}:F${worksheet1.lastRow.number + 20}`);
 
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename=Report_${Date.now()}.xlsx`
-      );
-
-      // Stream the workbook to the response
-      await workbook.xlsx.write(res);
-
-      // End the response after sending the file
-      res.end();
-    } else if (value == 2) {
-
-      function addHeading(text, worksheet) {
+      function addHeading2(text, worksheet) {
         const row = worksheet.addRow([text]);
 
         row.alignment = { horizontal: "center" };
@@ -1209,7 +1192,6 @@ const generateExcelReport = async (req, res) => {
         row.font = { bold: true, size: 15 };
         return row;
       }
-      const workbook = new ExcelJS.Workbook();
 
       function addcerts(data, headings, worksheet) {
         worksheet.getColumn(1).width = 25;
@@ -1256,9 +1238,9 @@ const generateExcelReport = async (req, res) => {
 
       }
 
-      const worksheet2 = workbook.addWorksheet("Certs Data");
+      const worksheet2 = workbook.addWorksheet("Details");
 
-      addHeading("Certs Data", worksheet2)
+      addHeading2("Details", worksheet2)
       let certsdata = [
         ...data.withpdfcerts,
         ...data.withoutpdfcerts,
@@ -1279,6 +1261,7 @@ const generateExcelReport = async (req, res) => {
         ],
         worksheet2
       );
+
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -1293,13 +1276,7 @@ const generateExcelReport = async (req, res) => {
 
       // End the response after sending the file
       res.end();
-    } else {
-      res.status(400).json({
-        code: 400,
-        status: "FAILED",
-        message: messageCode.msgEnterInvalid,
-      });
-    }
+
   } catch (error) {
     console.error("Internal server error:", error);
     res.status(500).json({
@@ -1322,14 +1299,27 @@ const generateInvoiceDocument = async (req, res) => {
     return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   try {
-    const { email, input } = req.body
-    if (!email) {
+    const { email, startDate, endDate } = req.body
+    if (!email || !startDate || !endDate) {
       return res.status(400).json({
         code: 400,
         status: "FAILED",
         message: messageCode.msgEnterInvalid,
       });
     }
+
+    const start = await parseDate(startDate);
+    const end = await parseDate(endDate);
+    if (start > end) {
+      return res.status(400).json({
+        code: 400,
+        status: "FAILED",
+        message: messageCode.msgStartDateShouldOld,
+        details: `Start Date : ${start}, End date: ${end}`,
+      });
+    }
+
+    const readableEndDate = await readableDateFormat(endDate);
 
     const dbStatus = isDBConnected();
     if (!dbStatus) {
@@ -1369,15 +1359,31 @@ const generateInvoiceDocument = async (req, res) => {
     // Sum the limit values
     const totalLimit = getCredits.reduce((sum, credits) => sum + credits.limit, 0);
     // console.log("Total Limit:", totalLimit);
+    // const issuerId = issuer.issuerId;
+    // const [
+    //   issuesFetch,
+    //   dynamicfetch,
+    //   dynamicbatchfetch,
+    //   batchfetch,
+
+    // ] = await Promise.all([
+    //   Issues.find({ issuerId, issueDate: { $gte: start, $lte: end } }),
+    //   DynamicIssues.find({ issuerId, issueDate: { $gte: start, $lte: end } }),
+    //   DynamicBatchIssues.find({
+    //     issuerId,
+    //     issueDate: { $gte: start, $lte: end },
+    //   }),
+    //   BatchIssues.find({ issuerId, issueDate: { $gte: start, $lte: end } }),
+    // ]);
 
     // Dynamically add user info (for "Bill To" section)
     const { name, address, city, state, country, designation, phoneNumber, organization, treansactionFee, approveDate } = issuer;
     let tableheaders = ['Item', 'Quantity', 'Price Per Unit', 'Amount']; // Dynamic headers
     let datarows = [
-      ['Subscription', '0', '0$', '0$'], // Row 1
-      ['Product A', '5', '10$', '50$'],  // Row 2
-      ['Product B', '2', '15$', '30$'],  // Row 3
-      ['Product D', '2', '25$', '50$'],  // Row 4
+      ['Subscription', '1', 'Base/Free', '0$'], // Row 1
+      ['TAX (IND)', '1', '18%', '0$'],  // Row 2
+      // ['Product B', '2', '15$', '30$'],  // Row 3
+      // ['Product D', '2', '25$', '50$'],  // Row 4
     ]; // Dynamic rows
 
     // Create a new PDF document
@@ -1440,7 +1446,11 @@ const generateInvoiceDocument = async (req, res) => {
     page.drawText(`Ph No: ${phoneNumber}`, { x: 50, y: 630, size: 12, font, color: black });
     page.drawText(address || 'Address Not Available', { x: 50, y: 610, size: 12, font, color: black });
     page.drawText(`${city}, ${state}, ${country}`, { x: 50, y: 590, size: 12, font, color: black });
-
+    page.drawText(`From-`, { x: 50, y: 570, size: 12, font: boldFont, color: black });
+    page.drawText(`${startDate}`, { x: 85, y: 570, size: 12, font, color: black });
+    page.drawText(`To-`, { x: 160, y: 570, size: 12, font: boldFont, color: black });
+    page.drawText(`${readableEndDate}`, { x: 180, y: 570, size: 12, font, color: black });
+   
     // Function to draw table borders dynamically
     const drawDynamicBorders = (xPositions, yPosition, rowHeight, page) => {
       xPositions.forEach((xPos) => {
@@ -1530,7 +1540,7 @@ const generateInvoiceDocument = async (req, res) => {
 
     // Usage example
     const startX = 50;
-    const startY = 550;
+    const startY = 520;
     const colWidths = [100, 100, 150, 150]; // Dynamic column widths
 
     // Call the drawTable function

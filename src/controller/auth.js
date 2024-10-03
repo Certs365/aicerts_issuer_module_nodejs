@@ -178,7 +178,6 @@ const signup = async (req, res) => {
           updatedAt: todayDate,
           resetAt: todayDate
         });
-
         // await newServiceAccountQuota.save();
         insertPromises.push(newServiceAccountQuota.save());
       }
@@ -187,7 +186,7 @@ const signup = async (req, res) => {
 
     } catch (error) {
       return res.json({
-        code: 400,
+        code: 500,
         status: "FAILED",
         message: messageCode.msgInternalError,
       });
