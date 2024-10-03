@@ -1397,8 +1397,8 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
  * @swagger
  * /api/generate-invoice-report:
  *   post:
- *     summary: API to generate the pdf invoice as per Issuer email, input (optional). 
- *     description: API to generate the Excel report as per Issuer email, input (optional). 
+ *     summary: API to generate the pdf invoice as per Issuer provided Start date and End date.
+ *     description: API to generate the PDF invoice as per Issuer provided Start date and End date, Example Date 09/20/2024 or 2024-09-20T23:59:59.999Z.
  *     tags: [Report/Invoice]
  *     security:
  *       - BearerAuth: []
