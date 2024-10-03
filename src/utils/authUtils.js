@@ -48,6 +48,24 @@ function generateRefreshToken(user) {
     }
 };
 
+const decryptRequestParseBody = (req, res, next) => {
+  try {
+    const key = process.env.ENCRYPTION_KEY; // Use an environment variable for the encryption key
+    const encryptedData = req.body.data; // Assuming the encrypted data is sent in the request body as 'encryptedData'
+    if (encryptedData) {
+      // Decrypt the data
+      const decryptedData = decryptData(encryptedData, key);
+      console.log(key, "key")
+      console.log(encryptedData, "encrypt")
+      console.log(decryptedData, "dycrypt")
+      req.body = decryptedData;
+    }
+    // Call the next middleware or controller
+    next();
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to decrypt request data' });
+  }
+};
 
 // Decrypt function
 const decryptData = (encryptedData, key) => {
@@ -59,5 +77,6 @@ const decryptData = (encryptedData, key) => {
 module.exports = {
   generateJwtToken,
   generateRefreshToken,
-  decryptRequestBody
+  decryptRequestBody,
+  decryptRequestParseBody
 };

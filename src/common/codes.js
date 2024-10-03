@@ -72,6 +72,10 @@ module.exports = {
     msgServerNameNotExist: "Server name not available, Please try again with valid name",
     msgServerDeleted: "Server details deleted succefully",
     msgFetchedVerificationCourses: "Verification results count fetched successfully with searched course",
-   
+    msgInvalidFlag: "Provide valid flag value",
+    msgProvideValidFilter: "Please provide valid filter key",
+    msgIssueFound: "Credential details found",
+    msgInvalidInput : "Invalid Input parameter",
+
 
 };

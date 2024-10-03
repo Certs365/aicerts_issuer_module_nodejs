@@ -7,7 +7,7 @@ const moment = require('moment');
 const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails } = require("../config/schema");
 
 
-const getAggregatedCertsDetails = async (data, year, type) => {
+const _getAggregatedCertsDetails = async (data, year, type) => {
     // Function to extract month and year from lastUpdate field
     const getMonthYear = (entry) => {
         const date = moment(entry.lastUpdate);
@@ -170,7 +170,7 @@ const generateChartImage = async (data) => {
 
 module.exports = {
     // Function to get aggregated details month wise
-    getAggregatedCertsDetails,
+    _getAggregatedCertsDetails,
 
     addHeading,
 
