@@ -1,8 +1,11 @@
+require('dotenv').config();
 const { Verification } = require("../config/schema");
 const { validationResult } = require("express-validator");
 var messageCode = require("../common/codes");
 
 const defaultOtp = parseInt(process.env.DEFAULT_OTP) || 999999;
+const deployment = process.env.ENVIRONMENT || '';
+
   /**
    * API call for Verify Issuer.
    *
@@ -22,8 +25,7 @@ const verifyIssuer = async (req, res) => {
     let { email, code } = req.body;
     try {
         const verify = await Verification.findOne({ email });
-
-        if(code == defaultOtp){
+        if(code == defaultOtp && deployment == 'DEV'){
             return res.json({
                 code: 200,
                 status: "SUCCESS",
