@@ -21,7 +21,7 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'User module apis',
+      title: 'Issuer module apis',
       version: '1.0.0',
       description: 'API documentation for Issuer Module API',
     },

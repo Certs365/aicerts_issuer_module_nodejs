@@ -33,7 +33,7 @@ module.exports = {
     msgInvalidOtp : "Invalid OTP entered / bad format.",
     msgErrorOnLogin : "Error Occured during the Login",
     msgErrorOnOtp : "An error occurred while sending OTP",
-    msgIssuerNotFound : "Issuer not found",
+    msgIssuerNotFound : "Issuer not found / not Active",
     msgIssuerFound : "Issuer Found",
     msgOtpSent : "OTP sent to the Issuer Email",
     msgExistEmail : "User with the provided email already exists",
@@ -56,9 +56,26 @@ module.exports = {
 
     //Migrated Fetching APIs Messages
     msgAllIssuersFetched: "All Issuer details fetched successfully",
-    msgErrorOnFetching: "Unable to fetch Issuer details, Please try again",
+    msgErrorOnFetching: "Unable to process requested details, Please try again",
     msgGraphDataFetched: "Graph data fetched successfully",
     msgInvalidGraphInput: "Please provide valid Graph Input",
-   
+    msgMatchFound: "Requested results found",
+    msgNoMatchFound: "No matching results found",
+    msgOperationSuccess: "Uploaded successfully",
+    msgAdminMailNotExist: "Admin with the provided email not exist",
+    msgInvalidIssuer: "Invalid / Inactive Issuer email",
+    msgUnableToProcessRequest: "Unable to process the request",
+    msgProvideValidFlag: "Please provide valid flag value as 1, 2",
+    msgStartDateShouldOld: "Provided Start date must not be future date to the End date",
+    msgUnableToGenerateRepoert: "Unable to generating the report, Please try again...",
+    msgServerNameExist: "Server name already existed, Please try again with different name",
+    msgServerNameNotExist: "Server name not available, Please try again with valid name",
+    msgServerDeleted: "Server details deleted succefully",
+    msgFetchedVerificationCourses: "Verification results count fetched successfully with searched course",
+    msgInvalidFlag: "Provide valid flag value",
+    msgProvideValidFilter: "Please provide valid filter key",
+    msgIssueFound: "Credential details found",
+    msgInvalidInput : "Invalid Input parameter",
+
 
 };

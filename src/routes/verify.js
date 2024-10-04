@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const verifyController = require('../controller/verify');
 const validationRoute = require("../common/validationRoutes");
+const { decryptRequestBody } = require('../utils/authUtils');
 
 /**
  * @swagger
@@ -78,6 +79,6 @@ const validationRoute = require("../common/validationRoutes");
  *                   example: An error occurred during the verification
  */
 
-router.post('/verify-issuer', validationRoute.verifyIssuer, verifyController.verifyIssuer);
+router.post('/verify-issuer', decryptRequestBody, validationRoute.verifyIssuer, verifyController.verifyIssuer);
 
 module.exports=router;

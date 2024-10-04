@@ -21,6 +21,7 @@ const forgotPassword = async (req, res) => {
     }
     let { email } = req.body;
     const generatedOtp = generateOTP();
+    console.log(email,generateOTP(),"ab")
     try {
       const verify = await Verification.findOne({ email });
   
@@ -45,6 +46,7 @@ const forgotPassword = async (req, res) => {
         // Update verification details
         verify.code = generatedOtp;
         verify.verified = true;
+        console.log(verify,"verify")
         await verify.save();
       }
       // password handling
@@ -72,7 +74,7 @@ const forgotPassword = async (req, res) => {
   const resetPassword = async (req, res) => {
     var validResult = validationResult(req);
     if (!validResult.isEmpty()) {
-        return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
     }
     let { email, password } = req.body;
     try {
@@ -84,6 +86,7 @@ const forgotPassword = async (req, res) => {
   
       if (!user || !user.approved) {
         return res.json({
+          code: 400,
           status: 'FAILED',
           message: messageCode.msgIssuerNotFound
         });
@@ -93,6 +96,7 @@ const forgotPassword = async (req, res) => {
       const isSamePassword = await bcrypt.compare(password, user.password);
       if (isSamePassword) {
         return res.json({
+          code: 400,
           status: 'FAILED',
           message: messageCode.msgPwdNotSame
         });
@@ -107,27 +111,31 @@ const forgotPassword = async (req, res) => {
           user
             .save()
             .then(() => {
-              res.json({
+              return res.json({
+                code: 200,
                 status: "SUCCESS",
                 message: messageCode.msgPwdReset
               });
             })
             .catch((err) => {
-              res.json({
+              return res.json({
+                code: 400,
                 status: "FAILED",
                 message: messageCode.msgErrorOnSaveUser
               });
             });
         })
         .catch((err) => {
-          res.json({
+          return res.json({
+            code: 400,
             status: "FAILED",
             message: messageCode.msgErrorOnPwdHash
           });
         });
   
     } catch (error) {
-      res.json({
+      return res.json({
+        code: 400,
         status: 'FAILED',
         message: messageCode.msgErroOnPwdReset
       });
@@ -143,7 +151,7 @@ const forgotPassword = async (req, res) => {
   const updateIssuer = async (req, res) => {
     let validResult = validationResult(req);
     if (!validResult.isEmpty()) {
-      return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
+      return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid ,details: validResult.array() });
     }
     // Get id from req.body instead of req.query
     const { id } = req.body; 
@@ -160,6 +168,7 @@ const forgotPassword = async (req, res) => {
   
       if (!existingIssuer) {
         res.json({
+          code: 400,
           status: "FAILED",
           message: messageCode.msgIssuerNotFound,
         });
@@ -176,7 +185,8 @@ const forgotPassword = async (req, res) => {
       // Save the updated issuer
       const updatedIssuer = await existingIssuer.save();
   
-      res.json({
+      return res.json({
+        code: 200,
         status: "SUCCESS",
         message: messageCode.msgIssuerUpdated,
         data: updatedIssuer,

@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    container_name: certs365_issuer
+    restart: unless-stopped
+    network_mode: bridge
+    env_file:
+      - .env
+    ports:
+      - 8060:8060
+    environment:
+      NODE_ENV: dev
