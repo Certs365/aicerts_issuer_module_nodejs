@@ -838,312 +838,373 @@ const generateExcelReport = async (req, res) => {
       ],
     };
 
-      const workbook = new ExcelJS.Workbook();
-      const worksheet1 = workbook.addWorksheet("Report");
+    const workbook = new ExcelJS.Workbook();
+    const worksheet1 = workbook.addWorksheet("Report");
 
-      // Create a bar chart image using QuickChart API
-      const generateChartImage = async () => {
-        const { default: fetch } = await import("node-fetch");
-        const chartConfig = {
-          type: "bar",
-          data: {
-            labels: ["Reactivate", "Revoke", "Renew", "Issued"],
-            datasets: [
-              {
-                label: "With PDF",
-                data: [
-                  data.withpdfreactivate,
-                  data.withpdfrevoke,
-                  data.withpdfrenew,
-                  data.withpdf,
-                ],
-                backgroundColor: "rgba(247, 232, 131, 1)",
-              },
-              {
-                label: "Without PDF",
-                data: [
-                  data.withoutpdfreactivate,
-                  data.withoutpdfrevoke,
-                  data.withoutpdfrenew,
-                  data.withoutpdf,
-                ],
-                backgroundColor: "rgba(247, 182, 2, 0.8)",
-              },
-              {
-                label: "Batch",
-                data: [
-                  data.batchreactivate,
-                  data.batchrevoke,
-                  data.batchrenew,
-                  data.batchfetch,
-                ],
-                backgroundColor: "rgba(255, 211, 15, 1)",
-              },
-              {
-                label: "Dynamic",
-                data: [
-                  data.dynamicreactivate,
-                  data.dynamicrevoke,
-                  data.dynamicrenew,
-                  data.dynamicfetch,
-                ],
-                backgroundColor: "rgba(173, 142, 0, 1)",
-              },
-              {
-                label: "Dynamic Batch",
-                data: [
-                  data.dynamicbatchreactivate,
-                  data.dynamicbatchrevoke,
-                  data.dynamicbatchrenew,
-                  data.dynamicbatchfetch,
-                ],
-                backgroundColor: "rgba(242, 166, 65, 1)",
-              },
-            ],
-          },
-          options: {
-            scales: {
-              x: {
-                ticks: {
-                  font: {
-                    weight: "bold", // Make x-axis labels bold
-                  },
-                },
-                grid: {
-                  borderWidth: 2, // Make x-axis border line thicker
+    // Create a bar chart image using QuickChart API
+    const generateChartImage = async () => {
+      const { default: fetch } = await import("node-fetch");
+      const chartConfig = {
+        type: "bar",
+        data: {
+          labels: ["Reactivate", "Revoke", "Renew", "Issued"],
+          datasets: [
+            {
+              label: "With PDF",
+              data: [
+                data.withpdfreactivate,
+                data.withpdfrevoke,
+                data.withpdfrenew,
+                data.withpdf,
+              ],
+              backgroundColor: "rgba(247, 232, 131, 1)",
+            },
+            {
+              label: "Without PDF",
+              data: [
+                data.withoutpdfreactivate,
+                data.withoutpdfrevoke,
+                data.withoutpdfrenew,
+                data.withoutpdf,
+              ],
+              backgroundColor: "rgba(247, 182, 2, 0.8)",
+            },
+            {
+              label: "Batch",
+              data: [
+                data.batchreactivate,
+                data.batchrevoke,
+                data.batchrenew,
+                data.batchfetch,
+              ],
+              backgroundColor: "rgba(255, 211, 15, 1)",
+            },
+            {
+              label: "Dynamic",
+              data: [
+                data.dynamicreactivate,
+                data.dynamicrevoke,
+                data.dynamicrenew,
+                data.dynamicfetch,
+              ],
+              backgroundColor: "rgba(173, 142, 0, 1)",
+            },
+            {
+              label: "Dynamic Batch",
+              data: [
+                data.dynamicbatchreactivate,
+                data.dynamicbatchrevoke,
+                data.dynamicbatchrenew,
+                data.dynamicbatchfetch,
+              ],
+              backgroundColor: "rgba(242, 166, 65, 1)",
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: {
+              ticks: {
+                font: {
+                  weight: "bold", // Make x-axis labels bold
                 },
               },
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  font: {
-                    weight: "bold", // Make y-axis labels bold
-                  },
-                },
-                grid: {
-                  borderWidth: 2, // Make y-axis border line thicker
-                },
+              grid: {
+                borderWidth: 2, // Make x-axis border line thicker
               },
             },
-            plugins: {
-              legend: {
-                labels: {
-                  font: {
-                    weight: "bold", // Make legend labels bold
-                  },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: {
+                  weight: "bold", // Make y-axis labels bold
                 },
+              },
+              grid: {
+                borderWidth: 2, // Make y-axis border line thicker
               },
             },
           },
-        };
-
-        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(
-          JSON.stringify(chartConfig)
-        )}`;
-        const response = await fetch(chartUrl);
-        const buffer = await response.arrayBuffer();
-
-        return buffer; // Return the image as binary data
+          plugins: {
+            legend: {
+              labels: {
+                font: {
+                  weight: "bold", // Make legend labels bold
+                },
+              },
+            },
+          },
+        },
       };
 
-      function addHeading(text, worksheet) {
-        const row = worksheet.addRow([text]);
-        row.alignment = { horizontal: "center" };
-        for (let i = 1; i <= 6; i++) {
-          const cell = row.getCell(i);
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFFFF033" }, // Yellow color
-          };
-        }
-        worksheet.mergeCells(`A${row.number}:F${row.number}`);
-        row.font = { bold: true, size: 15 };
-        return row;
-      }
+      const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(
+        JSON.stringify(chartConfig)
+      )}`;
+      const response = await fetch(chartUrl);
+      const buffer = await response.arrayBuffer();
 
-      addHeading("Issuer Details", worksheet1);
+      return buffer; // Return the image as binary data
+    };
 
-      const issuerDetails = [
-        ["Issuer Name", data.issuername],
-        ["Organization", data.organization],
-        ["Designation", data.designation],
-        ["Issuer ID", data.issuerId],
-        ["Email", data.email],
-        ["Start Date", readableStartDate],
-        ["End Date", readableEndDate],
-      ];
-
-      issuerDetails.forEach((row) => {
-        const dataRow = worksheet1.addRow(row);
-        dataRow.getCell(1).fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFD3D3D3" }, // Light grey
-        };
-        dataRow.getCell(1).font = { bold: true };
-        dataRow.getCell(2).font = { bold: true };
-      });
-
-      worksheet1.addRow([]);
-
-      let row = await addHeading("Usage", worksheet1);
-
-      const headers = [
-        "",
-        "With PDF",
-        "Without PDF",
-        "Batch",
-        "Dynamic",
-        "Dynamic Batch",
-      ];
-      const headerRow = worksheet1.addRow(headers);
-      headerRow.alignment = { horizontal: "center" };
-
-      const rows = [
-        [
-          "Reactivate",
-          data.withpdfreactivate,
-          data.withoutpdfreactivate,
-          data.batchreactivate,
-          data.dynamicreactivate,
-          data.dynamicbatchreactivate,
-        ],
-        [
-          "Revoke",
-          data.withpdfrevoke,
-          data.withoutpdfrevoke,
-          data.batchrevoke,
-          data.dynamicrevoke,
-          data.dynamicbatchrevoke,
-        ],
-        [
-          "Renew",
-          data.withpdfrenew,
-          data.withoutpdfrenew,
-          data.batchrenew,
-          data.dynamicrenew,
-          data.dynamicbatchrenew,
-        ],
-        [
-          "Issued",
-          data.withpdf,
-          data.withoutpdf,
-          data.batchfetch,
-          data.dynamicfetch,
-          data.dynamicbatchfetch,
-        ],
-      ];
-
-      rows.forEach((rowData, rowIndex) => {
-        const row = worksheet1.addRow(rowData);
-        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-          cell.border = {
-            top: { style: rowIndex === 0 ? "medium" : "thin" },
-            left: { style: colNumber === 1 ? "medium" : "thin" },
-            bottom: { style: rowIndex === rows.length - 1 ? "medium" : "thin" },
-            right: { style: colNumber === headers.length ? "medium" : "thin" },
-          };
-        });
-        row.alignment = { horizontal: "center" };
-      });
-
-      headerRow.eachCell({ includeEmpty: true }, (cell) => {
+    function addHeading(text, worksheet) {
+      const row = worksheet.addRow([text]);
+      row.alignment = { horizontal: "center" };
+      for (let i = 1; i <= 6; i++) {
+        const cell = row.getCell(i);
         cell.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FFD3D3D3" }, // Light grey
+          fgColor: { argb: "FFFFF033" }, // Yellow color
         };
-        cell.font = { bold: true };
-        cell.border = {
-          top: { style: "thin" },
-          left: { style: "thin" },
-          bottom: { style: "thin" },
-          right: { style: "thin" },
-        };
-      });
-
-      worksheet1
-        .getColumn(1)
-        .eachCell({ includeEmpty: true }, (cell, rowNumber) => {
-          if (rowNumber > 6) {
-            cell.font = { bold: true };
-          }
-        });
-
-      worksheet1.getColumn(1).width = 25;
-      worksheet1.getColumn(2).width = 20;
-      worksheet1.getColumn(3).width = 20;
-      worksheet1.getColumn(4).width = 20;
-      worksheet1.getColumn(5).width = 20;
-      worksheet1.getColumn(6).width = 20;
-
+      }
+      worksheet.mergeCells(`A${row.number}:F${row.number}`);
       row.font = { bold: true, size: 15 };
-      worksheet1.addRow([]);
+      return row;
+    }
 
-      addHeading("Total Counts", worksheet1);
-      const totalCounts = [
-        ["Total Revoke Operations", data.Totalrevokecount],
-        ["Total Renew Operations", data.Totalrenewcount],
-        ["Total Reactivate Operations", data.Totalreactivatecount],
-        ["Total Issued Certs", data.Totalissues],
-      ];
+    addHeading("Issuer Details", worksheet1);
 
-      totalCounts.forEach((row) => {
-        const dataRow = worksheet1.addRow(row);
-        dataRow.getCell(1).fill = {
+    const issuerDetails = [
+      ["Issuer Name", data.issuername],
+      ["Organization", data.organization],
+      ["Designation", data.designation],
+      ["Issuer ID", data.issuerId],
+      ["Email", data.email],
+      ["Start Date", readableStartDate],
+      ["End Date", readableEndDate],
+    ];
+
+    issuerDetails.forEach((row) => {
+      const dataRow = worksheet1.addRow(row);
+      dataRow.getCell(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" }, // Light grey
+      };
+      dataRow.getCell(1).font = { bold: true };
+      dataRow.getCell(2).font = { bold: true };
+    });
+
+    worksheet1.addRow([]);
+
+    let row = await addHeading("Usage", worksheet1);
+
+    const headers = [
+      "",
+      "With PDF",
+      "Without PDF",
+      "Batch",
+      "Dynamic",
+      "Dynamic Batch",
+    ];
+    const headerRow = worksheet1.addRow(headers);
+    headerRow.alignment = { horizontal: "center" };
+
+    const rows = [
+      [
+        "Reactivate",
+        data.withpdfreactivate,
+        data.withoutpdfreactivate,
+        data.batchreactivate,
+        data.dynamicreactivate,
+        data.dynamicbatchreactivate,
+      ],
+      [
+        "Revoke",
+        data.withpdfrevoke,
+        data.withoutpdfrevoke,
+        data.batchrevoke,
+        data.dynamicrevoke,
+        data.dynamicbatchrevoke,
+      ],
+      [
+        "Renew",
+        data.withpdfrenew,
+        data.withoutpdfrenew,
+        data.batchrenew,
+        data.dynamicrenew,
+        data.dynamicbatchrenew,
+      ],
+      [
+        "Issued",
+        data.withpdf,
+        data.withoutpdf,
+        data.batchfetch,
+        data.dynamicfetch,
+        data.dynamicbatchfetch,
+      ],
+    ];
+
+    rows.forEach((rowData, rowIndex) => {
+      const row = worksheet1.addRow(rowData);
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.border = {
+          top: { style: rowIndex === 0 ? "medium" : "thin" },
+          left: { style: colNumber === 1 ? "medium" : "thin" },
+          bottom: { style: rowIndex === rows.length - 1 ? "medium" : "thin" },
+          right: { style: colNumber === headers.length ? "medium" : "thin" },
+        };
+      });
+      row.alignment = { horizontal: "center" };
+    });
+
+    headerRow.eachCell({ includeEmpty: true }, (cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" }, // Light grey
+      };
+      cell.font = { bold: true };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    worksheet1
+      .getColumn(1)
+      .eachCell({ includeEmpty: true }, (cell, rowNumber) => {
+        if (rowNumber > 6) {
+          cell.font = { bold: true };
+        }
+      });
+
+    worksheet1.getColumn(1).width = 25;
+    worksheet1.getColumn(2).width = 20;
+    worksheet1.getColumn(3).width = 20;
+    worksheet1.getColumn(4).width = 20;
+    worksheet1.getColumn(5).width = 20;
+    worksheet1.getColumn(6).width = 20;
+
+    row.font = { bold: true, size: 15 };
+    worksheet1.addRow([]);
+
+    addHeading("Total Counts", worksheet1);
+    const totalCounts = [
+      ["Total Revoke Operations", data.Totalrevokecount],
+      ["Total Renew Operations", data.Totalrenewcount],
+      ["Total Reactivate Operations", data.Totalreactivatecount],
+      ["Total Issued Certs", data.Totalissues],
+    ];
+
+    totalCounts.forEach((row) => {
+      const dataRow = worksheet1.addRow(row);
+      dataRow.getCell(1).fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" }, // Light grey
+      };
+      dataRow.getCell(1).font = { bold: true };
+      dataRow.getCell(2).font = { bold: true };
+      dataRow.alignment = { horizontal: "center" };
+    });
+    worksheet1.addRow([]);
+    // Courses Section
+    addHeading("Courses Section", worksheet1);
+
+    // Define courses data
+    const courseCategories = {
+      "With PDF Courses": data.withpdfcourses,
+      "Without PDF Courses": data.withoutpdfcourses,
+      "Batch Courses": data.batchcourses,
+      "Dynamic Courses": data.dynamiccourses,
+      "Dynamic Batch Courses": data.dynamicbatchcourses,
+    };
+
+    // Add table headers for categories
+    const categories = Object.keys(courseCategories);
+    worksheet1.addRow(["S.No", ...categories]);
+
+    // Determine the maximum number of courses in any category
+    const maxCourses = Math.max(
+      ...Object.values(courseCategories).map((courses) => courses.length)
+    );
+
+    // Add courses data to the table
+    for (let i = 0; i < maxCourses; i++) {
+      let row = [i + 1]; // Row number for course index
+      categories.forEach((category) => {
+        row.push(courseCategories[category][i] || ""); // Add course or empty string if not available
+      });
+      row = worksheet1.addRow(row);
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+      row.alignment = { horizontal: "center" };
+    }
+
+    // Style the header row
+    const headerRow2 = worksheet1.getRow(22);
+    headerRow2.alignment = { horizontal: "center" };
+    headerRow2.eachCell({ includeEmpty: true }, (cell) => {
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFD3D3D3" }, // Light grey
+      };
+      cell.font = { bold: true };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+    });
+
+    worksheet1.addRow([]);
+
+    const chartImageBuffer = await generateChartImage();
+
+    // Add chart image to the worksheet
+    const imageId = workbook.addImage({
+      buffer: chartImageBuffer, // Use buffer data instead of filename
+      extension: "png",
+    });
+
+    addHeading("Charts", worksheet1)
+    worksheet1.addRow([]);
+
+    // Add image to the worksheet at a specific position
+    worksheet1.addImage(imageId, `A${worksheet1.lastRow.number}:F${worksheet1.lastRow.number + 20}`);
+
+    function addHeading2(text, worksheet) {
+      const row = worksheet.addRow([text]);
+
+      row.alignment = { horizontal: "center" };
+
+      for (let i = 1; i <= 6; i++) {
+        const cell = row.getCell(i);
+        cell.fill = {
           type: "pattern",
           pattern: "solid",
-          fgColor: { argb: "FFD3D3D3" }, // Light grey
+          fgColor: { argb: "FFFFF033" }, // Yellow color
         };
-        dataRow.getCell(1).font = { bold: true };
-        dataRow.getCell(2).font = { bold: true };
-        dataRow.alignment = { horizontal: "center" };
-      });
-      worksheet1.addRow([]);
-      // Courses Section
-      addHeading("Courses Section", worksheet1);
-
-      // Define courses data
-      const courseCategories = {
-        "With PDF Courses": data.withpdfcourses,
-        "Without PDF Courses": data.withoutpdfcourses,
-        "Batch Courses": data.batchcourses,
-        "Dynamic Courses": data.dynamiccourses,
-        "Dynamic Batch Courses": data.dynamicbatchcourses,
-      };
-
-      // Add table headers for categories
-      const categories = Object.keys(courseCategories);
-      worksheet1.addRow(["S.No", ...categories]);
-
-      // Determine the maximum number of courses in any category
-      const maxCourses = Math.max(
-        ...Object.values(courseCategories).map((courses) => courses.length)
-      );
-
-      // Add courses data to the table
-      for (let i = 0; i < maxCourses; i++) {
-        let row = [i + 1]; // Row number for course index
-        categories.forEach((category) => {
-          row.push(courseCategories[category][i] || ""); // Add course or empty string if not available
-        });
-        row = worksheet1.addRow(row);
-        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            bottom: { style: "thin" },
-            right: { style: "thin" },
-          };
-        });
-        row.alignment = { horizontal: "center" };
       }
 
-      // Style the header row
-      const headerRow2 = worksheet1.getRow(22);
-      headerRow2.alignment = { horizontal: "center" };
-      headerRow2.eachCell({ includeEmpty: true }, (cell) => {
+      worksheet.mergeCells(`A${row.number}:G${row.number}`);
+      row.font = { bold: true, size: 15 };
+      return row;
+    }
+
+    function addcerts(data, headings, worksheet) {
+      worksheet.getColumn(1).width = 25;
+      worksheet.getColumn(2).width = 20;
+      worksheet.getColumn(3).width = 20;
+      worksheet.getColumn(4).width = 20;
+      worksheet.getColumn(5).width = 20;
+      worksheet.getColumn(6).width = 20;
+      worksheet.getColumn(7).width = 20
+      let headers3 = headings;
+      let headerRow3 = worksheet.addRow(headers3);
+      headerRow3.alignment = { horizontal: "center" };
+      headerRow3.eachCell({ includeEmpty: true }, (cell) => {
         cell.fill = {
           type: "pattern",
           pattern: "solid",
@@ -1158,59 +1219,13 @@ const generateExcelReport = async (req, res) => {
         };
       });
 
-      worksheet1.addRow([]);
-
-      const chartImageBuffer = await generateChartImage();
-
-      // Add chart image to the worksheet
-      const imageId = workbook.addImage({
-        buffer: chartImageBuffer, // Use buffer data instead of filename
-        extension: "png",
-      });
-
-      addHeading("Charts", worksheet1)
-      worksheet1.addRow([]);
-
-      // Add image to the worksheet at a specific position
-      worksheet1.addImage(imageId, `A${worksheet1.lastRow.number}:F${worksheet1.lastRow.number + 20}`);
-
-      function addHeading2(text, worksheet) {
-        const row = worksheet.addRow([text]);
-
-        row.alignment = { horizontal: "center" };
-
-        for (let i = 1; i <= 6; i++) {
-          const cell = row.getCell(i);
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFFFF033" }, // Yellow color
-          };
-        }
-
-        worksheet.mergeCells(`A${row.number}:G${row.number}`);
-        row.font = { bold: true, size: 15 };
-        return row;
-      }
-
-      function addcerts(data, headings, worksheet) {
-        worksheet.getColumn(1).width = 25;
-        worksheet.getColumn(2).width = 20;
-        worksheet.getColumn(3).width = 20;
-        worksheet.getColumn(4).width = 20;
-        worksheet.getColumn(5).width = 20;
-        worksheet.getColumn(6).width = 20;
-        worksheet.getColumn(7).width = 20
-        let headers3 = headings;
-        let headerRow3 = worksheet.addRow(headers3);
-        headerRow3.alignment = { horizontal: "center" };
-        headerRow3.eachCell({ includeEmpty: true }, (cell) => {
-          cell.fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFD3D3D3" }, // Light grey
-          };
-          cell.font = { bold: true };
+      data.forEach((item) => {
+        let row = [];
+        headings.forEach((header) => {
+          row.push(item[header] || null); // Insert the value if it exists, or null if it doesn't
+        });
+        row = worksheet.addRow(row);
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
           cell.border = {
             top: { style: "thin" },
             left: { style: "thin" },
@@ -1218,64 +1233,49 @@ const generateExcelReport = async (req, res) => {
             right: { style: "thin" },
           };
         });
+        row.alignment = { horizontal: "center" }; // Add the row to the worksheet
+      });
 
-        data.forEach((item) => {
-          let row = [];
-          headings.forEach((header) => {
-            row.push(item[header] || null); // Insert the value if it exists, or null if it doesn't
-          });
-          row = worksheet.addRow(row);
-          row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-            cell.border = {
-              top: { style: "thin" },
-              left: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "thin" },
-            };
-          });
-          row.alignment = { horizontal: "center" }; // Add the row to the worksheet
-        });
+    }
 
-      }
+    const worksheet2 = workbook.addWorksheet("Details");
 
-      const worksheet2 = workbook.addWorksheet("Details");
+    addHeading2("Details", worksheet2)
+    let certsdata = [
+      ...data.withpdfcerts,
+      ...data.withoutpdfcerts,
+      ...data.batchcerts,
+      ...data.dynamiccerts,
+      ...data.dynamicbatchcerts,
+    ];
+    addcerts(
+      certsdata,
+      [
+        "certificateNumber",
+        "name",
+        "course",
+        "grantDate",
+        "expirationDate",
+        "Status",
+        "Type",
+      ],
+      worksheet2
+    );
 
-      addHeading2("Details", worksheet2)
-      let certsdata = [
-        ...data.withpdfcerts,
-        ...data.withoutpdfcerts,
-        ...data.batchcerts,
-        ...data.dynamiccerts,
-        ...data.dynamicbatchcerts,
-      ];
-      addcerts(
-        certsdata,
-        [
-          "certificateNumber",
-          "name",
-          "course",
-          "grantDate",
-          "expirationDate",
-          "Status",
-          "Type",
-        ],
-        worksheet2
-      );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Report_${Date.now()}.xlsx`
+    );
 
-      res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename=Report_${Date.now()}.xlsx`
-      );
+    // Stream the workbook to the response
+    await workbook.xlsx.write(res);
 
-      // Stream the workbook to the response
-      await workbook.xlsx.write(res);
-
-      // End the response after sending the file
-      res.end();
+    // End the response after sending the file
+    res.end();
 
   } catch (error) {
     console.error("Internal server error:", error);
@@ -1450,7 +1450,7 @@ const generateInvoiceDocument = async (req, res) => {
     page.drawText(`${startDate}`, { x: 85, y: 570, size: 12, font, color: black });
     page.drawText(`To-`, { x: 160, y: 570, size: 12, font: boldFont, color: black });
     page.drawText(`${readableEndDate}`, { x: 180, y: 570, size: 12, font, color: black });
-   
+
     // Function to draw table borders dynamically
     const drawDynamicBorders = (xPositions, yPosition, rowHeight, page) => {
       xPositions.forEach((xPos) => {
@@ -2272,7 +2272,7 @@ const fetchGraphStatusDetails = async (req, res) => {
     }).lean();
     // console.log("All status responses", fetchAllCertificateIssues.length, fetchAllCertificateRenewes.length, fetchAllCertificateRevoked.length, fetchAllCertificateReactivated.length);
 
-console.log("Reached");
+    console.log("Reached");
     if (value > 2000 && value < 2199) {
 
       var getIssueDetailsMonthCount = await getAggregatedCertsDetails(fetchAllCertificateIssues, value);
@@ -2362,6 +2362,482 @@ const getMonthAggregatedCertsDetails = async (data, month, year) => {
   return daysCountsArray;
 };
 
+/**
+ * API to fetch details with Query-parameter.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const fetchIssuesLogDetails = async (req, res) => {
+  let validResult = validationResult(req);
+  if (!validResult.isEmpty()) {
+    return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+  }
+  try {
+    // Extracting required data from the request body
+    const email = req.body.email;
+    const queryCode = req.body.queryCode;
+    const queryParams = req.query.queryParams;
+
+    // Get today's date
+    var today = new Date();
+    // Formatting the parsed date into ISO 8601 format with timezone
+    var formattedDate = today.toISOString();
+    var queryResponse;
+
+    // Get today's date
+    const getTodayDate = async () => {
+      const today = new Date();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // Add leading zero if month is less than 10
+      const day = String(today.getDate()).padStart(2, '0'); // Add leading zero if day is less than 10
+      const year = today.getFullYear();
+      return `${month}/${day}/${year}`;
+    };
+    const todayDate = await getTodayDate();
+
+    // console.log("date", todayDate);
+
+    // Check mongoose connection
+    const dbStatus = await isDBConnected();
+    const dbStatusMessage = (dbStatus == true) ? "Database connection is Ready" : "Database connection is Not Ready";
+    console.log(dbStatusMessage);
+
+    // Check if user with provided email exists
+    const issuerExist = await isValidIssuer(email);
+
+    if (!issuerExist) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgUserNotFound });
+    }
+
+    if (queryCode || queryParams) {
+      var inputQuery = parseInt(queryCode || queryParams);
+      switch (inputQuery) {
+        case 1:  // Get the all issued certs count
+          var issueCount = issuerExist.certificatesIssued;
+
+          // var query1Promise = Issues.find({
+          //   issuerId: issuerExist.issuerId,
+          //   url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          // }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // var query2Promise = BatchIssues.find({
+          //   issuerId: issuerExist.issuerId,
+          //   url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          // }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // // Wait for both queries to resolve
+          // var [queryResponse1, queryResponse2] = await Promise.all([query1Promise, query2Promise]);
+
+          // // Merge the results into a single array
+          // var _queryResponse = [...queryResponse1, ...queryResponse2];
+          // let issueCount = _queryResponse.length;
+
+          var renewCount = issuerExist.certificatesRenewed;
+
+          // var query11Promise = Issues.find({
+          //   issuerId: issuerExist.issuerId,
+          //   certificateStatus: { $in: [2] },
+          //   url: { $exists: true,  $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          // }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // var query21Promise = BatchIssues.find({
+          //   issuerId: issuerExist.issuerId,
+          //   certificateStatus: { $in: [2] },
+          //   url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          // }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // // Wait for both queries to resolve
+          // var [queryResponse11, queryResponse21] = await Promise.all([query11Promise, query21Promise]);
+
+          // // Merge the results into a single array
+          // var _queryResponse1 = [...queryResponse11, ...queryResponse21];
+          // var renewCount = _queryResponse1.length;
+
+          var revokedCount = await IssueStatus.find({
+            email: req.body.email,
+            certStatus: 3
+          });
+          var reactivatedCount = await IssueStatus.find({
+            email: req.body.email,
+            certStatus: 4
+          });
+          queryResponse = { issued: issueCount, renewed: renewCount, revoked: revokedCount.length, reactivated: reactivatedCount.length };
+          break;
+        case 2:
+          queryResponse = await IssueStatus.find({
+            email: req.body.email,
+            $and: [
+              { certStatus: { $eq: [1, 2] } },
+              { expirationDate: { $gt: formattedDate } }]
+          });
+          // Sort the data based on the 'lastUpdate' date in descending order
+          // queryResponse.sort((b, a) => new Date(b.expirationDate) - new Date(a.expirationDate));
+          break;
+        case 3:
+          queryResponse = await IssueStatus.find({
+            email: req.body.email,
+            $and: [{ certStatus: { $eq: [1, 2] }, expirationDate: { $ne: "1" } }]
+          });
+          // Sort the data based on the 'lastUpdate' date in descending order
+          // queryResponse.sort((b, a) => new Date(b.expirationDate) - new Date(a.expirationDate));
+          break;
+        case 4:
+          queryResponse = await IssueStatus.find({
+            email: req.body.email,
+            $and: [{ certStatus: { $eq: 3 }, expirationDate: { $gt: formattedDate } }]
+          });
+          // Sort the data based on the 'lastUpdate' date in descending order
+          queryResponse.sort((b, a) => new Date(b.expirationDate) - new Date(a.expirationDate));
+          break;
+        case 5:
+          queryResponse = await IssueStatus.find({
+            email: req.body.email,
+            $and: [{ expirationDate: { $lt: formattedDate } }]
+          });
+          // Sort the data based on the 'lastUpdate' date in descending order
+          queryResponse.sort((b, a) => new Date(b.expirationDate) - new Date(a.expirationDate));
+          break;
+        case 6:
+          var filteredResponse6 = [];
+          var query1Promise = await Issues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query2Promise = await BatchIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query3Promise = await DynamicIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query4Promise = await DynamicBatchIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // Wait for both queries to resolve
+          var [queryResponse1, queryResponse2, queryResponse3, queryResponse4] = await Promise.all([query1Promise, query2Promise, query3Promise, query4Promise]);
+
+          // Merge the results into a single array
+          var _queryResponse = [...queryResponse1, ...queryResponse2, ...queryResponse3, ...queryResponse4];
+          // Sort the data based on the 'issueDate' date in descending order
+          _queryResponse.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+
+          for (var item6 of _queryResponse) {
+            var certificateNumber = item6.certificateNumber;
+            const issueStatus6 = await IssueStatus.findOne({ certificateNumber });
+            if (issueStatus6) {
+              // Push the matching issue status into filteredResponse
+              filteredResponse6.push(item6);
+            }
+            // If filteredResponse reaches 30 matches, break out of the loop
+            if (filteredResponse6.length >= 30) {
+              break;
+            }
+          }
+          // Take only the first 30 records
+          // var queryResponse = _queryResponse.slice(0, Math.min(_queryResponse.length, 30));
+          queryResponse = filteredResponse6;
+          break;
+        case 7://To fetch Revoked certifications and count
+          var query1Promise = await Issues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: 3,
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query2Promise = await BatchIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: 3,
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query3Promise = await DynamicIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: 3,
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query4Promise = await DynamicBatchIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: 3,
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // Wait for both queries to resolve
+          var [queryResponse1, queryResponse2, queryResponse3, queryResponse4] = await Promise.all([query1Promise, query2Promise, query3Promise, query4Promise]);
+
+          // Merge the results into a single array
+          var _queryResponse = [...queryResponse1, ...queryResponse2, ...queryResponse3, ...queryResponse4];
+          // Sort the data based on the 'issueDate' date in descending order
+          _queryResponse.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+
+          // Take only the first 30 records
+          queryResponse = _queryResponse.slice(0, Math.min(_queryResponse.length, 30));
+          break;
+        case 8:
+          var filteredResponse8 = [];
+          var query1Promise = await Issues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            expirationDate: { $ne: "1" },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          var query2Promise = await BatchIssues.find({
+            issuerId: issuerExist.issuerId,
+            certificateStatus: { $in: [1, 2, 4] },
+            expirationDate: { $ne: "1" },
+            url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+          }).lean(); // Use lean() to convert documents to plain JavaScript objects
+
+          // Wait for both queries to resolve
+          var [queryResponse1, queryResponse2] = await Promise.all([query1Promise, query2Promise]);
+
+          // Merge the results into a single array
+          var queryResponse = [...queryResponse1, ...queryResponse2];
+
+          // Filter the data to show only expiration dates on or after today
+          queryResponse = queryResponse.filter(item => new Date(item.expirationDate) >= new Date(todayDate));
+
+          // Sort the data based on the 'expirationDate' date in descending order
+          queryResponse.sort((a, b) => new Date(a.expirationDate) - new Date(b.expirationDate));
+
+          // Sort the data based on the 'issueDate' date in descending order
+          // queryResponse.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+
+          for (let item8 of queryResponse) {
+            let certificateNumber = item8.certificateNumber;
+            const issueStatus8 = await IssueStatus.findOne({ certificateNumber });
+            if (issueStatus8) {
+              // Push the matching issue status into filteredResponse
+              filteredResponse8.push(item8);
+            }
+            // If filteredResponse reaches 30 matches, break out of the loop
+            if (filteredResponse8.length >= 30) {
+              break;
+            }
+          }
+          // Take only the first 30 records
+          // var queryResponse = queryResponse.slice(0, Math.min(queryResponse.length, 30));
+          queryResponse = filteredResponse8;
+          break;
+        case 9:
+          var queryResponse = await Issues.find({
+            issuerId: issuerExist.issuerId,
+            $and: [{ certificateStatus: { $eq: 4 } }]
+          });
+          break;
+        default:
+          queryResponse = 0;
+          var totalResponses = 0;
+          var responseMessage = messageCode.msgNoMatchFound;
+      };
+    } else {
+      queryResponse = 0;
+      var totalResponses = 0;
+      var responseMessage = messageCode.msgNoMatchFound;
+    }
+
+    var totalResponses = queryResponse.length || Object.keys(queryResponse).length;
+    var responseStatus = totalResponses > 0 ? 'SUCCESS' : 'FAILED';
+    var responseCode = totalResponses > 0 ? 200 : 400;
+    var responseMessage = totalResponses > 0 ? messageCode.msgAllQueryFetched : messageCode.msgNoMatchFound;
+
+    // Respond with success and all user details
+    res.json({
+      code: responseCode,
+      status: responseStatus,
+      data: queryResponse,
+      responses: totalResponses,
+      message: responseMessage
+    });
+
+  } catch (error) {
+    // Error occurred while fetching user details, respond with failure message
+    res.json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgErrorOnFetching
+    });
+  }
+};
+
+/**
+ * API to fetch single issues with Query-parameter.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getSingleCertificates = async (req, res) => {
+  try {
+    const { issuerId, type } = req.body;
+
+    // Validate request body
+    if (!issuerId || (type !== 1 && type !== 2)) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: "issuerId and valid type (1 or 2 or 3) are required" });
+    }
+
+    // Convert type to integer if it is a string
+    const typeInt = parseInt(type, 10);
+
+    // Determine the type field value based on the provided type
+    let typeField;
+    if (typeInt == 1) {
+      typeField = ['withpdf', 'dynamic'];
+    } else if (typeInt == 2) {
+      typeField = ['withoutpdf'];
+    } else {
+      return res.status(400).json({ code: 400, status: "FAILED", message: "Invalid type provided" });
+    }
+    // Fetch certificates based on issuerId and type
+    const certificatesSimple = await Issues.find({
+      issuerId: issuerId,
+      type: { $in: typeField },
+      url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+    });
+
+    const certificatesDynamic = await DynamicIssues.find({
+      issuerId: issuerId,
+      type: { $in: typeField },
+      url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket } // Filter to include documents where `url` exists
+    });
+
+    const certificates = [...certificatesSimple, ...certificatesDynamic];
+
+    // Function to sort data by issueDate
+    certificates.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+
+    // Respond with success and the certificates
+    res.json({
+      code: 200,
+      status: 'SUCCESS',
+      data: certificates,
+      message: 'Certificates fetched successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching certificates:', error);
+
+    // Respond with failure message
+    res.status(500).json({
+      code: 500,
+      status: 'FAILED',
+      message: 'An error occurred while fetching the certificates',
+      details: error.message
+    });
+  }
+};
+
+/**
+ * API to fetch batch issues dates with Query-parameter.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getBatchCertificateDates = async (req, res) => {
+  try {
+    const { issuerId } = req.body;
+
+    // Validate issuerId
+    if (!issuerId) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: "issuerId is required" });
+    }
+
+    // Fetch all batch certificates for the given issuerId
+    const batchCertificatesOne = await BatchIssues.find({ issuerId }).sort({ issueDate: 1 });
+    const batchCertificatesTwo = await DynamicBatchIssues.find({ issuerId }).sort({ issueDate: 1 });
+
+    const batchCertificates = [...batchCertificatesOne, ...batchCertificatesTwo];
+
+
+    // Create a map to store the first certificate's issueDate for each batchId
+    const batchDateMap = new Map();
+
+    // Iterate through the certificates and store the first occurrence's issueDate for each batchId
+    batchCertificates.forEach(cert => {
+      if (!batchDateMap.has(cert.batchId)) {
+        batchDateMap.set(cert.batchId, { issueDate: cert.issueDate, issuerId: cert.issuerId });
+      }
+    });
+
+    // Convert the map to an array of objects with batchId, issueDate, and issuerId
+    const uniqueBatchDates = Array.from(batchDateMap, ([batchId, value]) => ({
+      batchId,
+      issueDate: value.issueDate,
+      issuerId: value.issuerId
+    }));
+
+    // Function to sort data by issueDate
+    uniqueBatchDates.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
+
+    // Respond with success and the unique batch dates
+    res.json({
+      code: 200,
+      status: 'SUCCESS',
+      data: uniqueBatchDates,
+      message: 'Unique batch dates fetched successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching unique batch dates:', error);
+
+    // Respond with failure message
+    res.status(500).json({
+      code: 500,
+      status: 'FAILED',
+      message: 'An error occurred while fetching the unique batch dates',
+      details: error.message
+    });
+  }
+};
+
+/**
+ * API to fetch batch issues with Query-parameter.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getBatchCertificates = async (req, res) => {
+  try {
+    const { batchId, issuerId } = req.body;
+
+    // Validate input
+    if (!batchId || !issuerId) {
+      return res.status(400).json({ code: 400, status: "FAILED", message: "batchId and issuerId are required" });
+    }
+
+    // Fetch all certificates for the given batchId and issuerId
+    var certificates = await BatchIssues.find({ batchId, issuerId });
+    if (!certificates || certificates.length < 1) {
+      certificates = await DynamicBatchIssues.find({ batchId, issuerId });
+    }
+
+    // Respond with success and the certificates
+    res.json({
+      code: 200,
+      status: 'SUCCESS',
+      data: certificates,
+      message: 'Certificates fetched successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching certificates:', error);
+
+    // Respond with failure message
+    res.status(500).json({
+      code: 500,
+      status: 'FAILED',
+      message: 'An error occurred while fetching the certificates',
+      details: error.message
+    });
+  }
+};
 
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
@@ -2404,4 +2880,19 @@ module.exports = {
 
   // Function to fetch Core features count based response on monthly/yearly for the Graph
   fetchGraphStatusDetails,
+
+  // Function to fetch details from Issuers log
+  fetchIssuesLogDetails,
+
+  // Function to get single issued certifications from the DB (with / without pdf)
+  getSingleCertificates,
+
+  // Function to get single issued certifications from the DB (with / without pdf)
+  getSingleCertificates,
+
+  // Function to get batch issued certifications from the DB
+  getBatchCertificates,
+
+  // Function to get batch issued certifications from the DB based on Dates
+  getBatchCertificateDates,
 };

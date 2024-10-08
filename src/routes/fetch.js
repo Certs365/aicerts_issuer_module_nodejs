@@ -1481,6 +1481,379 @@ router.post('/generate-excel-report', validationRoute.generateExcel, userControl
 
 router.post('/generate-invoice-report', validationRoute.generateInvoice, userController.generateInvoiceDocument);
 
+/**
+ * @swagger
+ * /api/get-issuers-log:
+ *   post:
+ *     summary: Get details of all issuers log with query code
+ *     description: API to fetch all issuer details queryCode (1-All Stats {Issued, Renewed, Revoked, Reactivated}, 2-All Details {for revoke}, 3-All Details {for expiration extended} , 4-All Revoked, 5-All expired, 6-Current Details {for revoke}, 7-Current Revoked, 8-Current Details {for expiration extended}).
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: Issuer's email address
+ *               queryCode:
+ *                 type: number
+ *                 description: Provide code to fetch appropriate details
+ *     responses:
+ *       '200':
+ *         description: All user details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     [Issuers Log Details]
+ *                 message:
+ *                   type: string
+ *                   example: All issuer log details fetched successfully
+ *       '400':
+ *         description: Bad request or Invalid code
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: Issuer log details not found (or) Bad request!
+ *       '422':
+ *         description: User given invalid input (Unprocessable Entity)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *             example:
+ *               status: "FAILED"
+ *               message: Error message for invalid input.
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching issuer log details
+ */
+
+router.post('/get-issuers-log',decryptRequestParseBody, validationRoute.queryCode, userController.fetchIssuesLogDetails);
+
+/**
+ * @swagger
+ * /api/get-single-certificates:
+ *   post:
+ *     summary: Get single certificate details
+ *     description: API to fetch a single certificate based on issuerId and type (1 for withpdf, 2 for withoutpdf).
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               issuerId:
+ *                 type: string
+ *                 description: Issuer's ID
+ *               type:
+ *                 type: number
+ *                 description: Type of certificate (1 for withpdf, 2 for withoutpdf)
+ *             required:
+ *               - issuerId
+ *               - type
+ *     responses:
+ *       '200':
+ *         description: Certificate details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       certificateId:
+ *                         type: string
+ *                       issuerId:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                       issueDate:
+ *                         type: string
+ *                         format: date
+ *                       pdfUrl:
+ *                         type: string
+ *                   example:
+ *                     - certificateId: "123456"
+ *                       issuerId: "issuer123"
+ *                       type: "withpdf"
+ *                       issueDate: "2024-01-01"
+ *                       pdfUrl: "https://example.com/certificate.pdf"
+ *                 message:
+ *                   type: string
+ *                   example: Certificate fetched successfully
+ *       '400':
+ *         description: Bad request or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: issuerId and type are required
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching the certificate
+ *                 details:
+ *                   type: string
+ *                   example: Error details
+ */
+
+router.post('/get-single-certificates',decryptRequestParseBody, userController.getSingleCertificates);
+
+/**
+ * @swagger
+ * /api/get-batch-certificates:
+ *   post:
+ *     summary: Get batch certificates based on issuerId
+ *     description: API to fetch all batch certificates for a given issuerId. The response will group the certificates by their issueDate.
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               issuerId:
+ *                 type: string
+ *                 description: Issuer's ID
+ *               batchId:
+ *                 type: string
+ *                 description: Batch ID
+ *             required:
+ *               - issuerId
+ *               - batchId
+ *     responses:
+ *       '200':
+ *         description: Batch certificates fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       issueDate:
+ *                         type: string
+ *                         format: date
+ *                       certificates:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             certificateId:
+ *                               type: string
+ *                             issuerId:
+ *                               type: string
+ *                             type:
+ *                               type: string
+ *                             issueDate:
+ *                               type: string
+ *                               format: date
+ *                             pdfUrl:
+ *                               type: string
+ *                   example:
+ *                     - issueDate: "2024-01-01"
+ *                       certificates:
+ *                         - certificateId: "123456"
+ *                           issuerId: "issuer123"
+ *                           type: "withpdf"
+ *                           issueDate: "2024-01-01"
+ *                           pdfUrl: "https://example.com/certificate.pdf"
+ *                 message:
+ *                   type: string
+ *                   example: Batch certificates fetched successfully
+ *       '400':
+ *         description: Bad request or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: issuerId is required
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching the batch certificates
+ *                 details:
+ *                   type: string
+ *                   example: Error details
+ */
+
+router.post('/get-batch-certificates', userController.getBatchCertificates);
+
+/**
+ * @swagger
+ * /api/get-batch-certificate-dates:
+ *   post:
+ *     summary: Get batch certificates based on issuerId
+ *     description: API to fetch all batch certificates for a given issuerId. The response will group the certificates by their issueDate.
+ *     tags: [Fetch/Upload]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               issuerId:
+ *                 type: string
+ *                 description: Issuer's ID
+ *             required:
+ *               - issuerId
+ *     responses:
+ *       '200':
+ *         description: Batch certificates fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: SUCCESS
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       issueDate:
+ *                         type: string
+ *                         format: date
+ *                       certificates:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             batchId:
+ *                               type: number
+ *                             issueDate:
+ *                               type: string
+ *                             issuerId:
+ *                               type: string
+ *                   example:
+ *                       data:
+ *                         - batchId: "12"
+ *                           issueDate: "2024-01-01"
+ *                           issuerId: "issuer123"
+ *                 message:
+ *                   type: string
+ *                   example: Batch certificates fetched successfully
+ *       '400':
+ *         description: Bad request or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: issuerId is required
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: FAILED
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while fetching the batch certificates
+ *                 details:
+ *                   type: string
+ *                   example: Error details
+ */
+
+router.post('/get-batch-certificate-dates',decryptRequestParseBody, userController.getBatchCertificateDates);
 
 
 module.exports = router;
