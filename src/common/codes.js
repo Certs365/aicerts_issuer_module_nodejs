@@ -76,6 +76,7 @@ module.exports = {
     msgProvideValidFilter: "Please provide valid filter key",
     msgIssueFound: "Credential details found",
     msgInvalidInput : "Invalid Input parameter",
+    msgUserNotFound: "Issuer not found! / Issuer not Approved",
 
 
 };

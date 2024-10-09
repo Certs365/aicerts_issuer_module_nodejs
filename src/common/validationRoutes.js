@@ -74,6 +74,17 @@ const validationRoutes = {
         body("input").notEmpty().withMessage(messageCode.msgNonEmpty).trim().isString().withMessage(messageCode.msgInputProvide),
         body("flag").notEmpty().withMessage(messageCode.msgNonEmpty).trim().isNumeric().isIn([1, 2]).withMessage(messageCode.msgInvalidFlag),
     ],
+    queryCode: [
+        body("email").notEmpty().withMessage(messageCode.msgNonEmpty).trim().isEmail().withMessage(messageCode.msgInvalidEmail).not().equals("string").withMessage(messageCode.msgInvalidEmail),
+        body("queryCode").optional().notEmpty().withMessage(messageCode.msgNonEmpty).trim().isNumeric().withMessage(messageCode.msgInputProvide).custom((value) => {
+            const intValue = parseInt(value);
+            if (intValue <= 0) {
+                throw new Error(messageCode.msgNonZero);
+            }
+            return true;
+        })
+
+    ]
   };
   
   module.exports = validationRoutes;
