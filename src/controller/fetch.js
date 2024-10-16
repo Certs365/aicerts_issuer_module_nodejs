@@ -2843,33 +2843,46 @@ module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
 
+  // Function to get the issuer details on email as input
   getIssuerByEmail,
 
+  // Function to fetch Custom server details
   fetchServerDetails,
 
+  // Function to upload server details
   uploadServerDetails,
 
+  // Function to delete existing server details
   deleteServerDetails,
 
+  // Function to get admin graph (issues & issuers count month wise) details
   getAdminGraphDetails,
 
+  // Function to update custom template details
   updateCertificateTemplate,
 
+  // Function to add custom certificate template details
   addCertificateTemplate,
 
+  // Function to get custom certificate template details
   getCertificateTemplates,
 
+  // Function to generate Issuer report in excel format
   generateExcelReport,
 
+  // Function to generate Issuer invoice in pdf format
   generateInvoiceDocument,
 
+  // Function to get credit service limits by issuer email
   getServiceLimitsByEmail,
 
+  // Function to get detailed verification responses (course wise)
   getVerificationDetailsByCourse,
 
   // Function to fetch issues/Gallery certs based on the flag based filter (certificationId, name, course, grantDate, expirationDate)
   getIssuesWithFilter,
 
+  // Function to fetch issues details (for renew/revoke/reactivation) as per the filter end user/ course name/ expiration date.
   adminSearchWithFilter,
 
   // Function to fetch only issuers based on the filter (name/email/organization)
