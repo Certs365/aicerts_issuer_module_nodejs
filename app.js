@@ -6,6 +6,7 @@ const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const tasksRoutes = require('./src/routes/index');
+const certificateRoutes = require("./src/routes/certificate_designer")
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -37,6 +38,7 @@ app.use(bodyParser.json());
 
 // Routes 
 app.use('/api', tasksRoutes);
+app.use('/api',certificateRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
