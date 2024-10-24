@@ -1854,6 +1854,8 @@ router.post('/get-batch-certificates', userController.getBatchCertificates);
  */
 
 router.post('/get-batch-certificate-dates',decryptRequestParseBody, userController.getBatchCertificateDates);
+router.post('/delete-certificatetemplate', userController.deleteCertificateTemplateById);
+router.post('/delete-all-certificatestemplates', userController.deleteCertificateTemplates);
 
 
 module.exports = router;

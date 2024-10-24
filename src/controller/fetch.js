@@ -574,6 +574,81 @@ const updateCertificateTemplate = async (req, res) => {
   }
 };
 
+
+/**
+* API to delete certificate/credential templates.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const deleteCertificateTemplates = async (req, res) => {
+  const { email } = req.body;  // Expecting email in the request body
+
+  try {
+    // Find and delete templates associated with the provided email
+    const result = await CrediantialTemplate.deleteMany({ email });
+
+    // If no templates are found and deleted, return an appropriate response
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No templates found for the provided email.",
+      });
+    }
+
+    // Return success response after deleting
+    res.json({
+      status: "SUCCESS",
+      message: `${result.deletedCount} template(s) deleted successfully.`,
+    });
+
+  } catch (error) {
+    console.error("Error deleting templates:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error deleting templates.',
+    });
+  }
+};
+
+/**
+* API to delete a certificate/credential template by certificateId.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const deleteCertificateTemplateById = async (req, res) => {
+  const { certificateId } = req.body;  // Expecting certificateId in the request body
+
+  try {
+    // Find and delete the template by certificateId
+    const result = await CrediantialTemplate.findOneAndDelete({ _id: certificateId });
+
+    // If no template is found, return an appropriate response
+    if (!result) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No template found for the provided certificateId.",
+      });
+    }
+
+    // Return success response after deleting
+    res.json({
+      status: "SUCCESS",
+      message: "Template deleted successfully.",
+    });
+
+  } catch (error) {
+    console.error("Error deleting template:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error deleting template.',
+    });
+  }
+};
+
+
+
 /**
  * API call to fetch DB file and generate reports into excel file format.
  *
@@ -2843,33 +2918,49 @@ module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
 
+  // Function to get the issuer details on email as input
   getIssuerByEmail,
 
+  // Function to fetch Custom server details
   fetchServerDetails,
 
+  // Function to upload server details
   uploadServerDetails,
 
+  // Function to delete existing server details
   deleteServerDetails,
 
+  // Function to get admin graph (issues & issuers count month wise) details
   getAdminGraphDetails,
 
+  // Function to update custom template details
   updateCertificateTemplate,
 
+  // Function to add custom certificate template details
   addCertificateTemplate,
 
+  // Function to get custom certificate template details
   getCertificateTemplates,
 
+  deleteCertificateTemplateById,
+
+  deleteCertificateTemplates,
+  // Function to generate Issuer report in excel format
   generateExcelReport,
 
+  // Function to generate Issuer invoice in pdf format
   generateInvoiceDocument,
 
+  // Function to get credit service limits by issuer email
   getServiceLimitsByEmail,
 
+  // Function to get detailed verification responses (course wise)
   getVerificationDetailsByCourse,
 
   // Function to fetch issues/Gallery certs based on the flag based filter (certificationId, name, course, grantDate, expirationDate)
   getIssuesWithFilter,
 
+  // Function to fetch issues details (for renew/revoke/reactivation) as per the filter end user/ course name/ expiration date.
   adminSearchWithFilter,
 
   // Function to fetch only issuers based on the filter (name/email/organization)
@@ -2895,4 +2986,6 @@ module.exports = {
 
   // Function to get batch issued certifications from the DB based on Dates
   getBatchCertificateDates,
+
+
 };
