@@ -2,13 +2,13 @@ require('dotenv').config();
 // mongodb user model
 const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
-const { 
-  sendEmail, 
-  generateAccount, 
-  generateOTP, 
-  isDBConnected, 
-  sendWelcomeMail, 
-  isValidIssuer 
+const {
+  sendEmail,
+  generateAccount,
+  generateOTP,
+  isDBConnected,
+  sendWelcomeMail,
+  isValidIssuer
 } = require('../models/tasks');
 // Password handler
 const bcrypt = require("bcrypt");
@@ -316,8 +316,8 @@ const login = async (req, res) => {
           const hashedPassword = data[0].password;
           bcrypt
             .compare(password, hashedPassword)
-            .then(async(result) => {
-              const JWTToken =  generateJwtToken()
+            .then(async (result) => {
+              const JWTToken = generateJwtToken()
               const refreshToken = generateRefreshToken(data[0]);
 
               await User.findOneAndUpdate(
@@ -330,14 +330,14 @@ const login = async (req, res) => {
                   code: 200,
                   status: "SUCCESS",
                   message: messageCode.msgValidCredentials,
-                  data:{
-                    JWTToken:JWTToken,
+                  data: {
+                    JWTToken: JWTToken,
                     refreshToken: refreshToken,
-                    name:data[0]?.name,
-                    organization:data[0]?.organization,
-                    email:data[0]?.email,
-                    certificatesIssued:data[0]?.certificatesIssued,
-                    issuerId:data[0]?.issuerId
+                    name: data[0]?.name,
+                    organization: data[0]?.organization,
+                    email: data[0]?.email,
+                    certificatesIssued: data[0]?.certificatesIssued,
+                    issuerId: data[0]?.issuerId
                   }
                 });
               } else {
@@ -399,7 +399,7 @@ const twoFactor = async (req, res) => {
   }
   const { email } = req.body;
   const verificationCode = generateOTP();
-  const issuer = await User.findOne({ email : email });
+  const issuer = await User.findOne({ email: email });
 
   if (!issuer || !issuer.approved) {
     return res.json({
@@ -409,26 +409,25 @@ const twoFactor = async (req, res) => {
     });
   }
   try {
-    const verify = await Verification.findOne({ email : email });
+    const verify = await Verification.findOne({ email: email });
     if (verify) {
       verify.code = verificationCode;
       verify.save();
-
-      await sendEmail(verificationCode, email, issuer.name);
-      res.status(200).json({
-        code:200,
-        status: "SUCCESS",
-        message: messageCode.msgOtpSent,
-      });
-      return;
     } else {
-      res.status(404).json({
-        code: 404,
-        status: "FAILED",
-        message: messageCode.msgIssuerNotFound,
+      const createVerify = new Verification({
+        email: email,
+        code: verificationCode,
+        verified: false
       });
-      return;
+      await createVerify.save();
     }
+    await sendEmail(verificationCode, email, issuer.name);
+    res.status(200).json({
+      code: 200,
+      status: "SUCCESS",
+      message: messageCode.msgOtpSent,
+    });
+    return;
   } catch (error) {
     res.status(500).json({
       code: 500,
@@ -457,9 +456,9 @@ const refreshToken = async (req, res) => {
 
   try {
     const foundUser = await User.findOne({ email: email });
-// console.log(foundUser,"fd")
-    if (!foundUser) { 
-      return res.status(401).send({ code: 401, status:"FAILED", message: messageCode.msgIssuerNotFound, details: email });
+    // console.log(foundUser,"fd")
+    if (!foundUser) {
+      return res.status(401).send({ code: 401, status: "FAILED", message: messageCode.msgIssuerNotFound, details: email });
     }
     // console.log(process.env.REFRESH_TOKEN)
     jwt.verify(
@@ -477,35 +476,35 @@ const refreshToken = async (req, res) => {
         }
         //refreshtoken still valid
         const JWTToken = generateJwtToken();
-  
+
         const newRefreshToken = generateRefreshToken(foundUser)
         foundUser.refreshtoken = newRefreshToken
         const result = await foundUser.save();
         return res.json({
           status: "SUCCESS",
           message: messageCode.msgValidCredentials,
-          data:{
-            JWTToken:JWTToken,
+          data: {
+            JWTToken: JWTToken,
             refreshToken: newRefreshToken,
-            name:foundUser.name,
-            organization:foundUser.organization,
-            email:foundUser.email,
-            certificatesIssued:foundUser.certificatesIssued,
-            issuerId:foundUser.issuerId
+            name: foundUser.name,
+            organization: foundUser.organization,
+            email: foundUser.email,
+            certificatesIssued: foundUser.certificatesIssued,
+            issuerId: foundUser.issuerId
           }
         });
       }
     );
   } catch (error) {
     console.error(error);
-    return res.status(401).send({ code: 401, status:"FAILED", message: messageCode.msgTokenExpired });
+    return res.status(401).send({ code: 401, status: "FAILED", message: messageCode.msgTokenExpired });
   }
 }
 module.exports = {
-    signup,
-    login,
-    twoFactor,
-    loginPhoneNumber,
-    refreshToken
+  signup,
+  login,
+  twoFactor,
+  loginPhoneNumber,
+  refreshToken
 }
 
