@@ -34,7 +34,8 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' })); // Adjust the limit as necessary
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // For URL-encoded payloads
 
 // Routes 
 app.use('/api', tasksRoutes);
