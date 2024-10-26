@@ -6,6 +6,7 @@ const cors = require("cors");
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const tasksRoutes = require('./src/routes/index');
+const certificateRoutes = require("./src/routes/certificate_designer")
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -33,10 +34,12 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' })); // Adjust the limit as necessary
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // For URL-encoded payloads
 
 // Routes 
 app.use('/api', tasksRoutes);
+app.use('/api',certificateRoutes)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
