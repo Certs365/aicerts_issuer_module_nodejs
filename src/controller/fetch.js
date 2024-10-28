@@ -414,14 +414,18 @@ const getAdminGraphDetails = async (req, res) => {
   }
 
   try {
-    var fetchAnnualIssues = await IssueStatus.find({
-      certStatus: { $eq: 1 }
-    }).lean();
+    const certificates = await IssueStatus.find(
+      { certStatus: 1 },
+      { lastUpdate: 1, certStatus: 1, /* other necessary fields */ }
+    ).lean();
+
+    var fetchAnnualIssues = certificates.filter(cert => cert.certStatus === 1);
 
     var fetchAnnualIssuers = await User.find({
       approveDate: { $ne: null }
     }).lean();
 
+    console.log("Reached", fetchAnnualIssues.length);
     if (!fetchAnnualIssues && !fetchAnnualIssuers) {
       return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgDbNotReady });
     }
