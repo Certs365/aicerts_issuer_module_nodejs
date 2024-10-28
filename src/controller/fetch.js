@@ -26,6 +26,7 @@ const {
 const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails, VerificationLog } = require("../config/schema");
 
 const messageCode = require("../common/codes");
+const retryOperation = require('../utils/retryOperation');
 
 const cloudBucket = '.png';
 const searchLimit = process.env.SEARCH_LIMIT || 20;
@@ -461,8 +462,13 @@ const getAdminGraphDetails = async (req, res) => {
 const addCertificateTemplate = async (req, res) => {
 
   let { url, email, designFields } = req.body;
+
+  if (!url || !email || !designFields) {
+    return res.status(400).json({ status: "FAILED", message: "Invalid input data." });
+  }
   try {
     const user = await User.findOne({ email: email, status: 1 });
+
 
     if (!user) {
       return res.status(400).json({
@@ -476,7 +482,7 @@ const addCertificateTemplate = async (req, res) => {
       designFields: designFields,
       url: url
     })
-    const savedTemplate = await templateDetails.save();
+    const savedTemplate = await retryOperation(() => templateDetails.save(), 3); // Retry save operation if it fails
 
 
     res.json({
@@ -622,6 +628,10 @@ const deleteCertificateTemplates = async (req, res) => {
 */
 const deleteCertificateTemplateById = async (req, res) => {
   const { certificateId } = req.body;  // Expecting certificateId in the request body
+
+  if (!certificateId) {
+    return res.status(400).json({ status: "FAILED", message: "certificateId is required." });
+  }
 
   try {
     // Find and delete the template by certificateId
