@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: {
-    name: 'AICerts Admin',
+    name: 'Certs365 Admin',
     address: process.env.USER_MAIL,
   },
   to: '',
@@ -39,7 +39,7 @@ Your one-time password (OTP) is ${otp}. Please enter this code to complete your 
 If you did not request this code, please ignore this message.
         
 Best regards,
-The AICerts Team`;
+The Certs365 Team`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
@@ -50,7 +50,7 @@ The AICerts Team`;
 const sendWelcomeMail = async (name, email) => {
   try {
     mailOptions.to = email;
-    mailOptions.subject = `Welcome to AICerts`;
+    mailOptions.subject = `Welcome to Certs365`;
     mailOptions.text = `Hi ${name},
 
 Welcome to the AICerts Portal, Your registration is now complete.
@@ -60,7 +60,7 @@ Your account details will be reviewed and approved by our admin team. Once your 
 Thank you for joining us.
 
 Best regards,
-The AICerts Team.`;
+The Certs365 Team.`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
