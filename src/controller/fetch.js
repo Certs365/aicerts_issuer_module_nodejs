@@ -2986,5 +2986,4 @@ module.exports = {
   // Function to get batch issued certifications from the DB based on Dates
   getBatchCertificateDates,
 
-
 };
