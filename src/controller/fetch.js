@@ -461,7 +461,7 @@ const getAdminGraphDetails = async (req, res) => {
 */
 const addCertificateTemplate = async (req, res) => {
 
-  let { url, email, designFields } = req.body;
+  let { url, email, designFields, dimentions } = req.body;
 
   if (!url || !email || !designFields) {
     return res.status(400).json({ status: "FAILED", message: "Invalid input data." });
@@ -480,7 +480,8 @@ const addCertificateTemplate = async (req, res) => {
     const templateDetails = new CrediantialTemplate({
       email: email,
       designFields: designFields,
-      url: url
+      url: url,
+      dimentions:dimentions
     })
     const savedTemplate = await retryOperation(() => templateDetails.save(), 3); // Retry save operation if it fails
 
@@ -539,6 +540,44 @@ const getCertificateTemplates = async (req, res) => {
   }
 };
 
+
+/**
+* API to get a certificate/credential template by ID.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const getCertificateTemplateById = async (req, res) => {
+  const { id } = req.params; // Expecting the certificate ID in the request parameters
+
+  try {
+    // Find the template by its ID
+    const template = await CrediantialTemplate.findById(id);
+
+    // If the template is not found, return an appropriate response
+    if (!template) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "Template not found for the provided ID.",
+      });
+    }
+
+    // Return the found template
+    res.json({
+      status: "SUCCESS",
+      message: "Template fetched successfully.",
+      data: template,
+    });
+
+  } catch (error) {
+    console.error("Error fetching template by ID:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error fetching template by ID.',
+    });
+  }
+};
+
 /**
 * API to update certificate/credential template.
 *
@@ -546,7 +585,7 @@ const getCertificateTemplates = async (req, res) => {
 * @param {Object} res - Express response object.
 */
 const updateCertificateTemplate = async (req, res) => {
-  const { id, url, designFields } = req.body; // Expecting template ID and update details
+  const { id, url, designFields, dimentions} = req.body;
 
   try {
     // Find the template by its ID
@@ -563,7 +602,7 @@ const updateCertificateTemplate = async (req, res) => {
     // Update the template fields
     template.url = url || template.url; // Only update if a new URL is provided
     template.designFields = designFields || template.designFields; // Update designFields if provided
-
+    template.dimentions = dimentions || template.dimentions
     // Save the updated template
     const updatedTemplate = await template.save();
 
@@ -2985,5 +3024,5 @@ module.exports = {
   // Function to get batch issued certifications from the DB based on Dates
   getBatchCertificateDates,
 
-
+  getCertificateTemplateById
 };

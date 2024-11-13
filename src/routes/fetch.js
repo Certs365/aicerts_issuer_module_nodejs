@@ -1304,6 +1304,7 @@ router.post('/add-certificate-template', userController.addCertificateTemplate);
  */
 
 router.put('/update-certificate-template', userController.updateCertificateTemplate);
+router.get('/get-certificate-template/:id', userController.getCertificateTemplateById);
 
 /**
  * @swagger

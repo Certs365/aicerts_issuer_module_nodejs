@@ -189,7 +189,8 @@ const ShortUrlSchema = new mongoose.Schema({
 const CrediantialTemplateSchema = new mongoose.Schema({
   email: { type: String, required: true },
   designFields: { type: Object},
-  url: { type: String }
+  url: { type: String },
+  dimentions:{ type: Object}
 });
 
 // Define the schema for the Issues model
