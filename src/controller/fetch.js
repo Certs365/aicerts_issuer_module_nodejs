@@ -2696,6 +2696,7 @@ const fetchIssuesLogDetails = async (req, res) => {
             issuerId: issuerExist.issuerId,
             certificateStatus: { $in: [1, 2, 4] },
             expirationDate: { $ne: "1" },
+            type: { $ne: "dynamic" },
             url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket }
           };
 
