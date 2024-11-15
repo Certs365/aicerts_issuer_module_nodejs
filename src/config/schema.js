@@ -179,13 +179,6 @@ const VerificationLogSchema = new mongoose.Schema({
   lastUpdate: { type: Date, default: Date.now } // IssueDate field is of type Date and defaults to the current date/time
 });
 
-// Define the schema for the Short URL model
-const ShortUrlSchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  certificateNumber: { type: String, required: true }, // CertificateNumber field is of type
-  url: { type: String, required: true }
-});
-
 // Define schema for certificate template
 const CrediantialTemplateSchema = new mongoose.Schema({
   email: { type: String, required: true },
@@ -206,6 +199,30 @@ const DynamicParamsSchema = new mongoose.Schema({
   modifiedDate: { type: Date, default: Date.now } // issueDate field is of type Date and defaults to the current date/time
 });
 
+// Define the schema for subscription plan
+const SubscriptionPlanSchema = new mongoose.Schema({
+  code: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  subheader: { type: String, required: true },
+  fee: { type: Number, required: true },
+  limit: { type: Number, required: true },
+  rate: { type: Number, required: true },
+  status: {type: Boolean, default: true},
+});
+
+// Store users Subscription plan details
+// If updating schema, update in signup code also
+const UserSubscriptionPlanSchema = new mongoose.Schema({
+  email: { type: String, required: true},
+  issuerId: { type: String }, // Issuer Id field is of type String and is required
+  subscriptionPlanName: { type: [String], required: true },
+  purchasedDate: { type: [Date], required: true},
+  subscriptionDuration: { type: [Number], default: [30] },
+  allocatedCredentials: { type: [Number] },
+  currentCredentials: { type: [Number], default: [0] },
+  status: {type: Boolean, default: true}
+});
+
 const Admin = mongoose.model('Admin', AdminSchema);
 const Verification = mongoose.model('Verification', VerificationSchema);
 const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
@@ -216,10 +233,11 @@ const IssueStatus = mongoose.model('IssueStatus', IssueStatusSchema);
 const DynamicIssues = mongoose.model('DynamicIssues', DynamicIssuesSchema);
 const DynamicBatchIssues = mongoose.model('DynamicBatchIssues', DynamicBatchIssuesSchema);
 const VerificationLog = mongoose.model('VerificationLog', VerificationLogSchema);
-const ShortUrl = mongoose.model('ShortUrl', ShortUrlSchema);
 const DynamicParameters = mongoose.model('DynamicParameters', DynamicParamsSchema);
 const ServerDetails = mongoose.model('ServerDetails', ServerDetailsSchema);
 const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTemplateSchema);
+const UserSubscriptionPlan = mongoose.model('UserSubscriptionPlan', UserSubscriptionPlanSchema);
+const SubscriptionPlan = mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
 
 module.exports = {
   Admin,
@@ -233,7 +251,8 @@ module.exports = {
   DynamicIssues,
   DynamicBatchIssues,
   VerificationLog,
-  ShortUrl,
   DynamicParameters,
-  CrediantialTemplate
+  CrediantialTemplate,
+  SubscriptionPlan,
+  UserSubscriptionPlan,
 };

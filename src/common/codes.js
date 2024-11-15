@@ -78,5 +78,15 @@ module.exports = {
     msgInvalidInput : "Invalid Input parameter",
     msgUserNotFound: "Issuer not found! / Issuer not Approved",
 
+    // my message
+    msgLimitExhausted: "Limit Exhausted",
+    msgLimitAboutToExhaust: "Limit About to Exhaust",
+    msgPlanExpired: "Your Subscription Plan is expired",
+    msgPlanAddedSuccess: "Plan added successfully",
+    msgPlanNotAdded: "Unable to add plan, Please check and Try again",
+    msgPlanNotFound: "Unable to find the plan, Please check and Try again",
+    msgPlanDeleted: "Plan(s) removed successfully",
+    msgPlanDetailsFetched: "Plan details fetched successfully",
+    msgPlanDetailsUpdated: "Plan details updated successfully",
 
 };

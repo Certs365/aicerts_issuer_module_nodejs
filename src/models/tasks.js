@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const mongoose = require("mongoose");
 
 // Import the Issues models from the schema defined in "../config/schema"
-const { User, Issues, BatchIssues, IssueStatus, VerificationLog, ShortUrl, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
+const { User, Issues, BatchIssues, IssueStatus, VerificationLog, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
 
 const transporter = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
@@ -189,7 +189,7 @@ const formatDate = async () => {
   return `${month}/${day}/${year}`;
 };
 
-const cerateInvoiceNumber = async (id, number, dateString) => {
+const createInvoiceNumber = async (id, number, dateString) => {
   let [month, day, year] = dateString.split('/');
   let formattedYear = year.slice(-4); // Get last two digits of the year
   let formattedDate = `${month}${formattedYear}`; // Combine month and formatted year
@@ -214,5 +214,5 @@ module.exports = {
   readableDateFormat,
   parseDate,
   formatDate,
-  cerateInvoiceNumber,
+  createInvoiceNumber,
 }

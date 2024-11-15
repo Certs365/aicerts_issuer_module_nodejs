@@ -14,7 +14,7 @@ const {
   isDBConnected, // Function to check if the database connection is established
   parseDate,
   readableDateFormat,
-  cerateInvoiceNumber,
+  createInvoiceNumber,
   isValidIssuer
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
@@ -1516,7 +1516,7 @@ const generateInvoiceDocument = async (req, res) => {
 
     const formattedTodayDate = await formatDate();
     let issuerInvoiceSerial = issuer.invoiceNumber;
-    const invoiceNumber = await cerateInvoiceNumber(issuer.issuerId, issuerInvoiceSerial, formattedTodayDate);
+    const invoiceNumber = await createInvoiceNumber(issuer.issuerId, issuerInvoiceSerial, formattedTodayDate);
     // console.log("The final invoice", invoiceNumber);
     if (!issuer.invoiceNumber) {
       issuer.invoiceNumber = 1;
