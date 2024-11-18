@@ -734,102 +734,102 @@ router.post('/add-enterprise-subscription-plan', decryptRequestBody, validationR
  */
 router.post('/fetch-user-subscription-details', validationRoute.emailCheck, userController.getIssuerSubscriptionDetails);
 
-/**
- * @swagger
- * /api/create-checkout-session:
- *   post:
- *     summary: API to perform checkout valid email and planCode (optional). 
- *     description: API to get selected / all subscritpion plans in DB by valid email and planCode (optional). 
- *     tags: [Subscription]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: Enter valid email.
- *               planCode:
- *                 type: string
- *                 description: The valid (unique) plan code.
- *             required:
- *               - email
- *     responses:
- *       '200':
- *         description: Successfully fetched the subscription plan.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *             example:
- *               code: 200
- *               status: "SUCCESS"
- *               message: "Subscription plan details."
- *       '400':
- *         description: Invalid request due to missing or invalid parameters.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *             example:
- *               code: 400
- *               status: "FAILED"
- *               message: "Unable to get subscription plan"
- *
- *       '401':
- *         description: Unauthorized (e.g., invalid credentials)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 message:
- *                   type: string
- *             example:
- *               code: 401.
- *               status: "FAILED"
- *               message: Invalid / unauthorized token
- *       '422':
- *         description: User given invalid input (Unprocessable Entity)
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 message:
- *                   type: string
- *             example:
- *               code: 422.
- *               status: "FAILED"
- *               message: Error message for invalid input.
- *       '500':
- *         description: Internal Server Error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                 message:
- *                   type: string
- *             example:
- *               code: 500
- *               status: "FAILED"
- *               message: "Internal Server Error."
- */
+// /**
+//  * @swagger
+//  * /api/create-checkout-session:
+//  *   post:
+//  *     summary: API to perform checkout valid email and planCode (optional). 
+//  *     description: API to get selected / all subscritpion plans in DB by valid email and planCode (optional). 
+//  *     tags: [Subscription]
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               email:
+//  *                 type: string
+//  *                 description: Enter valid email.
+//  *               planCode:
+//  *                 type: string
+//  *                 description: The valid (unique) plan code.
+//  *             required:
+//  *               - email
+//  *     responses:
+//  *       '200':
+//  *         description: Successfully fetched the subscription plan.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *             example:
+//  *               code: 200
+//  *               status: "SUCCESS"
+//  *               message: "Subscription plan details."
+//  *       '400':
+//  *         description: Invalid request due to missing or invalid parameters.
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *             example:
+//  *               code: 400
+//  *               status: "FAILED"
+//  *               message: "Unable to get subscription plan"
+//  *
+//  *       '401':
+//  *         description: Unauthorized (e.g., invalid credentials)
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 status:
+//  *                   type: string
+//  *                 message:
+//  *                   type: string
+//  *             example:
+//  *               code: 401.
+//  *               status: "FAILED"
+//  *               message: Invalid / unauthorized token
+//  *       '422':
+//  *         description: User given invalid input (Unprocessable Entity)
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 status:
+//  *                   type: string
+//  *                 message:
+//  *                   type: string
+//  *             example:
+//  *               code: 422.
+//  *               status: "FAILED"
+//  *               message: Error message for invalid input.
+//  *       '500':
+//  *         description: Internal Server Error
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 status:
+//  *                   type: string
+//  *                 message:
+//  *                   type: string
+//  *             example:
+//  *               code: 500
+//  *               status: "FAILED"
+//  *               message: "Internal Server Error."
+//  */
 router.post('/create-checkout-session', decryptRequestBody, validationRoute.emailCheck, userController.createCheckoutSession);
 
 /**
