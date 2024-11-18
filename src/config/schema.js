@@ -202,12 +202,14 @@ const DynamicParamsSchema = new mongoose.Schema({
 // Define the schema for subscription plan
 const SubscriptionPlanSchema = new mongoose.Schema({
   code: { type: String, required: true, unique: true },
-  title: { type: String, required: true },
-  subheader: { type: String, required: true },
-  fee: { type: Number, required: true },
-  limit: { type: Number, required: true },
-  rate: { type: Number, required: true },
-  status: {type: Boolean, default: true},
+  title: { type: String, required: true }, // The subscription Plan title
+  subheader: { type: String, required: true }, // The sub header for the UI
+  fee: { type: Number, required: true }, // The subscription fee (rate x limit)
+  limit: { type: Number, required: true }, // Allocated Credits
+  rate: { type: Number, required: true }, // The rate per credit usage
+  validity: { type: Number, default: 30 }, // Number of days the plan valid for
+  lastUpdate: { type: Date, default: Date.now }, 
+  status: {type: Boolean, default: true}, // Subscription plan status
 });
 
 // Store users Subscription plan details
@@ -215,11 +217,12 @@ const SubscriptionPlanSchema = new mongoose.Schema({
 const UserSubscriptionPlanSchema = new mongoose.Schema({
   email: { type: String, required: true},
   issuerId: { type: String }, // Issuer Id field is of type String and is required
-  subscriptionPlanName: { type: [String], required: true },
-  purchasedDate: { type: [Date], required: true},
-  subscriptionDuration: { type: [Number], default: [30] },
+  subscriptionPlanTitle: { type: [String], required: true },
+  purchasedDate: { type: [Date], default: Date.now},
+  subscriptionFee: { type: [Number] },
+  subscriptionDuration: { type: [Number], default: 30 },
   allocatedCredentials: { type: [Number] },
-  currentCredentials: { type: [Number], default: [0] },
+  currentCredentials: { type: [Number], default: 0 },
   status: {type: Boolean, default: true}
 });
 

@@ -11,7 +11,6 @@ const upload = multer();
 // Upload image route
 router.post('/add/certificate/image', upload.single('image'), uploadImage);
 
-
 // Get images route
 router.get('/get/certificate/image/:issuerId', getImagesByIssuerId);
 router.get('/get/certificate/background/:issuerId', getBackgroundsByIssuerId);

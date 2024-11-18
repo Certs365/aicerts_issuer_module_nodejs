@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const { validationResult } = require("express-validator");
+const moment = require('moment');
 
 // Import MongoDB models
 const { Admin, User, SubscriptionPlan, UserSubscriptionPlan } = require("../config/schema");
@@ -12,54 +13,55 @@ const messageCode = require("../common/codes");
 const {
     formatDate,
     isDBConnected, // Function to check if the database connection is established
-    parseDate,
-    readableDateFormat,
-    createInvoiceNumber,
-    isValidIssuer
+    sendGrievanceMail,
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
 // This is your test secret API key.
 const stripe = require('stripe')(process.env.STRIPE_TEST_KEY);
 
 /**
- * API call to set details of users current subscritpion plan in DB by email.
+ * API call to set details of the new subscritpion plan in DB by email.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const addSubscriptionPlans = async (req, res) => {
-    const todayDate = new Date();
+const addSubscriptionPlan = async (req, res) => {
     let validResult = validationResult(req);
     if (!validResult.isEmpty()) {
         return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
     }
-
-    const { email, subscriptionPlanName, subscriptionDuration, allocatedCredentials, currentCredentials } = req.body;
+    const { email, code, title, subheader, fee, limit, rate, validity } = req.body;
 
     try {
         // Check mongoose connection
-        const dbStatus = await isDBConnected();
-        const dbStatusMessage = (dbStatus) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
-        console.log(dbStatusMessage);
+        await isDBConnected();
 
-        const issuerExist = await User.findOne({ email: email });
-        if (!issuerExist || !issuerExist.issuerId) {
-            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
+        const adminExist = await Admin.findOne({ email: email });
+        if (!adminExist || !adminExist.email) {
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidEmail, details: email });
         }
-        const issuerId = issuerExist.issuerId;
 
-        const subscriptionDetails = new UserSubscriptionPlan({
-            email: email,
-            issuerId: issuerId,
-            subscriptionPlanName: subscriptionPlanName,
-            purchasedDate: todayDate,
-            subscriptionDuration: subscriptionDuration,
-            allocatedCredentials: allocatedCredentials,
-            currentCredentials: currentCredentials,
+        const planExist = await SubscriptionPlan.findOne({ code: code });
+        if (planExist) {
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgPlanCodeExist, details: code });
+        }
+
+        // const fee = limit * rate;
+        const today = new Date();
+
+        const subscriptionDetails = new SubscriptionPlan({
+            code,
+            title,
+            subheader,
+            fee,
+            limit,
+            rate,
+            validity,
+            lastUpdate: today
         });
         const savePlan = await subscriptionDetails.save();
 
-        res.json({
+        return res.status(200).json({
             code: 200,
             status: "SUCCESS",
             message: messageCode.msgOperationSuccess,
@@ -68,8 +70,8 @@ const addSubscriptionPlans = async (req, res) => {
 
 
     } catch (error) {
-        res.json({
-            code: 400,
+        return res.status(500).json({
+            code: 500,
             status: 'FAILED',
             message: messageCode.msgInternalError
         });
@@ -77,7 +79,7 @@ const addSubscriptionPlans = async (req, res) => {
 };
 
 /**
- * API call for set details of all plans, one time thing.
+ * API call for update details of existing subscriptin plan.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -141,7 +143,63 @@ const updateSubscriptionPlan = async (req, res) => {
 };
 
 /**
- * API call for get details of selected / all plans for the ui.
+ * API call for deletion of selective or all plan for ui.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const deleteSubscriptionPlan = async (req, res) => {
+    var validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
+    const email = req.body.email;
+    const planCode = req.body.code;
+    if (!email || !planCode || planCode == "string") {
+        return res.status(400).json({
+            code: 400,
+            status: 'FAILED',
+            message: messageCode.msgInvalidInput
+        });
+    }
+    try {
+        await isDBConnected();
+        const isAdmin = await Admin.findOne({ email: email });
+        if (!isAdmin) {
+            return res.status(400).json({
+                code: 400,
+                status: 'FAILED',
+                message: messageCode.msgAdminMailNotExist,
+            });
+        }
+
+        const isPlanExist = await SubscriptionPlan.findOne({ code: planCode });
+        if (!isPlanExist) {
+            return res.status(400).json({
+                code: 400,
+                status: 'FAILED',
+                message: messageCode.msgPlanNotFound,
+            });
+        }
+        await SubscriptionPlan.deleteOne({ code: planCode });
+        return res.status(200).json({
+            code: 200,
+            status: 'SUCCESS',
+            message: messageCode.msgPlanDeleted,
+            details: isPlanExist
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            code: 500,
+            status: 'FAILED',
+            message: messageCode.msgInternalError,
+        });
+    }
+};
+
+/**
+ * API call to fetch details of selected / all subscription plans.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -177,6 +235,7 @@ const getSubscriptionPlans = async (req, res) => {
             }
         }
         const allPlans = await SubscriptionPlan.find({ status: true }).lean();
+        // const allPlans = await SubscriptionPlan.find({ }).lean();
         res.status(200).json({
             code: 200,
             status: 'SUCCESS',
@@ -193,15 +252,101 @@ const getSubscriptionPlans = async (req, res) => {
 };
 
 /**
- * API call for deletion of selective or all plan for ui.
+ * API call to set details of users current subscritpion plan (admin) in DB by email.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const deleteSubscriptionPlans = async (req, res) => {
-    const email = req.body.email;
-    const planCode = req.body.planCode;
-    if (!email) {
+const addUserSubscriptionPlan = async (req, res) => {
+    let validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
+
+    const { email, code } = req.body;
+
+    try {
+        // Check mongoose connection
+        await isDBConnected();
+
+        const issuerExist = await User.findOne({ email: email });
+        if (!issuerExist) {
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
+        }
+
+        const isPlanExist = await SubscriptionPlan.findOne({ code: code });
+        if (!isPlanExist) {
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgPlanNotFound, details: code });
+        }
+
+        const issuerId = issuerExist.issuerId;
+        const todayDate = new Date();
+
+        const isUserPlanExist = await UserSubscriptionPlan.findOne({ email: email });
+        if (isUserPlanExist) {
+            isUserPlanExist.subscriptionPlanTitle.push(isPlanExist?.title);
+            isUserPlanExist.purchasedDate.push(todayDate);
+            isUserPlanExist.subscriptionFee.push(isPlanExist?.fee);
+            isUserPlanExist.subscriptionDuration.push(isPlanExist?.validity);
+            isUserPlanExist.allocatedCredentials.push(isPlanExist?.limit);
+            // Get the last item in the currentCredentials array
+            const lastCurrentCredential = isUserPlanExist.currentCredentials.at(-1) || 0;
+            isUserPlanExist.currentCredentials.push(lastCurrentCredential + isPlanExist?.limit);
+
+            await isUserPlanExist.save();
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgPlanAddedSuccess,
+                data: isUserPlanExist
+            });
+
+        } else {
+
+            const subscriptionPlanDetails = new UserSubscriptionPlan({
+                email: email,
+                issuerId: issuerId,
+                subscriptionPlanTitle: [isPlanExist?.title],
+                purchasedDate: [todayDate],
+                subscriptionFee: [isPlanExist?.fee],
+                subscriptionDuration: [isPlanExist?.validity],
+                allocatedCredentials: [isPlanExist?.limit],
+                currentCredentials: [isPlanExist?.limit],
+            });
+            const savePlan = await subscriptionPlanDetails.save();
+
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgPlanAddedSuccess,
+                data: subscriptionPlanDetails
+            });
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            code: 500,
+            status: 'FAILED',
+            message: messageCode.msgInternalError
+        });
+    }
+};
+
+/**
+ * API call to add details of an enterprise plan.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const addEnterpriseSubscriptionPlan = async (req, res) => {
+    let validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
+    const todayDate = new Date();
+    const { email, subscriptionPlanTitle, subscriptionDuration, allocatedCredentials } = req.body;
+
+    if (!email, !subscriptionPlanTitle, !subscriptionDuration, !allocatedCredentials) {
         return res.status(400).json({
             code: 400,
             status: 'FAILED',
@@ -209,44 +354,68 @@ const deleteSubscriptionPlans = async (req, res) => {
         });
     }
     try {
+        // Check mongoose connection
         await isDBConnected();
-        const isAdmin = await Admin.findOne({ email: email });
-        if (!isAdmin) {
+
+        const issuerExist = await User.findOne({ email: email });
+        if (!issuerExist) {
             return res.status(400).json({
                 code: 400,
                 status: 'FAILED',
-                message: messageCode.msgAdminMailNotExist,
+                message: messageCode.msgInvalidIssuer,
+                details: email
             });
         }
-        if (planCode && planCode != "string") {
-            const getPlan = await SubscriptionPlan.deleteOne({ code: planCode });
-            if (getPlan) {
-                return res.status(400).json({
-                    code: 200,
-                    status: 'FAILED',
-                    message: messageCode.msgPlanNotFound,
-                    details: getPlan
-                });
-            } else {
-                return res.status(400).json({
-                    code: 400,
-                    status: 'FAILED',
-                    message: messageCode.msgPlanNotFound,
-                    details: planCode
-                });
-            }
+
+        //todo=> amount is hardcoded as of now, please make it dynamic as per user inputs
+        const subscriptionFee = 5 * allocatedCredentials;
+
+        const isUserPlanExist = await UserSubscriptionPlan.findOne({ email: email });
+
+        if (isUserPlanExist) {
+            isUserPlanExist.subscriptionPlanTitle.push(subscriptionPlanTitle);
+            isUserPlanExist.purchasedDate.push(todayDate);
+            isUserPlanExist.subscriptionDuration.push(subscriptionDuration);
+            isUserPlanExist.subscriptionFee.push(subscriptionFee);
+            isUserPlanExist.allocatedCredentials.push(allocatedCredentials);
+            // Get the last item in the currentCredentials array
+            const lastCurrentCredential = isUserPlanExist.currentCredentials.at(-1) || 0;
+            isUserPlanExist.currentCredentials.push(lastCurrentCredential + allocatedCredentials);
+
+            await isUserPlanExist.save();
+
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgPlanAddedSuccess,
+                data: isUserPlanExist
+            });
+        } else {
+            const subscriptionDetails = new UserSubscriptionPlan({
+                email: email,
+                issuerId: issuerExist.issuerId,
+                subscriptionPlanTitle: [subscriptionPlanTitle],
+                purchasedDates: [todayDate], // Initialize with an array
+                subscriptionFee: [subscriptionFee], // Initialize with an array
+                subscriptionDurations: [subscriptionDuration], // Initialize with an array
+                allocatedCredentials: [allocatedCredentials], // Initialize with an array
+                currentCredentials: [allocatedCredentials], // Initialize with an array
+            });
+            const savePlan = await subscriptionDetails.save();
+
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgPlanAddedSuccess,
+                data: subscriptionDetails
+            });
         }
-        await SubscriptionPlan.deleteMany({});
-        res.json({
-            code: 200,
-            status: 'SUCCESS',
-            message: messageCode.msgPlanDetailsUpdated,
-        });
+
     } catch (error) {
-        res.json({
-            code: 400,
+        return res.status(500).json({
+            code: 500,
             status: 'FAILED',
-            message: messageCode.msgInternalError,
+            message: messageCode.msgInternalError
         });
     }
 };
@@ -264,101 +433,86 @@ const getIssuerSubscriptionDetails = async (req, res) => {
     }
     try {
         // Check mongoose connection
-        const dbStatus = await isDBConnected();
-        const dbStatusMessage = (dbStatus) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
-        console.log(dbStatusMessage);
+        await isDBConnected();
 
-        const { email } = req.body;
+        const email = req.body.email;
 
-        const issuerExist = await User.findOne({ email: email });
-        if (!issuerExist || !issuerExist.issuerId) {
-            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
-        }
+        // const issuerExist = await User.findOne({ email: email });
 
-        const subscriptionDetails = await UserSubscriptionPlan.find({ email });
+        // if (!issuerExist) {
+        //     return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInvalidIssuer, details: email });
+        // }
+
+        const subscriptionDetails = await UserSubscriptionPlan.findOne({ email: email });
 
         //!  msgMatchLimitsNotFound, msgMatchLimitsFound -> no message init, need to fix
         // Get the plan details
         if (!subscriptionDetails) {
-            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgNoMatchFound, details: email });
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgPlanNotFound, details: email });
         }
-        const latestPlanDetails = subscriptionDetails[subscriptionDetails.length - 1];
 
-        console.log("latestPlan", latestPlanDetails);
-        let planDetails = {
-            subscriptionPlanName: latestPlanDetails.subscriptionPlanName,
-            purchasedDate: latestPlanDetails.purchasedDate,
-            subscriptionDuration: latestPlanDetails.subscriptionDuration,
-            allocatedCredentials: latestPlanDetails.allocatedCredentials,
-            currentCredentials: latestPlanDetails.currentCredentials,
-            status: latestPlanDetails.status
+        // Get the latest details (last element of each array)
+        const latestDetails = {
+            subscriptionPlanTitle: subscriptionDetails.subscriptionPlanTitle.at(-1),
+            purchasedDate: subscriptionDetails.purchasedDate.at(-1),
+            subscriptionFee: subscriptionDetails.subscriptionFee.at(-1),
+            subscriptionDuration: subscriptionDetails.subscriptionDuration.at(-1),
+            allocatedCredentials: subscriptionDetails.allocatedCredentials.at(-1),
+            currentCredentials: subscriptionDetails.currentCredentials.at(-1),
         };
-
-        if (!planDetails) {
-            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgNoMatchFound, details: email });
-        }
-
-        // if user exhausted all credits
-        if (planDetails.currentCredentials == 0) {
-            await UserSubscriptionPlan.updateOne({ email }, { status: false });
-            planDetails.status = false;
-            return res.status(200).json({ code: 200, status: "WARNING", message: messageCode.msgLimitExhausted, details: planDetails });
-        }
-
-
         // check for expiring  in 5 day or less
-
-        // const today = new Date();
-        // const purchaseDate = new Date(planDetails.purchasedDate);
-        // const expireDate = new Date(purchaseDate.setDate(purchaseDate.getDate() + planDetails.subscriptionDuration));
-        // const diffTime = Math.abs(today - expireDate);
-        // const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
 
         function normalizeDate(date) {
             return new Date(date.setHours(0, 0, 0, 0));
         }
         const today = normalizeDate(new Date());
-        const purchaseDate = normalizeDate(new Date(planDetails.purchasedDate));
-        const expireDate = normalizeDate(new Date(purchaseDate.setDate(purchaseDate.getDate() + planDetails.subscriptionDuration)))
-        // const diffTime = Math.abs(today - expireDate);
-        // const diffTime =  expireDate - today;
+        const purchaseDate = normalizeDate(new Date(latestDetails.purchasedDate));
+        const expireDate = normalizeDate(new Date(purchaseDate.setDate(purchaseDate.getDate() + latestDetails.subscriptionDuration)));
         const diffTime = today > expireDate ? 0 : expireDate - today;
         const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-        // console.log("today", today)
-        // console.log("expireDate", expireDate)
-        // console.log("e-t", expireDate - today)
-        // console.log("t-e", today- expireDate)
-        // console.log("purchase date", purchaseDate)
-        // console.log("diffTime", diffTime)
-        // console.log("diffDays", diffDays)
-        // console.log("expireDate",normalizeDate(new Date(purchaseDate.setDate(purchaseDate.getDate() + planDetails.subscriptionDuration))));
-        // console.log("datediff",normalizeDate(new Date(purchaseDate.setDate(purchaseDate.getDate() -1))));
-        // todo=> below, credit and plan name is hardcoded for now.
+        // console.log("expireDate", expireDate);
+        // console.log("purchase date", purchaseDate);
+        // console.log("diffDays", diffDays);
+
         if (diffDays <= 5 && diffDays > 0) {
-            return res.status(200).json({ code: 200, status: "SUCCESS", message: messageCode.msgLimitAboutToExhaust, details: planDetails, remainingDays: diffDays });
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgLimitAboutToExhaust,
+                details: latestDetails,
+                remainingDays: diffDays,
+                // planHistory: subscriptionDetails
+            });
         } else if (diffDays <= 0) {
-            const result = await UserSubscriptionPlan.findOneAndUpdate(
-                { email },
-                {
-                    $set: {
-                        status: false,
-                        currentCredentials: 0,
-                        subscriptionPlanName: "Free"
-                    }
-                },
-                { new: true } // give the updated document
-            );
-            // console.log(result);
-            if (!result) {
-                return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgInternalError });
+
+            if (subscriptionDetails.subscriptionDuration.at(-1) != 0) {
+                // latestDetails.status = false;
+                subscriptionDetails.subscriptionPlanTitle.push("Free");
+                subscriptionDetails.purchasedDate.push(new Date());
+                subscriptionDetails.subscriptionDuration.push(0);
+                subscriptionDetails.subscriptionFee.push(0);
+                subscriptionDetails.allocatedCredentials.push(50);
+                subscriptionDetails.currentCredentials.push(50);
+
+                await subscriptionDetails.save();
             }
-            planDetails.status = false;
-            planDetails.currentCredentials = 0;
-            planDetails.subscriptionPlanName = "Free";
-            return res.status(200).json({ code: 200, status: "SUCCESS", message: messageCode.msgLimitExhausted, details: planDetails, remainingDays: diffDays });
+
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgLimitExhausted,
+                details: subscriptionDetails,
+                remainingDays: diffDays,
+                // planHistory: subscriptionDetails
+            });
         } else {
-            return res.status(200).json({ code: 200, status: "SUCCESS", message: messageCode.msgPlanDetailsFetched, details: planDetails });
+            return res.status(200).json({
+                code: 200,
+                status: "SUCCESS",
+                message: messageCode.msgPlanDetailsFetched,
+                details: latestDetails,
+                // planHistory: subscriptionDetails
+            });
         }
 
     } catch (error) {
@@ -372,218 +526,40 @@ const getIssuerSubscriptionDetails = async (req, res) => {
 };
 
 /**
- * API call to add details of an enterprise plan.
- *
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const addEnterpriseSubscriptionPlan = async (req, res) => {
-    let validResult = validationResult(req);
-    if (!validResult.isEmpty()) {
-        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
-    }
-    const todayDate = new Date();
-    const { email, subscriptionPlanName, subscriptionDuration, allocatedCredentials, currentCredentials } = req.body;
-
-    if (!email, !subscriptionPlanName, !subscriptionDuration, !allocatedCredentials, !currentCredentials) {
-        return res.status(400).json({
-            code: 400,
-            status: 'FAILED',
-            message: messageCode.msgInvalidInput
-        });
-    }
-    try {
-
-        // Check mongoose connection
-        const dbStatus = await isDBConnected();
-        const dbStatusMessage = (dbStatus == true) ? messageCode.msgDbReady : messageCode.msgDbNotReady;
-        console.log(dbStatusMessage);
-        const issuerExist = await User.findOne({ email: email });
-        if (issuerExist) {
-            return res.status(400).json({
-                code: 400,
-                status: 'FAILED',
-                message: messageCode.msgPlanNotFound,
-                details: email
-            });
-        }
-
-        const enterprisePlanExist = await UserSubscriptionPlan.findOne({ email: email });
-
-        if (enterprisePlanExist) {
-            enterprisePlanExist.subscriptionPlanName.push(subscriptionPlanName);
-            enterprisePlanExist.purchasedDate.push(todayDate);
-            enterprisePlanExist.subscriptionDuration.push(subscriptionDuration);
-            enterprisePlanExist.allocatedCredentials.push(allocatedCredentials);
-            enterprisePlanExist.currentCredentials.push(currentCredentials);
-
-            await enterprisePlanExist.save();
-        }
-
-        const subscriptionDetails = new UserSubscriptionPlan({
-            email: email,
-            issuerId: issuerExist.issuerId,
-            subscriptionPlanName: [subscriptionPlanName],
-            purchasedDates: [todayDate], // Initialize with an array
-            subscriptionDurations: [subscriptionDuration], // Initialize with an array
-            allocatedCredentials: [allocatedCredentials], // Initialize with an array
-            currentCredentials: [currentCredentials], // Initialize with an array
-        });
-        const savePlan = await subscriptionDetails.save();
-
-        //todo=> amount is hardcoded as of now, please make it dynamic as per user inputs
-        const amount = 5 * allocatedCredentials;
-
-        res.json({
-            code: 200,
-            status: "SUCCESS",
-            message: messageCode.msgOperationSuccess,
-            data: savePlan,
-            amount: amount,
-        });
-        return;
-
-    } catch (error) {
-        res.json({
-            code: 500,
-            status: 'FAILED',
-            message: messageCode.msgInternalError
-        });
-    }
-};
-
-/**
- * API call to get details of selected / all enterprise plans.
- *
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- */
-const fetchEnterpriseSubscriptionPlan = async (req, res) => {
-    let validResult = validationResult(req);
-    if (!validResult.isEmpty()) {
-        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
-    }
-    const email = req.body.email;
-    const subscriptionPlanName = req.body.enterprisePlan;
-    var isPlanExist;
-    try {
-        await isDBConnected();
-        if (subscriptionPlanName && subscriptionPlanName != "string") {
-            // Check if the email exists and the subscriptionPlanName is in the array
-            //     isPlanExist = await UserSubscriptionPlan.findOne({
-            //         email: email,
-            //         subscriptionPlanName: { $in: [subscriptionPlanName] }
-            //     });
-            // } else {
-            //     isPlanExist = await UserSubscriptionPlan.findOne({ email: email });
-            // }
-
-            // if (isPlanExist) {
-            //     return res.status(200).json({
-            //         code: 200,
-            //         status: 'SUCCESS',
-            //         message: messageCode.msgPlanDetailsFetched,
-            //         details: isPlanExist
-            //     });
-            // } else {
-            //     return res.status(400).json({
-            //         code: 400,
-            //         status: 'FAILED',
-            //         message: messageCode.msgPlanNotFound,
-            //         details: email
-            //     });
-            // }
-
-            // Find the document
-            const userPlan = await UserSubscriptionPlan.findOne({ email: email });
-
-            if (userPlan) {
-                // Get all matched indexes
-                const matchedIndexes = userPlan.subscriptionPlanName
-                    .map((plan, index) => (plan === subscriptionPlanName ? index : -1))
-                    .filter(index => index !== -1);
-
-                // If there are matches, retrieve corresponding details
-                if (matchedIndexes.length > 0) {
-                    const matchedDetails = matchedIndexes.map(index => ({
-                        subscriptionPlanName: userPlan.subscriptionPlanName[index],
-                        purchasedDate: userPlan.purchasedDate[index],
-                        subscriptionDuration: userPlan.subscriptionDuration[index],
-                        allocatedCredentials: userPlan.allocatedCredentials?.[index],
-                        currentCredentials: userPlan.currentCredentials?.[index],
-                    }));
-
-                    return res.status(200).json({
-                        code: 200,
-                        status: 'SUCCESS',
-                        message: messageCode.msgPlanDetailsFetched,
-                        details: matchedDetails,
-                    });
-                }
-            }
-
-            return res.status(400).json({
-                code: 400,
-                status: 'FAILED',
-                message: messageCode.msgPlanNotFound,
-                details: email,
-            });
-        } else {
-            // Default logic if no specific subscriptionPlanName is provided
-            isPlanExist = await UserSubscriptionPlan.findOne({ email: email });
-
-            if (isPlanExist) {
-                return res.status(200).json({
-                    code: 200,
-                    status: 'SUCCESS',
-                    message: messageCode.msgPlanDetailsFetched,
-                    details: isPlanExist,
-                });
-            }
-
-            return res.status(400).json({
-                code: 400,
-                status: 'FAILED',
-                message: messageCode.msgPlanNotFound,
-                details: email,
-            });
-        }
-
-    } catch (error) {
-        console.error("An error occured while fetching enterprise plan ", error);
-        return res.status(500).json({
-            code: 500,
-            status: 'FAILED',
-            message: messageCode.msgInternalError,
-            details: error
-        });
-    }
-};
-
-/**
  * API call to approach grevience cell with email and transaction ID.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
 const createGrievance = async (req, res) => {
+    let validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
     try {
         const { email, paymentID } = req.body;
         const report = {
             email,
             paymentID
+        };
+
+        if (!email || !paymentID || paymentID == "string") {
+            return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgEnterInvalid, details: report });
         }
-        res.json({
+
+        await sendGrievanceMail(email, paymentID);
+
+        res.status(200).json({
             code: 200,
             status: 'SUCCESS',
-            message: messageCode.msgPlanDetailsFetched,
+            message: messageCode.msgGrievanceSent,
             details: report
         });
     } catch (error) {
-        res.json({
-            code: 400,
+        res.status(500).json({
+            code: 500,
             status: 'FAILED',
-            message: messageCode.msgPlanNotAdded,
+            message: messageCode.msgInternalError,
         });
     }
 };
@@ -595,6 +571,10 @@ const createGrievance = async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const createCheckoutSession = async (req, res) => {
+    let validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
     const { plan } = req.body;
     // const fee = parseFloat(plan.fee);
     try {
@@ -654,62 +634,94 @@ const createCheckoutSession = async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const fetchPaymentDetails = async (req, res) => {
-    const { sessionId } = req.params;
-    if (!sessionId) {
-        res.status(400).json({
+    let validResult = validationResult(req);
+    if (!validResult.isEmpty()) {
+        return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
+    }
+    const email = req.body.email
+    const sessionId = req.body.sessionId;
+    if (!email || !sessionId || sessionId == "string") {
+        return res.status(400).json({
             code: 400,
             status: 'FAILED',
             message: messageCode.msgInvalidInput
         });
-        return;
     }
 
+    const issuerExist = await User.findOne({ email: email });
+    if (!issuerExist) {
+        return res.status(400).json({
+            code: 400,
+            status: 'FAILED',
+            message: messageCode.msgInvalidEmail,
+            details: email
+        });
+    }
+    // Dynamically import fetch
+    const { default: fetch } = await import('node-fetch');
     try {
-        // Fetch payment intent details from Stripe using the payment ID
-        const paymentIntent = await stripe.paymentIntents.retrieve(sessionId);
-        console.log(paymentIntent);
-        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        // Define your encoded Basic Auth string
+        const basicAuthToken = process.env.BASIC_AUTH_TOKEN;
+        // Define the session URL
+        const sessionUrl =
+            `https://api.stripe.com/v1/checkout/sessions/${sessionId}`;
+        // Make the API call
+        const sessionResponse = await fetch(sessionUrl, {
+            method: 'GET',
+            headers: {
+                Authorization: `Basic ${basicAuthToken}`,
+            },
+        });
 
-        // Retrieve the payment_intent from the session object
+        if (!sessionResponse.ok) {
+            // throw new Error(`Failed to fetch session: ${sessionResponse.statusText}`);
+            return res.status(400).json({
+                code: 400,
+                status: 'FAILED',
+                message: `Invalid Session Id / ${sessionResponse.statusText}`,
+            });
+        }
+
+        const session = await sessionResponse.json();
         const paymentIntentId = session.payment_intent;
 
-        console.log('Payment Intent ID:', paymentIntentId);  // Log the payment intent
-
-        // Return the payment intent and session details
-        res.json({
+        // Return the session details
+        return res.status(200).json({
+            code: 200,
+            status: 'SUCCESS',
             paymentIntentId,    // Return payment intent ID to frontend
-            sessionId,          // Also return session ID
+            sessionId,
             message: 'Session retrieved successfully',
         });
-        return;
 
-    } catch (err) {
-        console.error('Error fetching session:', err);  // Log any errors during session retrieval
-        res.status(500).json({ error: 'Failed to retrieve session' });
+    } catch (error) {
+        console.error('Error fetching session:', error);
+        return res.status(500).json({ error: 'Failed to retrieve session' });
     }
 };
 
 module.exports = {
-    //set subscription plans
+
+    // Function to create new subscription plan by admin
+    addUserSubscriptionPlan,
+
+    // Function to update existing subscription plan by admin
     updateSubscriptionPlan,
 
-    // get details of all plans
+    // Function to delete existing subscription plan by admin
+    deleteSubscriptionPlan,
+
+    // Function to get all existing active subscription plans (all) / selected.
     getSubscriptionPlans,
 
     //  Function to get users current plan and warn user for credit limit exhaust or expirationdate
     getIssuerSubscriptionDetails,
 
     // Function to set users current subscription detials in DB by email
-    addSubscriptionPlans,
+    addSubscriptionPlan,
 
     // Functionfor to add enterprise subscription plans
     addEnterpriseSubscriptionPlan,
-
-    // Functionfor to fetch enterprise subscription plans
-    fetchEnterpriseSubscriptionPlan,
-
-    // for testing, deletion purpose
-    deleteSubscriptionPlans,
 
     // Function to connect to stripe checkout page and payment
     createCheckoutSession,

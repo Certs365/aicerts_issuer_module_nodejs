@@ -68,6 +68,32 @@ The Certs365 Team.`;
   }
 };
 
+const sendGrievanceMail = async (email, id) => {
+  try {
+    mailOptions.to = process.env.USER_MAIL;
+    mailOptions.subject = `Grievance Request`;
+    mailOptions.text = `Hi Admin,
+
+A grievance request has been submitted on the AICerts Portal. Below are the details:
+
+- User Email: ${email}
+- Payment ID: ${id}
+
+Please review this request and take the necessary action.
+
+If you have any questions or need additional information, please reach out to the user directly at the provided email address.
+
+Thank you.
+
+Best regards,
+The Certs365 Team.`;
+    transporter.sendMail(mailOptions);
+    console.log('Grievance email sent successfully');
+  } catch (error) {
+    console.error('Error sending grievance email:', error);
+  }
+};
+
 // Function to verify the Issuer email
 const isValidIssuer = async (email) => {
   if (!email) {
@@ -215,4 +241,5 @@ module.exports = {
   parseDate,
   formatDate,
   createInvoiceNumber,
+  sendGrievanceMail,
 }
