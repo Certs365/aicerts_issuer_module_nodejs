@@ -28,18 +28,48 @@ const mailOptions = {
   text: '',
 };
 
-const sendEmail = async (otp, email, name) => {
+const sendEmail = async (_otp, email, name) => {
   try {
+    // Ensure OTP is a string
+    const otp = String(_otp);
     mailOptions.to = email;
     mailOptions.subject = `Your Authentication OTP`;
-    mailOptions.text = `Hi ${name},
-
-Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
-
-If you did not request this code, please ignore this message.
-        
-Best regards,
-The Certs365 Team`;
+    mailOptions.html = `
+<html>
+  <body>
+    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+        <h3 style="color: #555;">Hi ${name},</h3>
+        <p>Your one-time password (OTP) is:</p>
+         <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+            ${otp
+              .split("")
+              .map(
+                digit => `
+              <div style="
+                width: 40px; 
+                height: 40px; 
+                display: inline-block; /* Use inline-block for better email client compatibility */
+                text-align: center; 
+                line-height: 40px; /* Align text vertically within the box */
+                border: 1px solid #ccc; 
+                border-radius: 10px; 
+                font-size: 20px; 
+                font-weight: bold; 
+                color: #333; 
+                background: #f9f9f9;">
+                ${digit}
+              </div>`
+              )
+              .join("")}
+          </div>
+        <p>Please enter this code to complete your authentication process.</p>
+        <p>If you did not request this code, please ignore this message.</p>
+        <br>
+        <p>Best regards,</p>
+        <p><strong>The Certs365 Team</strong></p>
+      </div>
+  </body>
+</html>`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
