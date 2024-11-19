@@ -11,7 +11,6 @@ const messageCode = require("../common/codes");
 
 // Importing functions from a custom module
 const {
-    formatDate,
     isDBConnected, // Function to check if the database connection is established
     sendGrievanceMail,
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module

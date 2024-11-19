@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 // Import the Issues models from the schema defined in "../config/schema"
 const { User, Issues, BatchIssues, IssueStatus, VerificationLog, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
 
+const messageCode = require("../common/codes");
+
 const transporter = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
   host: process.env.MAIL_HOST,
@@ -37,7 +39,7 @@ const sendEmail = async (_otp, email, name) => {
     mailOptions.html = `
 <html>
   <body>
-    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333 border: 1px solid #ddd; border-radius: 10px;">
         <h3 style="color: #555;">Hi ${name},</h3>
         <p>Your one-time password (OTP) is:</p>
          <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
@@ -67,6 +69,10 @@ const sendEmail = async (_otp, email, name) => {
         <br>
         <p>Best regards,</p>
         <p><strong>The Certs365 Team</strong></p>
+        <hr>
+        <p style="font-size: 12px; color: #999;">
+        ${messageCode.msgEmailNote}
+        </p>
       </div>
   </body>
 </html>`;
@@ -81,16 +87,26 @@ const sendWelcomeMail = async (name, email) => {
   try {
     mailOptions.to = email;
     mailOptions.subject = `Welcome to Certs365`;
-    mailOptions.text = `Hi ${name},
-
-Welcome to the AICerts Portal, Your registration is now complete.
-
-Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.
-
-Thank you for joining us.
-
-Best regards,
-The Certs365 Team.`;
+    mailOptions.html = `
+<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px;">
+    <div
+        style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
+        <h3 style="color: #555;">Hi ${name},</h3>
+        <p>Welcome to the <strong>Certs365 Portal</strong>! Your registration is now complete.</p>
+        <p>Your account details will be reviewed and approved by our admin team. Once your account has been approved,
+            you will receive a notification with further instructions.</p>
+        <p>Thank you for joining us!</p>
+        <br>
+        <p style="font-weight: bold;">Best regards,</p>
+        <p><strong>The Certs365 Team</strong></p>
+        <hr>
+        <p style="font-size: 12px; color: #999;">
+        ${messageCode.msgEmailNote}
+        </p>
+    </div>
+</body>
+</html>`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {

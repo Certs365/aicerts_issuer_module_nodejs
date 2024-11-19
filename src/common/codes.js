@@ -6,6 +6,7 @@ module.exports = {
     
     // Response code messages
     msgInternalError : "Unable to reach the server, Please try again...",
+    msgEmailNote: "This is an automated email. Please do not reply directly to this message.",
 
     // Validation Error codes Issues (Route)
     msgInvalidFile : "Invalid file uploaded / Please Try again ...",
