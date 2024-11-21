@@ -444,6 +444,7 @@ const getAdminGraphDetails = async (req, res) => {
     res.json({
       code: 200,
       status: "SUCCESS",
+      totalIssues: fetchAnnualIssues.length,
       message: messageCode.msgGraphDataFetched,
       data: responseData,
     });
