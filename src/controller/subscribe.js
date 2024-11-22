@@ -2,7 +2,6 @@
 require('dotenv').config();
 
 const { validationResult } = require("express-validator");
-const moment = require('moment');
 
 // Import MongoDB models
 const { Admin, User, SubscriptionPlan, UserSubscriptionPlan } = require("../config/schema");
@@ -12,8 +11,12 @@ const messageCode = require("../common/codes");
 // Importing functions from a custom module
 const {
     isDBConnected, // Function to check if the database connection is established
-    sendGrievanceMail,
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
+
+const {
+    sendGrievanceEmail,
+    planPurchasedEmail,
+} = require('../models/emails');
 
 // This is your test secret API key.
 const stripe = require('stripe')(process.env.STRIPE_TEST_KEY);
@@ -293,6 +296,8 @@ const addUserSubscriptionPlan = async (req, res) => {
             isUserPlanExist.currentCredentials.push(lastCurrentCredential + isPlanExist?.limit);
 
             await isUserPlanExist.save();
+            // Send email to user of plan purchsed
+            await planPurchasedEmail(email, issuerExist.name, isUserPlanExist);
             return res.status(200).json({
                 code: 200,
                 status: "SUCCESS",
@@ -313,7 +318,8 @@ const addUserSubscriptionPlan = async (req, res) => {
                 currentCredentials: [isPlanExist?.limit],
             });
             const savePlan = await subscriptionPlanDetails.save();
-
+            // Send email to user of plan purchsed
+            await planPurchasedEmail(email, issuerExist.name, subscriptionPlanDetails);
             return res.status(200).json({
                 code: 200,
                 status: "SUCCESS",
@@ -382,7 +388,8 @@ const addEnterpriseSubscriptionPlan = async (req, res) => {
             isUserPlanExist.currentCredentials.push(lastCurrentCredential + allocatedCredentials);
 
             await isUserPlanExist.save();
-
+            // Send email to user of plan purchsed
+            await planPurchasedEmail(email, issuerExist.name, isUserPlanExist);
             return res.status(200).json({
                 code: 200,
                 status: "SUCCESS",
@@ -401,7 +408,8 @@ const addEnterpriseSubscriptionPlan = async (req, res) => {
                 currentCredentials: [allocatedCredentials], // Initialize with an array
             });
             const savePlan = await subscriptionDetails.save();
-
+            // Send email to user of plan purchsed
+            await planPurchasedEmail(email, issuerExist.name, subscriptionDetails);
             return res.status(200).json({
                 code: 200,
                 status: "SUCCESS",
@@ -546,7 +554,7 @@ const createGrievance = async (req, res) => {
             return res.status(400).json({ code: 400, status: "FAILED", message: messageCode.msgEnterInvalid, details: report });
         }
 
-        await sendGrievanceMail(email, paymentID);
+        await sendGrievanceEmail(email, paymentID);
 
         res.status(200).json({
             code: 200,

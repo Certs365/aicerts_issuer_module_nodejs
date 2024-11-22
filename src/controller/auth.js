@@ -3,13 +3,19 @@ require('dotenv').config();
 const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
 const {
-  sendEmail,
   generateAccount,
   generateOTP,
   isDBConnected,
-  sendWelcomeMail,
   isValidIssuer
 } = require('../models/tasks');
+
+const {
+  sendOTPEmail,
+  sendWelcomeMail,
+  sendGrievanceEmail,
+  planPurchasedEmail,
+} = require('../models/emails');
+
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
@@ -421,7 +427,8 @@ const twoFactor = async (req, res) => {
       });
       await createVerify.save();
     }
-    await sendEmail(verificationCode, email, issuer.name);
+    await sendOTPEmail(verificationCode, email, issuer.name);
+
     res.status(200).json({
       code: 200,
       status: "SUCCESS",

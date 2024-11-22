@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const mongoose = require("mongoose");
 
 // Import the Issues models from the schema defined in "../config/schema"
-const { User, Issues, BatchIssues, IssueStatus, VerificationLog, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
+const { User } = require("../config/schema");
 
 const messageCode = require("../common/codes");
 

@@ -226,6 +226,14 @@ const UserSubscriptionPlanSchema = new mongoose.Schema({
   status: {type: Boolean, default: true}
 });
 
+const MailSchema = new mongoose.Schema({
+  messageId: { type: String, required: true },
+  from: { type: String, required: true },
+  subject: { type: String, required: true },
+  body: { type: String, required: true },
+  status: { type: String, default: 'pending', enum: ['pending', 'resolved'] },
+}, { timestamps: true });
+
 const Admin = mongoose.model('Admin', AdminSchema);
 const Verification = mongoose.model('Verification', VerificationSchema);
 const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
@@ -241,6 +249,7 @@ const ServerDetails = mongoose.model('ServerDetails', ServerDetailsSchema);
 const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTemplateSchema);
 const UserSubscriptionPlan = mongoose.model('UserSubscriptionPlan', UserSubscriptionPlanSchema);
 const SubscriptionPlan = mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
+const MailStatus = mongoose.model('MailStatus', MailSchema);
 
 module.exports = {
   Admin,
@@ -258,4 +267,5 @@ module.exports = {
   CrediantialTemplate,
   SubscriptionPlan,
   UserSubscriptionPlan,
+  MailStatus
 };
