@@ -194,6 +194,19 @@ const CrediantialTemplateSchema = new mongoose.Schema({
   dimentions:{ type: Object}
 });
 
+// Define schema for certificate template
+const BadgeTemplateSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  designFields: { type: Object},
+  url: { type: String },
+  dimentions:{ type: Object},
+  attributes:{ type: Object},
+  title:{ type: String },
+  subTitle:{type: String },
+  description:{type: String }
+});
+
+
 // Define the schema for the Issues model
 const DynamicParamsSchema = new mongoose.Schema({
   email: { type: String, required: true },
@@ -220,6 +233,7 @@ const ShortUrl = mongoose.model('ShortUrl', ShortUrlSchema);
 const DynamicParameters = mongoose.model('DynamicParameters', DynamicParamsSchema);
 const ServerDetails = mongoose.model('ServerDetails', ServerDetailsSchema);
 const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTemplateSchema);
+const BadgeTemplate = mongoose.model('BadgeTemplateSchema', BadgeTemplateSchema);
 
 module.exports = {
   Admin,
@@ -235,5 +249,6 @@ module.exports = {
   VerificationLog,
   ShortUrl,
   DynamicParameters,
-  CrediantialTemplate
+  CrediantialTemplate,
+  BadgeTemplate
 };
