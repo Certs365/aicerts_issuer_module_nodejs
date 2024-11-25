@@ -187,6 +187,19 @@ const CrediantialTemplateSchema = new mongoose.Schema({
   dimentions:{ type: Object}
 });
 
+// Define schema for certificate template
+const BadgeTemplateSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  designFields: { type: Object},
+  url: { type: String },
+  dimentions:{ type: Object},
+  attributes:{ type: Object},
+  title:{ type: String },
+  subTitle:{type: String },
+  description:{type: String }
+});
+
+
 // Define the schema for the Issues model
 const DynamicParamsSchema = new mongoose.Schema({
   email: { type: String, required: true },
@@ -250,6 +263,7 @@ const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTem
 const UserSubscriptionPlan = mongoose.model('UserSubscriptionPlan', UserSubscriptionPlanSchema);
 const SubscriptionPlan = mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
 const MailStatus = mongoose.model('MailStatus', MailSchema);
+const BadgeTemplate = mongoose.model('BadgeTemplateSchema', BadgeTemplateSchema);
 
 module.exports = {
   Admin,
@@ -267,5 +281,6 @@ module.exports = {
   CrediantialTemplate,
   SubscriptionPlan,
   UserSubscriptionPlan,
-  MailStatus
+  MailStatus,
+  BadgeTemplate
 };
