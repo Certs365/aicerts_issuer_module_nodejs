@@ -551,9 +551,6 @@ const addBadgeTemplate = async (req, res) => {
 
   const { url,email, designFields, dimentions,title,subTitle, description, attributes} = req.body;
 
-  if (!url || !email || !designFields) {
-    return res.status(400).json({ status: "FAILED", message: "Invalid input data." });
-  }
   try {
     const user = await User.findOne({ email: email, status: 1 });
 
