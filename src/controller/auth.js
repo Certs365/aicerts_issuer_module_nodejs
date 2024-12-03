@@ -5,15 +5,12 @@ var admin = require("firebase-admin");
 const {
   generateAccount,
   generateOTP,
-  isDBConnected,
-  isValidIssuer
+  isDBConnected
 } = require('../models/tasks');
 
 const {
   sendOTPEmail,
-  sendWelcomeMail,
-  sendGrievanceEmail,
-  planPurchasedEmail,
+  sendWelcomeMail
 } = require('../models/emails');
 
 // Password handler
