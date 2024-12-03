@@ -18,7 +18,7 @@ router.get('/auth', emailController.authenticate);
  * /api/issue-resolved:
  *   post:
  *     summary: API to update the Grievance status
- *     tags: [Login]
+ *     tags: [Subscription]
  *     description: API to update the Grievance status (pending, resolved).
  *     requestBody:
  *       description: User email, MessageID, status
@@ -37,8 +37,11 @@ router.get('/auth', emailController.authenticate);
  *                 description: User's message ID
  *               status:
  *                 type: string
- *                 description: User's Grievance status
- *
+ *                 description: User's Grievance status (pending, resolved).
+ *             required:
+ *               - email
+ *               - messageID
+ *               - status
  *     responses:
  *       '200':
  *         description: Grievance status updated successfully.
