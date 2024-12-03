@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: {
-    name: 'Certs365 Admin',
+    name: 'Certs365',
     address: process.env.USER_MAIL,
   },
   to: '',
