@@ -2,31 +2,31 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-    service: process.env.MAIL_SERVICE,
-    host: process.env.MAIL_HOST,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.USER_NAME,
-      pass: process.env.MAIL_PWD,
-    },
-  });
-  
-  const mailOptions = {
-    from: {
-      name: "Certs365",
-      address: process.env.USER_MAIL,
-    },
-    to: "",
-    subject: "",
-    text: "",
-  };
-  
-  const sendOTPEmail = async (otp, email, name) => {
-    try {
-      mailOptions.to = email;
-      mailOptions.subject = `Your Authentication OTP`;
-      (mailOptions.text = `Hi ${name},
+  service: process.env.MAIL_SERVICE,
+  host: process.env.MAIL_HOST,
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.USER_NAME,
+    pass: process.env.MAIL_PWD,
+  },
+});
+
+const mailOptions = {
+  from: {
+    name: "Certs365",
+    address: process.env.USER_MAIL,
+  },
+  to: "",
+  subject: "",
+  text: "",
+};
+
+const sendOTPEmail = async (otp, email, name) => {
+  try {
+    mailOptions.to = email;
+    mailOptions.subject = `Your Authentication OTP`;
+    (mailOptions.text = `Hi ${name},
   
   Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
   
@@ -34,7 +34,7 @@ const transporter = nodemailer.createTransport({
           
   Best regards,
   The Certs365 Team`),
-  (mailOptions.html = `<head>
+      (mailOptions.html = `<head>
   <title></title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]--><!--[if !mso]><!-->
@@ -417,11 +417,11 @@ const transporter = nodemailer.createTransport({
   <tr>
   <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:28px;text-align:center;">
   <div align="center" class="alignment">
-  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block;" width="208px">
+  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Instagram" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Facebook" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="Pinterest" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -486,18 +486,18 @@ const transporter = nodemailer.createTransport({
   </tbody>
   </table><!-- End -->
   </body>`);
-      transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  };
-  
-  const sendWelcomeMail = async (name, email) => {
-    try {
-      mailOptions.to = email;
-      mailOptions.subject = `Welcome to Certs365`;
-      (mailOptions.text = `Hi ${name},
+    transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
+const sendWelcomeMail = async (name, email) => {
+  try {
+    mailOptions.to = email;
+    mailOptions.subject = `Welcome to Certs365`;
+    (mailOptions.text = `Hi ${name},
   
   Welcome to the Certs365, Your registration is now complete.
   
@@ -507,7 +507,7 @@ const transporter = nodemailer.createTransport({
   
   Best regards,
   The Certs365 Team.`),
-        (mailOptions.html = `<head>
+      (mailOptions.html = `<head>
   <title></title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]--><!--[if !mso]><!-->
@@ -870,11 +870,11 @@ const transporter = nodemailer.createTransport({
   <tr>
   <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:28px;text-align:center;">
   <div align="center" class="alignment">
-  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block;" width="208px">
+  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Instagram" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Facebook" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="Pinterest" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -942,19 +942,19 @@ const transporter = nodemailer.createTransport({
   </tbody>
   </table><!-- End -->
   </body>`);
-      transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  };
-  
-  const sendGrievanceEmail = async (email, paymentID) => {
-    try {
-      // todo-> email should go to support team of aicerts, not to user
-      mailOptions.to = "Nikhil.Meshram@Aicerts.io";
-      mailOptions.subject = "Payment Grievance from user";
-      (mailOptions.text = `Hi Support team,
+    transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
+const sendGrievanceEmail = async (email, paymentID) => {
+  try {
+    // todo-> email should go to support team of aicerts, not to user
+    mailOptions.to = "Nikhil.Meshram@Aicerts.io";
+    mailOptions.subject = "Payment Grievance from user";
+    (mailOptions.text = `Hi Support team,
   
       You have submitted a payment grievance:
       "Plan not upgraded after payment"
@@ -965,24 +965,24 @@ const transporter = nodemailer.createTransport({
       
       Best regards,
       The Certs365 Team.`),
-        // mailOptions.html = `
-        //         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-        //           <h1 style="color: #333;">Payment Grievance</h1>
-        //           <p style="font-size: 16px; color: #555;">
-        //             <strong>Name:</strong> ${name}<br>
-        //             <strong>Email:</strong> ${email}<br>
-        //             <strong>Grievance:</strong> ${grievance}
-        //           </p>
-        //           <p style="font-size: 14px; color: #555; margin-top: 20px;">
-        //             Our team will review the grievance and get back to you shortly.
-        //           </p>
-        //           <hr>
-        //           <p style="font-size: 12px; color: #999;">
-        //             This is an automated email. Please do not reply directly to this message.
-        //           </p>
-        //         </div>
-        //       `;
-        (mailOptions.html = `<head>
+      // mailOptions.html = `
+      //         <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+      //           <h1 style="color: #333;">Payment Grievance</h1>
+      //           <p style="font-size: 16px; color: #555;">
+      //             <strong>Name:</strong> ${name}<br>
+      //             <strong>Email:</strong> ${email}<br>
+      //             <strong>Grievance:</strong> ${grievance}
+      //           </p>
+      //           <p style="font-size: 14px; color: #555; margin-top: 20px;">
+      //             Our team will review the grievance and get back to you shortly.
+      //           </p>
+      //           <hr>
+      //           <p style="font-size: 12px; color: #999;">
+      //             This is an automated email. Please do not reply directly to this message.
+      //           </p>
+      //         </div>
+      //       `;
+      (mailOptions.html = `<head>
   <!--[if gte mso 9]>
   <xml>
     <o:OfficeDocumentSettings>
@@ -1262,19 +1262,19 @@ const transporter = nodemailer.createTransport({
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
   </body>`);
-      transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  };
-  
-  const sendResolvedEmail = async (email) => {
-    try {
-      // todo-> email should go to support team of aicerts, not to user
-      mailOptions.to = email;
-      mailOptions.subject = "Update on Payment Grievance";
-      (mailOptions.text = `Hi user,
+    transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
+const sendResolvedEmail = async (email) => {
+  try {
+    // todo-> email should go to support team of aicerts, not to user
+    mailOptions.to = email;
+    mailOptions.subject = "Update on Payment Grievance";
+    (mailOptions.text = `Hi user,
   
       Your plan has beed updated successfully.
   
@@ -1284,7 +1284,7 @@ const transporter = nodemailer.createTransport({
       
       Best regards,
       The Certs365 Team.`),
-        (mailOptions.html = `<head>
+      (mailOptions.html = `<head>
   <!--[if gte mso 9]>
   <xml>
     <o:OfficeDocumentSettings>
@@ -1565,32 +1565,32 @@ const transporter = nodemailer.createTransport({
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
   </body>`);
-      transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
+    transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
   }
-  
-  //Email to user ,after buying any plan
-  const planPurchasedEmail = async (email,name,isUserPlanExist) => {
-      const subscriptionPlanTitle= isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
-      const purchasedDate= isUserPlanExist.purchasedDate.slice(-1)[0];
-      const subscriptionDuration= isUserPlanExist.subscriptionDuration.slice(-1)[0];
-      const allocatedCredentials= isUserPlanExist.allocatedCredentials.slice(-1)[0];
-      const subscriptionFee= isUserPlanExist.subscriptionFee.slice(-1)[0];
-  
-      const purchasedDateObj = new Date(purchasedDate);
-      const purchasedDay = `0${purchasedDateObj.getDate()}`.slice(-2);
-      const purchasedMonth = `0${purchasedDateObj.getMonth() + 1}`.slice(-2);
-      const purchasedYear = purchasedDateObj.getFullYear();
-      const purchasedDateFormatted = `${purchasedMonth}/${purchasedDay}/${purchasedYear}`;
-      
-    try {
-      console.log("inside our function t osend u mail")
-      mailOptions.to = email;
-      mailOptions.subject = "Plan purchased successfully";
-      (mailOptions.text = `Hi ${name},
+}
+
+//Email to user ,after buying any plan
+const planPurchasedEmail = async (email, name, isUserPlanExist) => {
+  const subscriptionPlanTitle = isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
+  const purchasedDate = isUserPlanExist.purchasedDate.slice(-1)[0];
+  const subscriptionDuration = isUserPlanExist.subscriptionDuration.slice(-1)[0];
+  const allocatedCredentials = isUserPlanExist.allocatedCredentials.slice(-1)[0];
+  const subscriptionFee = isUserPlanExist.subscriptionFee.slice(-1)[0];
+
+  const purchasedDateObj = new Date(purchasedDate);
+  const purchasedDay = `0${purchasedDateObj.getDate()}`.slice(-2);
+  const purchasedMonth = `0${purchasedDateObj.getMonth() + 1}`.slice(-2);
+  const purchasedYear = purchasedDateObj.getFullYear();
+  const purchasedDateFormatted = `${purchasedMonth}/${purchasedDay}/${purchasedYear}`;
+
+  try {
+    console.log("inside our function t osend u mail")
+    mailOptions.to = email;
+    mailOptions.subject = "Plan purchased successfully";
+    (mailOptions.text = `Hi ${name},
   
       You have successfully purchased the plan.
       Please found the related details below:
@@ -1605,7 +1605,7 @@ const transporter = nodemailer.createTransport({
       
       Best regards,
       The AICerts Team.`),
-        (mailOptions.html = `<head>
+      (mailOptions.html = `<head>
   <title></title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/><!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]--><!--[if !mso]><!--><!--<![endif]-->
@@ -2087,11 +2087,11 @@ const transporter = nodemailer.createTransport({
   <tr>
   <td class="pad" style="padding-bottom:10px;text-align:center;padding-right:0px;padding-left:0px;">
   <div align="center" class="alignment">
-  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block;" width="168px">
+  <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Instagram" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Facebook" width="32"/></a></td>
-  <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="Pinterest" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -2153,17 +2153,17 @@ const transporter = nodemailer.createTransport({
   </tbody>
   </table><!-- End -->
   </body>`);
-      transporter.sendMail(mailOptions);
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  };
+    transporter.sendMail(mailOptions);
+    console.log("Email sent successfully");
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
 
-  module.exports = {
-    sendOTPEmail,
-    sendWelcomeMail,
-    sendGrievanceEmail,
-    planPurchasedEmail,
-    sendResolvedEmail,
-  };
+module.exports = {
+  sendOTPEmail,
+  sendWelcomeMail,
+  sendGrievanceEmail,
+  planPurchasedEmail,
+  sendResolvedEmail,
+};
