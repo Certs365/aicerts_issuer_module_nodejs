@@ -230,8 +230,8 @@ const loginPhoneNumber = async (req, res) => {
   if (!validResult.isEmpty()) {
     return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
-  const { idToken, email } = req.body;
-
+  const { idToken, _email } = req.body;
+  const email = _email.toLowerCase();
   try {
     // Check mongoose connection
     const dbStatus = await isDBConnected();
@@ -253,7 +253,7 @@ const loginPhoneNumber = async (req, res) => {
     const data = await User.findOne({ 
       $expr: {
         $and: [
-          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+          { $eq: [{ $toLower: "$email" }, email] }
         ]
       }
      });
@@ -313,7 +313,7 @@ const login = async (req, res) => {
   }
 
   let { email, password } = req.body;
-  email = email.trim();
+  email = email.toLowerCase();
   password = password.trim();
 
   if (email == "" || password == "") {
@@ -327,7 +327,7 @@ const login = async (req, res) => {
     User.find({ 
       $expr: {
         $and: [
-          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+          { $eq: [{ $toLower: "$email" }, email] }
         ]
       }
      })
