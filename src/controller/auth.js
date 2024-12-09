@@ -122,7 +122,13 @@ const signup = async (req, res) => {
     console.log(dbStatusMessage);
 
     // Checking if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      }
+     });
 
     if (existingUser) {
       res.json({
@@ -244,7 +250,13 @@ const loginPhoneNumber = async (req, res) => {
     // Your existing code for credential verification
 
     const JWTToken = generateJwtToken();
-    const data = await User.findOne({ email });
+    const data = await User.findOne({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      }
+     });
 
     if (!data) {
       erro.log(messageCode.msgIssuerNotFound);
@@ -312,7 +324,13 @@ const login = async (req, res) => {
     });
   } else {
     // Checking if user exists  
-    User.find({ email })
+    User.find({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      }
+     })
       .then((data) => {
         if (data.length && data[0].approved == true) {
           // User exists
