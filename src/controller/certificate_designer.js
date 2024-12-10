@@ -20,7 +20,7 @@ exports.uploadImage = async (req, res) => {
 
         const { issuerId,type } = req.body;
         const imageUrl = uploadResult.Location; // Get the S3 URL of the uploaded image
-        console.log(type)
+        // console.log(type)
 
         const newImage = new Image({
             issuerId,
@@ -58,8 +58,6 @@ exports.getImagesByIssuerId = async (req, res) => {
             id: image._id,          // Use '_id' for MongoDB ObjectId
             imageUrl: image.imageUrl
         }));
-       
-
         return res.status(200).json(imageDetails); // Send the image URLs as the response
     } catch (error) {
         console.error(error);
