@@ -57,7 +57,7 @@ const server = app.listen(port, () => {
 });
 
 // Initialize email polling when the server starts
-startEmailPolling();
+// startEmailPolling();
 
 // Graceful Shutdown
 process.on('SIGINT', () => {
