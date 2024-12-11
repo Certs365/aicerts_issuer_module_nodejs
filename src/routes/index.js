@@ -8,6 +8,7 @@ let fetch = require("./fetch");
 let subscribe = require("./subscribe");
 let health = require("./health");
 let email = require("./emailRoutes");
+let matic = require("./matic");
 
 router.use(auth);
 router.use(user);
@@ -16,5 +17,6 @@ router.use(fetch);
 router.use(subscribe);
 router.use(health);
 router.use(email);
+router.use(matic);
 
 module.exports = router
