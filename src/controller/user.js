@@ -5,7 +5,10 @@ var messageCode = require("../common/codes");
 
 // mongodb user model
 const { User, Verification } = require("../config/schema");
-const { sendEmail, generateOTP , isDBConnected } = require('../models/tasks');
+const { generateOTP , isDBConnected } = require('../models/tasks');
+const {
+  sendOTPEmail
+} = require('../models/emails');
 const bcrypt = require("bcrypt");
 
   /**
@@ -50,7 +53,7 @@ const forgotPassword = async (req, res) => {
         await verify.save();
       }
       // password handling
-      sendEmail(generatedOtp, email, user.name);
+      sendOTPEmail(generatedOtp, email, user.name);
   
       return res.json({
           status: 'PASSED',

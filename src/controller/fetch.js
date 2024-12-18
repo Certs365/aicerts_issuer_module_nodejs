@@ -14,7 +14,7 @@ const {
   isDBConnected, // Function to check if the database connection is established
   parseDate,
   readableDateFormat,
-  cerateInvoiceNumber,
+  createInvoiceNumber,
   isValidIssuer
 } = require('../models/tasks'); // Importing functions from the '../model/tasks' module
 
@@ -23,7 +23,7 @@ const {
 } = require('../utils/customModules');
 
 // Import MongoDB models
-const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails, VerificationLog } = require("../config/schema");
+const { Admin, User, Issues, BatchIssues, IssueStatus, CrediantialTemplate, ServiceAccountQuotas, DynamicIssues, DynamicBatchIssues, ServerDetails, VerificationLog, BadgeTemplate } = require("../config/schema");
 
 const messageCode = require("../common/codes");
 const retryOperation = require('../utils/retryOperation');
@@ -444,6 +444,7 @@ const getAdminGraphDetails = async (req, res) => {
     res.json({
       code: 200,
       status: "SUCCESS",
+      totalIssues: fetchAnnualIssues.length,
       message: messageCode.msgGraphDataFetched,
       data: responseData,
     });
@@ -461,7 +462,7 @@ const getAdminGraphDetails = async (req, res) => {
 */
 const addCertificateTemplate = async (req, res) => {
 
-  let { url, email, designFields } = req.body;
+  let { url, email, designFields, dimentions } = req.body;
 
   if (!url || !email || !designFields) {
     return res.status(400).json({ status: "FAILED", message: "Invalid input data." });
@@ -480,7 +481,8 @@ const addCertificateTemplate = async (req, res) => {
     const templateDetails = new CrediantialTemplate({
       email: email,
       designFields: designFields,
-      url: url
+      url: url,
+      dimentions:dimentions
     })
     const savedTemplate = await retryOperation(() => templateDetails.save(), 3); // Retry save operation if it fails
 
@@ -539,6 +541,97 @@ const getCertificateTemplates = async (req, res) => {
   }
 };
 
+
+/**
+* API to add custom certificate/credential template.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const addBadgeTemplate = async (req, res) => {
+
+  const { url,email, designFields, dimentions,title,subTitle, description, attributes} = req.body;
+
+  if (!url || !email || !designFields) {
+    return res.status(400).json({ status: "FAILED", message: "Invalid input data." });
+  }
+  try {
+    const user = await User.findOne({ email: email, status: 1 });
+
+
+    if (!user) {
+      return res.status(400).json({
+        status: "FAILED",
+        message: messageCode.msgInvalidIssuer,
+      });
+    }
+
+    const templateDetails = new BadgeTemplate({
+      email: email,
+      designFields: designFields,
+      url: url,
+      dimentions:dimentions,
+      title:title,
+      subTitle:subTitle,
+      description:description,
+      attributes:attributes
+    })
+    const savedTemplate = await retryOperation(() => templateDetails.save(), 3); // Retry save operation if it fails
+
+
+    res.json({
+      code: 200,
+      status: "SUCCESS",
+      message: messageCode.msgOperationSuccess,
+      data: savedTemplate
+    });
+
+  } catch (error) {
+    console.error(messageCode.msgInternalError, error);
+    res.status(500).json({
+      code: 400,
+      status: 'FAILED',
+      message: messageCode.msgInternalError
+    });
+  }
+};
+/**
+* API to get a certificate/credential template by ID.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const getCertificateTemplateById = async (req, res) => {
+  const { id } = req.params; // Expecting the certificate ID in the request parameters
+
+  try {
+    // Find the template by its ID
+    const template = await CrediantialTemplate.findById(id);
+
+    // If the template is not found, return an appropriate response
+    if (!template) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "Template not found for the provided ID.",
+      });
+    }
+
+    // Return the found template
+    res.json({
+      status: "SUCCESS",
+      message: "Template fetched successfully.",
+      data: template,
+    });
+
+  } catch (error) {
+    console.error("Error fetching template by ID:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error fetching template by ID.',
+    });
+  }
+};
+
 /**
 * API to update certificate/credential template.
 *
@@ -546,7 +639,7 @@ const getCertificateTemplates = async (req, res) => {
 * @param {Object} res - Express response object.
 */
 const updateCertificateTemplate = async (req, res) => {
-  const { id, url, designFields } = req.body; // Expecting template ID and update details
+  const { id, url, designFields, dimentions} = req.body;
 
   try {
     // Find the template by its ID
@@ -563,7 +656,7 @@ const updateCertificateTemplate = async (req, res) => {
     // Update the template fields
     template.url = url || template.url; // Only update if a new URL is provided
     template.designFields = designFields || template.designFields; // Update designFields if provided
-
+    template.dimentions = dimentions || template.dimentions
     // Save the updated template
     const updatedTemplate = await template.save();
 
@@ -1477,7 +1570,7 @@ const generateInvoiceDocument = async (req, res) => {
 
     const formattedTodayDate = await formatDate();
     let issuerInvoiceSerial = issuer.invoiceNumber;
-    const invoiceNumber = await cerateInvoiceNumber(issuer.issuerId, issuerInvoiceSerial, formattedTodayDate);
+    const invoiceNumber = await createInvoiceNumber(issuer.issuerId, issuerInvoiceSerial, formattedTodayDate);
     // console.log("The final invoice", invoiceNumber);
     if (!issuer.invoiceNumber) {
       issuer.invoiceNumber = 1;
@@ -2657,6 +2750,7 @@ const fetchIssuesLogDetails = async (req, res) => {
             issuerId: issuerExist.issuerId,
             certificateStatus: { $in: [1, 2, 4] },
             expirationDate: { $ne: "1" },
+            type: { $ne: "dynamic" },
             url: { $exists: true, $ne: null, $ne: "", $regex: cloudBucket }
           };
 
@@ -2912,6 +3006,209 @@ const getBatchCertificates = async (req, res) => {
   }
 };
 
+
+/**
+* API to get certificate/credential template.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const getBadgeTemplates = async (req, res) => {
+  const { email } = req.body;  // Expecting email in the request body
+console.log(email)
+  try {
+    // Find all templates associated with the provided email
+    const templates = await BadgeTemplate.find({ email });
+
+    // If no templates are found, return an appropriate response
+    if (!templates.length) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No templates found for the provided email.",
+      });
+    }
+
+    // Return the found templates
+    res.json({
+      status: "SUCCESS",
+      message: "Templates fetched successfully.",
+      data: templates,
+    });
+
+  } catch (error) {
+    console.error("Error fetching templates:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error fetching templates.',
+    });
+  }
+};
+
+
+/**
+* API to get a certificate/credential template by ID.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const getBadgeTemplateById = async (req, res) => {
+  const { id } = req.params; // Expecting the certificate ID in the request parameters
+
+  try {
+    // Find the template by its ID
+    const template = await BadgeTemplate.findById(id);
+
+    // If the template is not found, return an appropriate response
+    if (!template) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "Template not found for the provided ID.",
+      });
+    }
+
+    // Return the found template
+    res.json({
+      status: "SUCCESS",
+      message: "Template fetched successfully.",
+      data: template,
+    });
+
+  } catch (error) {
+    console.error("Error fetching template by ID:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error fetching template by ID.',
+    });
+  }
+};
+
+
+/**
+* API to update certificate/credential template.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const updateBadgeTemplate = async (req, res) => {
+  const { id, url, designFields, dimentions,title,subTitle, description, attributes} = req.body;
+
+  try {
+    // Find the template by its ID
+    const template = await BadgeTemplate.findById(id);
+
+    if (!template) {
+      return res.status(404).json({
+        code: 404,
+        status: "FAILED",
+        message: "Template not found.",
+      });
+    }
+
+    // Update the template fields
+    template.url = url || template.url; // Only update if a new URL is provided
+    template.designFields = designFields || template.designFields; // Update designFields if provided
+    template.dimentions = dimentions || template.dimentions
+    template.title = title || template.title
+    template.subTitle= subTitle || template.subTitle
+    template.description= description || template.description
+    template.attributes= attributes || template.attributes
+    // Save the updated template
+    const updatedTemplate = await template.save();
+
+    // Respond with the updated template
+    res.json({
+      code: 200,
+      status: "SUCCESS",
+      message: "Template updated successfully.",
+      data: updatedTemplate,
+    });
+
+  } catch (error) {
+    console.error("Error updating template:", error);
+    res.status(500).json({
+      status: "FAILED",
+      message: "Error updating template.",
+    });
+  }
+};
+
+
+/**
+* API to delete certificate/credential templates.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const deleteBadgeTemplates = async (req, res) => {
+  const { email } = req.body;  // Expecting email in the request body
+
+  try {
+    // Find and delete templates associated with the provided email
+    const result = await BadgeTemplate.deleteMany({ email });
+
+    // If no templates are found and deleted, return an appropriate response
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No templates found for the provided email.",
+      });
+    }
+
+    // Return success response after deleting
+    res.json({
+      status: "SUCCESS",
+      message: `${result.deletedCount} template(s) deleted successfully.`,
+    });
+
+  } catch (error) {
+    console.error("Error deleting templates:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error deleting templates.',
+    });
+  }
+};
+
+/**
+* API to delete a certificate/credential template by certificateId.
+*
+* @param {Object} req - Express request object.
+* @param {Object} res - Express response object.
+*/
+const deleteBadgeTemplateById = async (req, res) => {
+  const { certificateId } = req.body;  // Expecting certificateId in the request body
+
+  if (!certificateId) {
+    return res.status(400).json({ status: "FAILED", message: "certificateId is required." });
+  }
+
+  try {
+    // Find and delete the template by certificateId
+    const result = await BadgeTemplate.findOneAndDelete({ _id: certificateId });
+
+    // If no template is found, return an appropriate response
+    if (!result) {
+      return res.status(404).json({
+        status: "FAILED",
+        message: "No template found for the provided certificateId.",
+      });
+    }
+
+    // Return success response after deleting
+    res.json({
+      status: "SUCCESS",
+      message: "Template deleted successfully.",
+    });
+
+  } catch (error) {
+    console.error("Error deleting template:", error);
+    res.status(500).json({
+      status: 'FAILED',
+      message: 'Error deleting template.',
+    });
+  }
+};
+
 module.exports = {
   // Function to get all issuers (Active, Inavtive, Pending)
   getAllIssuers,
@@ -2984,6 +3281,11 @@ module.exports = {
 
   // Function to get batch issued certifications from the DB based on Dates
   getBatchCertificateDates,
-
-
+  addBadgeTemplate,
+  getCertificateTemplateById,
+  getBadgeTemplates,
+  getBadgeTemplateById,
+  updateBadgeTemplate,
+  deleteBadgeTemplates,
+  deleteBadgeTemplateById 
 };

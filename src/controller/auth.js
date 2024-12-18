@@ -3,13 +3,16 @@ require('dotenv').config();
 const { User, Verification, ServiceAccountQuotas } = require("../config/schema");
 var admin = require("firebase-admin");
 const {
-  sendEmail,
   generateAccount,
   generateOTP,
-  isDBConnected,
-  sendWelcomeMail,
-  isValidIssuer
+  isDBConnected
 } = require('../models/tasks');
+
+const {
+  sendOTPEmail,
+  sendWelcomeMail
+} = require('../models/emails');
+
 // Password handler
 const bcrypt = require("bcrypt");
 const { generateJwtToken, generateRefreshToken } = require('../utils/authUtils');
@@ -119,7 +122,13 @@ const signup = async (req, res) => {
     console.log(dbStatusMessage);
 
     // Checking if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      }
+     });
 
     if (existingUser) {
       res.json({
@@ -222,7 +231,6 @@ const loginPhoneNumber = async (req, res) => {
     return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
   const { idToken, email } = req.body;
-
   try {
     // Check mongoose connection
     const dbStatus = await isDBConnected();
@@ -241,7 +249,13 @@ const loginPhoneNumber = async (req, res) => {
     // Your existing code for credential verification
 
     const JWTToken = generateJwtToken();
-    const data = await User.findOne({ email });
+    const data = await User.findOne({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email] }
+        ]
+      }
+     });
 
     if (!data) {
       erro.log(messageCode.msgIssuerNotFound);
@@ -309,7 +323,13 @@ const login = async (req, res) => {
     });
   } else {
     // Checking if user exists  
-    User.find({ email })
+    User.find({ 
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      }
+     })
       .then((data) => {
         if (data.length && data[0].approved == true) {
           // User exists
@@ -421,7 +441,8 @@ const twoFactor = async (req, res) => {
       });
       await createVerify.save();
     }
-    await sendEmail(verificationCode, email, issuer.name);
+    await sendOTPEmail(verificationCode, email, issuer.name);
+
     res.status(200).json({
       code: 200,
       status: "SUCCESS",

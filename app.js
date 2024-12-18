@@ -13,6 +13,7 @@ const port = process.env.PORT || 8000;
 
 // For accepting post form data
 const bodyParser = require('body-parser');
+const { startEmailPolling } = require('./src/utils/fetchEmails');
 // const bodyParser = require('express').json;
 
 // app.use(express.json());
@@ -50,6 +51,14 @@ app.use((err, req, res, next) => {
 
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Start the server
+const server = app.listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
+});
+
+// Initialize email polling when the server starts
+// startEmailPolling();
+
 // Graceful Shutdown
 process.on('SIGINT', () => {
   console.log('Received SIGINT. Closing server gracefully.');
@@ -58,8 +67,4 @@ process.on('SIGINT', () => {
     console.log('Server closed.');
     process.exit(0); // Exit the process with a success code
   });
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
 });

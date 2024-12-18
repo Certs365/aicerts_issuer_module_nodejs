@@ -6,6 +6,7 @@ module.exports = {
     
     // Response code messages
     msgInternalError : "Unable to reach the server, Please try again...",
+    msgEmailNote: "This is an automated email. Please do not reply directly to this message.",
 
     // Validation Error codes Issues (Route)
     msgInvalidFile : "Invalid file uploaded / Please Try again ...",
@@ -78,5 +79,18 @@ module.exports = {
     msgInvalidInput : "Invalid Input parameter",
     msgUserNotFound: "Issuer not found! / Issuer not Approved",
 
-
+    // my message
+    msgLimitExhausted: "Limit Exhausted",
+    msgLimitAboutToExhaust: "Limit About to Exhaust",
+    msgPlanExpired: "Your Subscription Plan is expired",
+    msgPlanAddedSuccess: "Plan added successfully",
+    msgPlanCodeExist: "Subscription plan code exist, Please check and Try again",
+    msgPlanCodeNotExist: "Subscription plan code doesn't exist, Please check and Try again",
+    msgPlanNotAdded: "Unable to add plan, Please check and Try again",
+    msgPlanNotFound: "Unable to find the plan, Please check and Try again",
+    msgPlanDeleted: "Plan removed successfully",
+    msgGrievanceSent: "Grievance request placed successfully",
+    msgPlanDetailsFetched: "Plan details fetched successfully",
+    msgPlanDetailsUpdated: "Plan details updated successfully",
+    msgLatestDetails: "Latest subscription plan details retrieved successfully",
 };

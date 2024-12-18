@@ -1304,6 +1304,7 @@ router.post('/add-certificate-template', userController.addCertificateTemplate);
  */
 
 router.put('/update-certificate-template', userController.updateCertificateTemplate);
+router.get('/get-certificate-template/:id', userController.getCertificateTemplateById);
 
 /**
  * @swagger
@@ -1856,6 +1857,12 @@ router.post('/get-batch-certificates', userController.getBatchCertificates);
 router.post('/get-batch-certificate-dates',decryptRequestParseBody, userController.getBatchCertificateDates);
 router.post('/delete-certificatetemplate', userController.deleteCertificateTemplateById);
 router.post('/delete-all-certificatestemplates', userController.deleteCertificateTemplates);
+router.post('/update-badge-template', userController.updateBadgeTemplate);
+router.get('/get-badge-template/:id', userController.getBadgeTemplateById);
+router.post('/add-badge-template', userController.addBadgeTemplate);
+router.post('/get-badge-templates', userController.getBadgeTemplates);
+router.post('/delete-badgetemplate', userController.deleteBadgeTemplateById);
+router.post('/delete-all-badgestemplates', userController.deleteBadgeTemplates);
 
 
 module.exports = router;

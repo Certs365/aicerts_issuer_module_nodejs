@@ -5,7 +5,9 @@ const crypto = require('crypto');
 const mongoose = require("mongoose");
 
 // Import the Issues models from the schema defined in "../config/schema"
-const { User, Issues, BatchIssues, IssueStatus, VerificationLog, ShortUrl, DynamicIssues, ServiceAccountQuotas, DynamicBatchIssues } = require("../config/schema");
+const { User } = require("../config/schema");
+
+const messageCode = require("../common/codes");
 
 const transporter = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
@@ -20,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: {
-    name: 'AICerts Admin',
+    name: 'Certs365',
     address: process.env.USER_MAIL,
   },
   to: '',
@@ -28,18 +30,52 @@ const mailOptions = {
   text: '',
 };
 
-const sendEmail = async (otp, email, name) => {
+const sendEmail = async (_otp, email, name) => {
   try {
+    // Ensure OTP is a string
+    const otp = String(_otp);
     mailOptions.to = email;
     mailOptions.subject = `Your Authentication OTP`;
-    mailOptions.text = `Hi ${name},
-
-Your one-time password (OTP) is ${otp}. Please enter this code to complete your authentication process.
-
-If you did not request this code, please ignore this message.
-        
-Best regards,
-The AICerts Team`;
+    mailOptions.html = `
+<html>
+  <body>
+    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333 border: 1px solid #ddd; border-radius: 10px;">
+        <h3 style="color: #555;">Hi ${name},</h3>
+        <p>Your one-time password (OTP) is:</p>
+         <div style="display: flex; justify-content: center; gap: 10px; margin: 20px 0;">
+            ${otp
+              .split("")
+              .map(
+                digit => `
+              <div style="
+                width: 40px; 
+                height: 40px; 
+                display: inline-block; /* Use inline-block for better email client compatibility */
+                text-align: center; 
+                line-height: 40px; /* Align text vertically within the box */
+                border: 1px solid #ccc; 
+                border-radius: 10px; 
+                font-size: 20px; 
+                font-weight: bold; 
+                color: #333; 
+                background: #f9f9f9;">
+                ${digit}
+              </div>`
+              )
+              .join("")}
+          </div>
+        <p>Please enter this code to complete your authentication process.</p>
+        <p>If you did not request this code, please ignore this message.</p>
+        <br>
+        <p>Best regards,</p>
+        <p><strong>The Certs365 Team</strong></p>
+        <hr>
+        <p style="font-size: 12px; color: #999;">
+        ${messageCode.msgEmailNote}
+        </p>
+      </div>
+  </body>
+</html>`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
@@ -50,21 +86,57 @@ The AICerts Team`;
 const sendWelcomeMail = async (name, email) => {
   try {
     mailOptions.to = email;
-    mailOptions.subject = `Welcome to AICerts`;
-    mailOptions.text = `Hi ${name},
-
-Welcome to the AICerts Portal, Your registration is now complete.
-
-Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.
-
-Thank you for joining us.
-
-Best regards,
-The AICerts Team.`;
+    mailOptions.subject = `Welcome to Certs365`;
+    mailOptions.html = `
+<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px;">
+    <div
+        style="max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f9f9f9;">
+        <h3 style="color: #555;">Hi ${name},</h3>
+        <p>Welcome to the <strong>Certs365 Portal</strong>! Your registration is now complete.</p>
+        <p>Your account details will be reviewed and approved by our admin team. Once your account has been approved,
+            you will receive a notification with further instructions.</p>
+        <p>Thank you for joining us!</p>
+        <br>
+        <p style="font-weight: bold;">Best regards,</p>
+        <p><strong>The Certs365 Team</strong></p>
+        <hr>
+        <p style="font-size: 12px; color: #999;">
+        ${messageCode.msgEmailNote}
+        </p>
+    </div>
+</body>
+</html>`;
     transporter.sendMail(mailOptions);
     console.log('Email sent successfully');
   } catch (error) {
     console.error('Error sending email:', error);
+  }
+};
+
+const sendGrievanceMail = async (email, id) => {
+  try {
+    mailOptions.to = process.env.USER_MAIL;
+    mailOptions.subject = `Grievance Request`;
+    mailOptions.text = `Hi Admin,
+
+A grievance request has been submitted on the AICerts Portal. Below are the details:
+
+- User Email: ${email}
+- Payment ID: ${id}
+
+Please review this request and take the necessary action.
+
+If you have any questions or need additional information, please reach out to the user directly at the provided email address.
+
+Thank you.
+
+Best regards,
+The Certs365 Team.`;
+    transporter.sendMail(mailOptions);
+    console.log('Grievance email sent successfully');
+  } catch (error) {
+    console.error('Error sending grievance email:', error);
   }
 };
 
@@ -75,7 +147,11 @@ const isValidIssuer = async (email) => {
   }
   try {
     var validIssuer = await User.findOne({
-      email: email,
+      $expr: {
+        $and: [
+          { $eq: [{ $toLower: "$email" }, email.toLowerCase()] }
+        ]
+      },
       status: 1
     }).select('-password');
 
@@ -189,7 +265,7 @@ const formatDate = async () => {
   return `${month}/${day}/${year}`;
 };
 
-const cerateInvoiceNumber = async (id, number, dateString) => {
+const createInvoiceNumber = async (id, number, dateString) => {
   let [month, day, year] = dateString.split('/');
   let formattedYear = year.slice(-4); // Get last two digits of the year
   let formattedDate = `${month}${formattedYear}`; // Combine month and formatted year
@@ -214,5 +290,6 @@ module.exports = {
   readableDateFormat,
   parseDate,
   formatDate,
-  cerateInvoiceNumber,
+  createInvoiceNumber,
+  sendGrievanceMail,
 }

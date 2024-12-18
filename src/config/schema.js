@@ -52,6 +52,7 @@ const UserSchema = new Schema({
   username: { type: String },
   rejectedDate: { type: Date, default: null },
   invoiceNumber: { type: Number, default: 0 },
+  batchSequence: { type: Number, default: 0 },
   transactionFee: { type: Number, default: 0 },
   qrPreference: { type: Number, default: 0 },
   blockchainPreference: { type: Number, default: 0 },
@@ -78,6 +79,7 @@ const IssuesSchema = new mongoose.Schema({
   width: { type: Number },
   height: { type: Number },
   qrOption: { type: Number, default: 0 },
+  blockchainOption: { type: Number, default: 0 },
   url: { type: String },
   type: { type: String, default: null }
 });
@@ -103,6 +105,7 @@ const BatchIssuesSchema = new Schema({
   width: { type: Number },
   height: { type: Number },
   qrOption: { type: Number, default: 0 },
+  blockchainOption: { type: Number, default: 0 },
   url: { type: String }
 });
 
@@ -117,6 +120,7 @@ const IssueStatusSchema = new mongoose.Schema({
   course: { type: String, required: true },
   expirationDate: { type: String, required: true }, // ExpirationDate field is of type String and is required
   certStatus: { type: Number, required: true },
+  blockchainOption: { type: Number, default: 0 },
   lastUpdate: { type: Date, default: Date.now } // IssueDate field is of type Date and defaults to the current date/time
 });
 
@@ -136,6 +140,7 @@ const DynamicIssuesSchema = new mongoose.Schema({
   positionY: { type: Number, default: 0},
   qrSize: { type: Number, default: 0},
   qrOption: { type: Number, default: 0 },
+  blockchainOption: { type: Number, default: 0 },
   url: { type: String },
   type: { type: String, default: 'dynamic' }
 });
@@ -159,6 +164,7 @@ const DynamicBatchIssuesSchema = new mongoose.Schema({
   positionY: { type: Number, default: 0},
   qrSize: { type: Number, default: 0},
   qrOption: { type: Number, default: 0 },
+  blockchainOption: { type: Number, default: 0 },
   url: { type: String },
   type: { type: String, default: 'dynamic' }
 });
@@ -178,19 +184,26 @@ const VerificationLogSchema = new mongoose.Schema({
   lastUpdate: { type: Date, default: Date.now } // IssueDate field is of type Date and defaults to the current date/time
 });
 
-// Define the schema for the Short URL model
-const ShortUrlSchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  certificateNumber: { type: String, required: true }, // CertificateNumber field is of type
-  url: { type: String, required: true }
-});
-
 // Define schema for certificate template
 const CrediantialTemplateSchema = new mongoose.Schema({
   email: { type: String, required: true },
   designFields: { type: Object},
-  url: { type: String }
+  url: { type: String },
+  dimentions:{ type: Object}
 });
+
+// Define schema for certificate template
+const BadgeTemplateSchema = new mongoose.Schema({
+  email: { type: String, required: true },
+  designFields: { type: Object},
+  url: { type: String },
+  dimentions:{ type: Object},
+  attributes:{ type: Object},
+  title:{ type: String },
+  subTitle:{type: String },
+  description:{type: String }
+});
+
 
 // Define the schema for the Issues model
 const DynamicParamsSchema = new mongoose.Schema({
@@ -204,6 +217,41 @@ const DynamicParamsSchema = new mongoose.Schema({
   modifiedDate: { type: Date, default: Date.now } // issueDate field is of type Date and defaults to the current date/time
 });
 
+// Define the schema for subscription plan
+const SubscriptionPlanSchema = new mongoose.Schema({
+  code: { type: String, required: true, unique: true },
+  title: { type: String, required: true }, // The subscription Plan title
+  subheader: { type: String, required: true }, // The sub header for the UI
+  fee: { type: Number, required: true }, // The subscription fee (rate x limit)
+  limit: { type: Number, required: true }, // Allocated Credits
+  rate: { type: Number, required: true }, // The rate per credit usage
+  validity: { type: Number, default: 30 }, // Number of days the plan valid for
+  lastUpdate: { type: Date, default: Date.now }, 
+  status: {type: Boolean, default: true}, // Subscription plan status
+});
+
+// Store users Subscription plan details
+// If updating schema, update in signup code also
+const UserSubscriptionPlanSchema = new mongoose.Schema({
+  email: { type: String, required: true},
+  issuerId: { type: String }, // Issuer Id field is of type String and is required
+  subscriptionPlanTitle: { type: [String], required: true },
+  purchasedDate: { type: [Date], default: Date.now},
+  subscriptionFee: { type: [Number] },
+  subscriptionDuration: { type: [Number], default: 30 },
+  allocatedCredentials: { type: [Number] },
+  currentCredentials: { type: [Number], default: 0 },
+  status: {type: Boolean, default: true}
+});
+
+const MailSchema = new mongoose.Schema({
+  messageId: { type: String, required: true },
+  from: { type: String, required: true },
+  subject: { type: String, required: true },
+  body: { type: String, required: true },
+  status: { type: String, default: 'pending', enum: ['pending', 'resolved'] },
+}, { timestamps: true });
+
 const Admin = mongoose.model('Admin', AdminSchema);
 const Verification = mongoose.model('Verification', VerificationSchema);
 const ServiceAccountQuotas = mongoose.model('ServiceAccountQuotas', ServiceAccountQuotasSchema);
@@ -214,10 +262,13 @@ const IssueStatus = mongoose.model('IssueStatus', IssueStatusSchema);
 const DynamicIssues = mongoose.model('DynamicIssues', DynamicIssuesSchema);
 const DynamicBatchIssues = mongoose.model('DynamicBatchIssues', DynamicBatchIssuesSchema);
 const VerificationLog = mongoose.model('VerificationLog', VerificationLogSchema);
-const ShortUrl = mongoose.model('ShortUrl', ShortUrlSchema);
 const DynamicParameters = mongoose.model('DynamicParameters', DynamicParamsSchema);
 const ServerDetails = mongoose.model('ServerDetails', ServerDetailsSchema);
 const CrediantialTemplate = mongoose.model('CrediantialTemplate', CrediantialTemplateSchema);
+const UserSubscriptionPlan = mongoose.model('UserSubscriptionPlan', UserSubscriptionPlanSchema);
+const SubscriptionPlan = mongoose.model('SubscriptionPlan', SubscriptionPlanSchema);
+const MailStatus = mongoose.model('MailStatus', MailSchema);
+const BadgeTemplate = mongoose.model('BadgeTemplateSchema', BadgeTemplateSchema);
 
 module.exports = {
   Admin,
@@ -231,7 +282,10 @@ module.exports = {
   DynamicIssues,
   DynamicBatchIssues,
   VerificationLog,
-  ShortUrl,
   DynamicParameters,
-  CrediantialTemplate
+  CrediantialTemplate,
+  SubscriptionPlan,
+  UserSubscriptionPlan,
+  MailStatus,
+  BadgeTemplate
 };
