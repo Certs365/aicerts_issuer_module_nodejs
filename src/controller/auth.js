@@ -310,7 +310,6 @@ const login = async (req, res) => {
   if (!validResult.isEmpty()) {
     return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
-
   let { email, password } = req.body;
   email = email.trim();
   password = password.trim();

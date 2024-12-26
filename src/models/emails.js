@@ -652,7 +652,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
+  <div class="fullWidth" style="max-width: 352px;"><img alt="Certs365" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
   </div>
   </td>
   </tr>
@@ -725,7 +725,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:15px;">
   <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:18px;line-height:120%;text-align:center;mso-line-height-alt:21.599999999999998px;">
-  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>${name}</strong></span></p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>Hi ${name},</strong></span></p>
   </div>
   </td>
   </tr>
@@ -734,7 +734,8 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:30px;padding-right:30px;padding-top:20px;">
   <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Your registration is now complete. <br/>You can now log in to your profile using your username <strong>${email}</strong>. We are excited to have you on board!</p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Thank you for registering with Certs365!</p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"></br>We’re excited to let you know that your account details have been </br>successfully submitted. Our admin team will review and approve your account. Once your account is approved, you’ll receive a notification </br>with further instructions on how to get started.</p>
   </div>
   </td>
   </tr>
