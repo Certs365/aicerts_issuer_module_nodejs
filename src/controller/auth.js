@@ -150,8 +150,8 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       issuerId,
-      approved: false,
-      status: 0,
+      approved: true,
+      status: 1,
       address,
       country,
       organizationType,
@@ -170,7 +170,7 @@ const signup = async (req, res) => {
       blockchainPreference: 0,
       certificatesIssued: 0,
       certificatesRenewed: 0,
-      approveDate: null,
+      approveDate: todayDate,
     });
     const savedUser = await newUser.save();
     try {
