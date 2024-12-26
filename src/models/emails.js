@@ -1,5 +1,5 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
@@ -14,12 +14,12 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: {
-    name: "Certs365",
+    name: 'Certs365',
     address: process.env.USER_MAIL,
   },
-  to: "",
-  subject: "",
-  text: "",
+  to: '',
+  subject: '',
+  text: '',
 };
 
 const sendOTPEmail = async (otp, email, name) => {
@@ -419,9 +419,9 @@ const sendOTPEmail = async (otp, email, name) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -487,9 +487,9 @@ const sendOTPEmail = async (otp, email, name) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
@@ -873,9 +873,9 @@ const sendWelcomeMail = async (name, email) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -944,17 +944,17 @@ const sendWelcomeMail = async (name, email) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
 const sendGrievanceEmail = async (email, paymentID) => {
   try {
     // todo-> email should go to support team of aicerts, not to user
-    mailOptions.to = "Nikhil.Meshram@Aicerts.io";
-    mailOptions.subject = "Payment Grievance from user";
+    mailOptions.to = 'Nikhil.Meshram@Aicerts.io';
+    mailOptions.subject = 'Payment Grievance from user';
     (mailOptions.text = `Hi Support team,
   
       You have submitted a payment grievance:
@@ -1263,10 +1263,10 @@ const sendGrievanceEmail = async (email, paymentID) => {
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
   </body>`);
-    transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
@@ -1274,7 +1274,7 @@ const sendResolvedEmail = async (email) => {
   try {
     // todo-> email should go to support team of aicerts, not to user
     mailOptions.to = email;
-    mailOptions.subject = "Update on Payment Grievance";
+    mailOptions.subject = 'Update on Payment Grievance';
     (mailOptions.text = `Hi user,
   
       Your plan has beed updated successfully.
@@ -1567,18 +1567,21 @@ const sendResolvedEmail = async (email) => {
     <!--[if IE]></div><![endif]-->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
-}
+};
 
 //Email to user ,after buying any plan
 const planPurchasedEmail = async (email, name, isUserPlanExist) => {
-  const subscriptionPlanTitle = isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
+  const subscriptionPlanTitle =
+    isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
   const purchasedDate = isUserPlanExist.purchasedDate.slice(-1)[0];
-  const subscriptionDuration = isUserPlanExist.subscriptionDuration.slice(-1)[0];
-  const allocatedCredentials = isUserPlanExist.allocatedCredentials.slice(-1)[0];
+  const subscriptionDuration =
+    isUserPlanExist.subscriptionDuration.slice(-1)[0];
+  const allocatedCredentials =
+    isUserPlanExist.allocatedCredentials.slice(-1)[0];
   const subscriptionFee = isUserPlanExist.subscriptionFee.slice(-1)[0];
 
   const purchasedDateObj = new Date(purchasedDate);
@@ -1588,9 +1591,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   const purchasedDateFormatted = `${purchasedMonth}/${purchasedDay}/${purchasedYear}`;
 
   try {
-    console.log("inside our function t osend u mail")
+    console.log('inside our function t osend u mail');
     mailOptions.to = email;
-    mailOptions.subject = "Plan purchased successfully";
+    mailOptions.subject = 'Plan purchased successfully';
     (mailOptions.text = `Hi ${name},
   
       You have successfully purchased the plan.
@@ -2090,9 +2093,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -2155,9 +2158,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
