@@ -501,7 +501,7 @@ const sendWelcomeMail = async (name, email) => {
   
   Welcome to the Certs365, Your registration is now complete.
   
-  Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.
+  You can now log in to your profile using your username ${email}. We are excited to have you on board!
   
   Thank you for joining us.
   
@@ -734,7 +734,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:30px;padding-right:30px;padding-top:20px;">
   <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Your registration is now complete. <br/>Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.</span></p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Your registration is now complete. <br/>You can now log in to your profile using your username <strong>${email}</strong>. We are excited to have you on board!</p>
   </div>
   </td>
   </tr>
