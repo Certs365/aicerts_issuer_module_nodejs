@@ -187,7 +187,7 @@ const sendOTPEmail = async (otp, email, name) => {
   <tr>
   <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
+  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
   </div>
   </td>
   </tr>
@@ -408,7 +408,7 @@ const sendOTPEmail = async (otp, email, name) => {
   <tr>
   <td class="pad" style="padding-top:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 300px;"><img alt="Alternate text" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="Alternate text" width="300"/></div>
+  <div style="max-width: 300px;"><img alt="Alternate text" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="Alternate text" width="300"/></div>
   </div>
   </td>
   </tr>
@@ -420,7 +420,7 @@ const sendOTPEmail = async (otp, email, name) => {
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
     <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
     <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
@@ -652,7 +652,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div class="fullWidth" style="max-width: 352px;"><img alt="Certs365" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
+  <div class="fullWidth" style="max-width: 352px;"><img alt="Certs365" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
   </div>
   </td>
   </tr>
@@ -874,7 +874,7 @@ const sendWelcomeMail = async (name, email) => {
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
     <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
     <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
@@ -1773,7 +1773,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <tr>
   <td class="pad">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 214px;"><img alt="" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
+  <div style="max-width: 214px;"><img alt="" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
   </div>
   </td>
   </tr>
@@ -2073,7 +2073,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <tr>
   <td class="pad" style="width:100%;padding-right:0px;padding-left:0px;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 214px;"><img alt="" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
+  <div style="max-width: 214px;"><img alt="" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
   </div>
   </td>
   </tr>
@@ -2094,7 +2094,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
     <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
     <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
