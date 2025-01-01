@@ -1138,7 +1138,7 @@ const sendGrievanceEmail = async (email, paymentID) => {
         <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 0px;font-family:'Raleway',sans-serif;" align="left">
           
     <!--[if mso]><table width="100%"><tr><td><![endif]-->
-      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The AICerts Team</p></h2>
+      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The Certs365 Team</p></h2>
     <!--[if mso]></td></tr></table><![endif]-->
   
         </td>
@@ -1440,7 +1440,7 @@ const sendResolvedEmail = async (email) => {
         <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 0px;font-family:'Raleway',sans-serif;" align="left">
           
     <!--[if mso]><table width="100%"><tr><td><![endif]-->
-      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The AICerts Team</p></h2>
+      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The Certs365 Team</p></h2>
     <!--[if mso]></td></tr></table><![endif]-->
   
         </td>
@@ -1608,7 +1608,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
       Thank you for choosing us.
       
       Best regards,
-      The AICerts Team.`),
+      The Certs365 Team.`),
       (mailOptions.html = `<head>
   <title></title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
