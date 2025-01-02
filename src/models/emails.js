@@ -1,5 +1,5 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
   service: process.env.MAIL_SERVICE,
@@ -14,12 +14,12 @@ const transporter = nodemailer.createTransport({
 
 const mailOptions = {
   from: {
-    name: "Certs365",
+    name: 'Certs365',
     address: process.env.USER_MAIL,
   },
-  to: "",
-  subject: "",
-  text: "",
+  to: '',
+  subject: '',
+  text: '',
 };
 
 const sendOTPEmail = async (otp, email, name) => {
@@ -187,7 +187,7 @@ const sendOTPEmail = async (otp, email, name) => {
   <tr>
   <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
+  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
   </div>
   </td>
   </tr>
@@ -408,7 +408,7 @@ const sendOTPEmail = async (otp, email, name) => {
   <tr>
   <td class="pad" style="padding-top:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 300px;"><img alt="Alternate text" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="Alternate text" width="300"/></div>
+  <div style="max-width: 300px;"><img alt="Alternate text" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="Alternate text" width="300"/></div>
   </div>
   </td>
   </tr>
@@ -419,9 +419,9 @@ const sendOTPEmail = async (otp, email, name) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -487,9 +487,9 @@ const sendOTPEmail = async (otp, email, name) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
@@ -501,7 +501,7 @@ const sendWelcomeMail = async (name, email) => {
   
   Welcome to the Certs365, Your registration is now complete.
   
-  Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.
+  You can now log in to your profile using your username ${email}. We are excited to have you on board!
   
   Thank you for joining us.
   
@@ -652,7 +652,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:40px;padding-right:40px;width:100%;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div class="fullWidth" style="max-width: 352px;"><img alt="I'm an image" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
+  <div class="fullWidth" style="max-width: 352px;"><img alt="Certs365" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="I'm an image" width="352"/></div>
   </div>
   </td>
   </tr>
@@ -725,7 +725,7 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:15px;">
   <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:18px;line-height:120%;text-align:center;mso-line-height-alt:21.599999999999998px;">
-  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>${name}</strong></span></p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"><strong>Hi ${name},</strong></span></p>
   </div>
   </td>
   </tr>
@@ -734,7 +734,8 @@ const sendWelcomeMail = async (name, email) => {
   <tr>
   <td class="pad" style="padding-left:30px;padding-right:30px;padding-top:20px;">
   <div style="color:#555555;font-family:Montserrat, Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;font-size:15px;line-height:150%;text-align:left;mso-line-height-alt:22.5px;">
-  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Your registration is now complete. <br/>Your account details will be reviewed and approved by our admin team. Once your account has been approved, you will receive a notification with further instructions.</span></p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;">Thank you for registering with Certs365!</p>
+  <p style="margin: 0; word-break: break-word;"><span style="word-break: break-word; color: #2b303a;"></br>We’re excited to let you know that your account details have been </br>successfully submitted. Our admin team will review and approve your account. Once your account is approved, you’ll receive a notification </br>with further instructions on how to get started.</p>
   </div>
   </td>
   </tr>
@@ -872,9 +873,9 @@ const sendWelcomeMail = async (name, email) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -943,17 +944,17 @@ const sendWelcomeMail = async (name, email) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
 const sendGrievanceEmail = async (email, paymentID) => {
   try {
     // todo-> email should go to support team of aicerts, not to user
-    mailOptions.to = "Nikhil.Meshram@Aicerts.io";
-    mailOptions.subject = "Payment Grievance from user";
+    mailOptions.to = 'Nikhil.Meshram@Aicerts.io';
+    mailOptions.subject = 'Payment Grievance from user';
     (mailOptions.text = `Hi Support team,
   
       You have submitted a payment grievance:
@@ -1137,7 +1138,7 @@ const sendGrievanceEmail = async (email, paymentID) => {
         <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 0px;font-family:'Raleway',sans-serif;" align="left">
           
     <!--[if mso]><table width="100%"><tr><td><![endif]-->
-      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The AICerts Team</p></h2>
+      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The Certs365 Team</p></h2>
     <!--[if mso]></td></tr></table><![endif]-->
   
         </td>
@@ -1262,10 +1263,10 @@ const sendGrievanceEmail = async (email, paymentID) => {
     <!--[if mso]></div><![endif]-->
     <!--[if IE]></div><![endif]-->
   </body>`);
-    transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 
@@ -1273,7 +1274,7 @@ const sendResolvedEmail = async (email) => {
   try {
     // todo-> email should go to support team of aicerts, not to user
     mailOptions.to = email;
-    mailOptions.subject = "Update on Payment Grievance";
+    mailOptions.subject = 'Update on Payment Grievance';
     (mailOptions.text = `Hi user,
   
       Your plan has beed updated successfully.
@@ -1439,7 +1440,7 @@ const sendResolvedEmail = async (email) => {
         <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 0px;font-family:'Raleway',sans-serif;" align="left">
           
     <!--[if mso]><table width="100%"><tr><td><![endif]-->
-      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The AICerts Team</p></h2>
+      <h2 class="v-text-align v-font-size" style="margin: 0px; color: #ced4d9; line-height: 140%; text-align: left; word-wrap: break-word; font-family: inherit; font-size: 20px; font-weight: 400;"><p>Best Regards,<br />The Certs365 Team</p></h2>
     <!--[if mso]></td></tr></table><![endif]-->
   
         </td>
@@ -1566,18 +1567,21 @@ const sendResolvedEmail = async (email) => {
     <!--[if IE]></div><![endif]-->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
-}
+};
 
 //Email to user ,after buying any plan
 const planPurchasedEmail = async (email, name, isUserPlanExist) => {
-  const subscriptionPlanTitle = isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
+  const subscriptionPlanTitle =
+    isUserPlanExist.subscriptionPlanTitle.slice(-1)[0];
   const purchasedDate = isUserPlanExist.purchasedDate.slice(-1)[0];
-  const subscriptionDuration = isUserPlanExist.subscriptionDuration.slice(-1)[0];
-  const allocatedCredentials = isUserPlanExist.allocatedCredentials.slice(-1)[0];
+  const subscriptionDuration =
+    isUserPlanExist.subscriptionDuration.slice(-1)[0];
+  const allocatedCredentials =
+    isUserPlanExist.allocatedCredentials.slice(-1)[0];
   const subscriptionFee = isUserPlanExist.subscriptionFee.slice(-1)[0];
 
   const purchasedDateObj = new Date(purchasedDate);
@@ -1587,9 +1591,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   const purchasedDateFormatted = `${purchasedMonth}/${purchasedDay}/${purchasedYear}`;
 
   try {
-    console.log("inside our function t osend u mail")
+    console.log('inside our function t osend u mail');
     mailOptions.to = email;
-    mailOptions.subject = "Plan purchased successfully";
+    mailOptions.subject = 'Plan purchased successfully';
     (mailOptions.text = `Hi ${name},
   
       You have successfully purchased the plan.
@@ -1604,7 +1608,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
       Thank you for choosing us.
       
       Best regards,
-      The AICerts Team.`),
+      The Certs365 Team.`),
       (mailOptions.html = `<head>
   <title></title>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
@@ -1769,7 +1773,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <tr>
   <td class="pad">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 214px;"><img alt="" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
+  <div style="max-width: 214px;"><img alt="" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
   </div>
   </td>
   </tr>
@@ -2069,7 +2073,7 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <tr>
   <td class="pad" style="width:100%;padding-right:0px;padding-left:0px;">
   <div align="center" class="alignment" style="line-height:10px">
-  <div style="max-width: 214px;"><img alt="" height="auto" src="https://images.netcomlearning.com/ai-certs/Certs365-logo.svg" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
+  <div style="max-width: 214px;"><img alt="" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Certs365logo.png" style="display: block; height: auto; border: 0; width: 100%;" title="" width="214"/></div>
   </div>
   </td>
   </tr>
@@ -2089,9 +2093,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   <div align="center" class="alignment">
   <table border="0" cellpadding="0" cellspacing="0" class="social-table" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; " width="108px">
   <tr>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com" target="_blank"><img alt="Linkedin" height="auto" src="https://images.netcomlearning.com/cms/icons/linkedin-white.svg" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
-    <td style="padding:0 5px 0 5px;"><a href="https://www.x.com/" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.youtube.com/@AICERTs" target="_blank"><img alt="Youtube" height="auto" src="https://images.netcomlearning.com/cms/icons/youtube-footer-icon.png" style="display: block; height: auto; border: 0;" title="Youtube" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://www.linkedin.com/company/certs-365/" target="_blank"><img alt="Linkedin" height="auto" src="https://certs365-live.s3.amazonaws.com/uploads/Media.png" style="display: block; height: auto; border: 0;" title="Linkedin" width="32"/></a></td>
+    <td style="padding:0 5px 0 5px;"><a href="https://x.com/Certs_365" target="_blank"><img alt="X" height="auto" src="https://images.netcomlearning.com/cms/images/twitter-new-logo_076622f5.png" style="display: block; height: auto; border: 0;" title="X" width="32"/></a></td>
   </tr>
   </table>
   </div>
@@ -2154,9 +2158,9 @@ const planPurchasedEmail = async (email, name, isUserPlanExist) => {
   </table><!-- End -->
   </body>`);
     transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log('Email sent successfully');
   } catch (error) {
-    console.error("Error sending email:", error);
+    console.error('Error sending email:', error);
   }
 };
 

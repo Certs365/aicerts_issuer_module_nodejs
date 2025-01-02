@@ -169,8 +169,7 @@ const signup = async (req, res) => {
       invoiceNumber: 0,
       blockchainPreference: 0,
       certificatesIssued: 0,
-      certificatesRenewed: 0,
-      approveDate: null,
+      certificatesRenewed: 0
     });
     const savedUser = await newUser.save();
     try {
@@ -310,7 +309,6 @@ const login = async (req, res) => {
   if (!validResult.isEmpty()) {
     return res.status(422).json({ code: 422, status: "FAILED", message: messageCode.msgEnterInvalid, details: validResult.array() });
   }
-
   let { email, password } = req.body;
   email = email.trim();
   password = password.trim();
