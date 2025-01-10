@@ -56,6 +56,7 @@ const UserSchema = new Schema({
   transactionFee: { type: Number, default: 0 },
   qrPreference: { type: Number, default: 0 },
   blockchainPreference: { type: Number, default: 0 },
+  refreshToken: { type: String },
   certificatesIssued: { type: Number },
   certificatesRenewed: { type: Number },
   approveDate: { type: Date, default: null}
